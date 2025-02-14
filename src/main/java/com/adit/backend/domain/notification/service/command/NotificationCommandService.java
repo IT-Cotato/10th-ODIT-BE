@@ -6,12 +6,14 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.adit.backend.domain.notification.constants.MsgFormat;
 import com.adit.backend.domain.notification.converter.NotificationConverter;
+import com.adit.backend.domain.notification.converter.NotificationEventConverter;
 import com.adit.backend.domain.notification.entity.Notification;
 import com.adit.backend.domain.notification.event.NotificationEvent;
 import com.adit.backend.domain.notification.repository.NotificationRepository;
 import com.adit.backend.domain.notification.service.RedisMessageService;
 import com.adit.backend.domain.notification.service.SseEmitterService;
 import com.adit.backend.domain.notification.service.query.NotificationQueryService;
+import com.adit.backend.domain.user.entity.Friendship;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.domain.user.service.query.UserQueryService;
 
@@ -30,7 +32,8 @@ public class NotificationCommandService {
 	private final RedisMessageService redisMessageService;
 	private final NotificationQueryService notificationQueryService;
 
-	private final NotificationConverter converter;
+	private final NotificationConverter notificationConverter;
+	private final NotificationEventConverter notificationEventConverter;
 
 	/**
 	 * 사용자가 SSE 구독을 시작합니다.
@@ -73,10 +76,20 @@ public class NotificationCommandService {
 	public void sendNotification(NotificationEvent event) {
 		User user = userQueryService.findUserByEmail(event.userEmail());
 
-		Notification notification = converter.toEntity(event.message(), event.notificationType());
+		Notification notification = notificationConverter.toEntity(event.message(), event.notificationType());
 		notification.assignUser(user);
 		notificationRepository.save(notification);
 
-		redisMessageService.publish(event.userEmail(), converter.toResponse(notification));
+		redisMessageService.publish(event.userEmail(), notificationConverter.toResponse(notification));
 	}
+
+	public void createNotificationOfAFriendRequest(Friendship savedForwardRequest) {
+		NotificationEvent event = notificationEventConverter.toRequestEvent(savedForwardRequest);
+		sendNotification(event);
+	}
+
+	public void createNotificationOfAFriendAccept(Friendship friendRequest) {
+
+	}
+
 }
