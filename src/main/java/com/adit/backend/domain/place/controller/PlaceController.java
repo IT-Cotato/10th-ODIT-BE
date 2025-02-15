@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.adit.backend.domain.image.dto.response.ImageResponseDto;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
+import com.adit.backend.domain.place.dto.response.FriendPlaceResponseDto;
 import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
 import com.adit.backend.domain.place.service.command.CommonPlaceCommandService;
 import com.adit.backend.domain.place.service.command.UserPlaceCommandService;
@@ -152,10 +153,13 @@ public class PlaceController {
 	//친구 기반 장소 찾기 API
 	@Operation(summary = "친구 장소 조회", description = "userId에 해당하는 사용자의 친구들이 저장한 장소를, 저장한 친구 수가 많은 순서대로 조회")
 	@GetMapping("/friend")
-	public ResponseEntity<ApiResponse<Map<PlaceResponseDto, List<UserResponse.InfoDto>>>> getPlaceByFriend(
+	public ResponseEntity<ApiResponse<List<FriendPlaceResponseDto>>> getPlaceByFriend(
 		@AuthenticationPrincipal(expression = "user") User user) {
 		Map<PlaceResponseDto, List<UserResponse.InfoDto>> placeByFriend = userPlaceQueryService.getPlaceByFriend(user.getId());
-		return ResponseEntity.ok(ApiResponse.success(placeByFriend));
+		List<FriendPlaceResponseDto> responseList = placeByFriend.entrySet().stream()
+			.map(entry -> new FriendPlaceResponseDto(entry.getKey(), entry.getValue()))
+			.toList();
+		return ResponseEntity.ok(ApiResponse.success(responseList));
 	}
 
 	//장소 메모 수정 API
