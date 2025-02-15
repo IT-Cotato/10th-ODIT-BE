@@ -1,7 +1,6 @@
 package com.adit.backend.domain.place.service.command;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.adit.backend.domain.place.entity.CommonPlace;
 import com.adit.backend.domain.place.entity.PlaceStatistics;
@@ -11,7 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class PlaceStatisticsCommandService {
 
 	private final PlaceStatisticsRepository placeStatisticsRepository;
