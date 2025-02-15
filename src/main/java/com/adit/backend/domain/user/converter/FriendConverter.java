@@ -24,4 +24,5 @@ public class FriendConverter {
 			.status(status)
 			.build();
 	}
+
 }

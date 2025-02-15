@@ -4,6 +4,6 @@ import java.util.List;
 
 import com.adit.backend.domain.user.dto.response.UserResponse;
 
-public record FriendPlaceResponseDto(PlaceResponseDto place, List<UserResponse.InfoDto> userList) {
+public record FriendPlaceResponseDto(PlaceResponseDto place, List<UserResponse.InfoDto> userList){
 
 }
