@@ -12,8 +12,8 @@ import lombok.Builder;
  * DTO for {@link Friendship}
  */
 @Builder
-public record FriendshipResponseDto(Long id, @NotNull(message = "From User ID must not be nul") User fromUser,
-									@NotNull(message = "To User ID must not be nul") User toUser, Boolean status)
+public record FriendshipResponseDto(Long id, @NotNull(message = "From User ID must not be nul") Long fromUserId,
+									@NotNull(message = "To User ID must not be nul") Long toUserId, Boolean status)
 	implements Serializable {
 
 }

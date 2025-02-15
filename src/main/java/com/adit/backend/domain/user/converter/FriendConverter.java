@@ -11,8 +11,8 @@ public class FriendConverter {
 
 	public FriendshipResponseDto toResponse(Friendship friendship) {
 		return FriendshipResponseDto.builder()
-			.fromUser(friendship.getFromUser())
-			.toUser(friendship.getToUser())
+			.fromUserId(friendship.getFromUser().getId())
+			.toUserId(friendship.getToUser().getId())
 			.status(friendship.getStatus())
 			.build();
 	}
