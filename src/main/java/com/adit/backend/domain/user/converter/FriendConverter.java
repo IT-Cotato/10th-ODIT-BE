@@ -17,19 +17,11 @@ public class FriendConverter {
 			.build();
 	}
 
-	public Friendship toForwardEntity(User fromUser, User toUser) {
+	public Friendship toEntity(User FromUser, User toUser, Boolean status) {
 		return Friendship.builder()
-			.fromUser(fromUser)
+			.fromUser(FromUser)
 			.toUser(toUser)
-			.status(true)
-			.build();
-	}
-
-	public Friendship toReverseEntity(User fromUser, User toUser) {
-		return Friendship.builder()
-			.fromUser(fromUser)
-			.toUser(toUser)
-			.status(false)
+			.status(status)
 			.build();
 	}
 }

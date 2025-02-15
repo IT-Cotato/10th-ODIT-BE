@@ -1,6 +1,7 @@
 package com.adit.backend.domain.place.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +18,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
+import com.adit.backend.domain.place.dto.response.FriendPlaceResponseDto;
 import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
 import com.adit.backend.domain.place.service.command.CommonPlaceCommandService;
 import com.adit.backend.domain.place.service.command.UserPlaceCommandService;
 import com.adit.backend.domain.place.service.query.CommonPlaceQueryService;
 import com.adit.backend.domain.place.service.query.UserPlaceQueryService;
+import com.adit.backend.domain.user.dto.response.UserResponse;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.global.common.ApiResponse;
 
@@ -145,12 +148,15 @@ public class PlaceController {
 	}
 
 	//친구 기반 장소 찾기 API
-	@Operation(summary = "친구 장소 조회", description = "userId에 해당하는 사용자의 친구가 저장한 장소 조회")
+	@Operation(summary = "친구 장소 조회", description = "userId에 해당하는 사용자의 친구들이 저장한 장소를, 저장한 친구 수가 많은 순서대로 조회")
 	@GetMapping("/friend")
-	public ResponseEntity<ApiResponse<List<PlaceResponseDto>>> getPlaceByFriend(
+	public ResponseEntity<ApiResponse<List<FriendPlaceResponseDto>>> getPlaceByFriend(
 		@AuthenticationPrincipal(expression = "user") User user) {
-		List<PlaceResponseDto> placeByFriend = userPlaceQueryService.getPlaceByFriend(user.getId());
-		return ResponseEntity.ok(ApiResponse.success(placeByFriend));
+		Map<PlaceResponseDto, List<UserResponse.InfoDto>> placeByFriend = userPlaceQueryService.getPlaceByFriend(user.getId());
+		List<FriendPlaceResponseDto> responseList = placeByFriend.entrySet().stream()
+			.map(entry -> new FriendPlaceResponseDto(entry.getKey(), entry.getValue()))
+			.toList();
+		return ResponseEntity.ok(ApiResponse.success(responseList));
 	}
 
 	//장소 메모 수정 API
