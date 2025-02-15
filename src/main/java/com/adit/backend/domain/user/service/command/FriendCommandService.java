@@ -13,6 +13,7 @@ import com.adit.backend.domain.user.dto.response.FriendshipResponseDto;
 import com.adit.backend.domain.user.entity.Friendship;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.domain.user.exception.FriendShipException;
+import com.adit.backend.domain.user.exception.UserException;
 import com.adit.backend.domain.user.repository.FriendshipRepository;
 import com.adit.backend.domain.user.repository.UserRepository;
 
@@ -32,10 +33,12 @@ public class FriendCommandService {
 
 	// 친구 요청 보내기
 	public FriendshipResponseDto sendFriendRequest(FriendRequestDto requestDto) {
+		User FromUser = userRepository.findById(requestDto.fromUserId()).orElseThrow(() -> new UserException(USER_NOT_FOUND));
+		User toUser = userRepository.findById(requestDto.toUserId()).orElseThrow(() -> new UserException(USER_NOT_FOUND));
 		// 친구 요청(정방향)
-		Friendship forwardRequest = friendConverter.toForwardEntity(requestDto);
+		Friendship forwardRequest = friendConverter.toEntity(FromUser, toUser, true);
 		// 친구 요청(역방향)
-		Friendship reverseRequest = friendConverter.toReverseEntity(requestDto);
+		Friendship reverseRequest = friendConverter.toEntity(toUser, FromUser, false);
 
 		Friendship savedForwardRequest = friendshipRepository.save(forwardRequest);
 		friendshipRepository.save(reverseRequest);
