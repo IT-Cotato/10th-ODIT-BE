@@ -34,7 +34,11 @@ public class CommonPlace extends BaseEntity {
 	@Column(nullable = false)
 	private String placeName;
 
+
+	@Column(precision = 38, scale = 7)
 	private BigDecimal latitude;
+	
+	@Column(precision = 38, scale = 7)
 	private BigDecimal longitude;
 
 	private String addressName;
