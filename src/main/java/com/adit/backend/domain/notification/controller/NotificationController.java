@@ -54,4 +54,12 @@ public class NotificationController {
 		return ResponseEntity.ok(
 			ApiResponse.success(notificationQueryService.getNotificationsByCategory(user, category)));
 	}
+
+	@Operation(summary = "알람 sse 구독 취소", description = "SSE 연결을 종료하고 구독을 취소합니다")
+	@GetMapping("/unsubscribe")
+	public ResponseEntity<ApiResponse<Void>> unsubscribe(@AuthenticationPrincipal(expression = "user") User user) {
+		notificationCommandService.unsubscribe(user.getEmail());
+		return ResponseEntity.noContent().build();
+	}
+
 }

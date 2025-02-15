@@ -83,4 +83,15 @@ public class NotificationCommandService {
 
 		redisMessageService.publish(event.userEmail(), notificationConverter.toResponse(notification));
 	}
+
+	/**
+	 * 주어진 사용자 이메일에 해당하는 SSE 구독을 종료합니다.
+	 *
+	 * @param userEmail 종료할 사용자 이메일
+	 */
+	public void unsubscribe(String userEmail) {
+		sseEmitterService.deleteEmitter(userEmail);
+		redisMessageService.removeSubscribe(userEmail);
+	}
+
 }
