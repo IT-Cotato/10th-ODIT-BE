@@ -12,8 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.adit.backend.domain.image.entity.Image;
 import com.adit.backend.domain.image.enums.Directory;
 import com.adit.backend.domain.image.service.command.ImageCommandService;
-import com.adit.backend.domain.notification.converter.NotificationEventConverter;
-import com.adit.backend.domain.notification.service.command.NotificationCommandService;
+import com.adit.backend.domain.notification.service.NotificationGenerationService;
 import com.adit.backend.domain.place.converter.CommonPlaceConverter;
 import com.adit.backend.domain.place.converter.UserPlaceConverter;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
@@ -22,7 +21,6 @@ import com.adit.backend.domain.place.entity.CommonPlace;
 import com.adit.backend.domain.place.entity.UserPlace;
 import com.adit.backend.domain.place.exception.PlaceException;
 import com.adit.backend.domain.place.repository.UserPlaceRepository;
-import com.adit.backend.domain.place.service.query.UserPlaceQueryService;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.domain.user.service.query.UserQueryService;
 import com.adit.backend.global.error.exception.BusinessException;
@@ -40,12 +38,10 @@ public class UserPlaceCommandService {
 	private final CommonPlaceCommandService commonPlaceCommandService;
 	private final ImageCommandService imageCommandService;
 	private final PlaceStatisticsCommandService placeStatisticsCommandService;
-	private final UserPlaceQueryService userPlaceQueryService;
+	private final NotificationGenerationService notificationGenerationService;
 
-	private final NotificationEventConverter notificationEventConverter;
 	private final CommonPlaceConverter commonPlaceConverter;
 	private final UserPlaceConverter userPlaceConverter;
-	private final NotificationCommandService notificationCommandService;
 
 	// 장소 저장시, EventStatistics.bookmarkCount 증가
 	public PlaceResponseDto createUserPlace(Long userId, PlaceRequestDto request) {
@@ -95,7 +91,7 @@ public class UserPlaceCommandService {
 		user.addUserPlace(userPlace);
 		commonPlace.addUserPlace(userPlace);
 		userPlaceRepository.save(userPlace);
-		notificationCommandService.createNotificationOfASavedPlace(user, commonPlace, userPlace);
+		notificationGenerationService.createNotificationOfASavedPlace(user, commonPlace, userPlace);
 	}
 
 	public boolean duplicatePlace(Long userId, PlaceRequestDto request) {

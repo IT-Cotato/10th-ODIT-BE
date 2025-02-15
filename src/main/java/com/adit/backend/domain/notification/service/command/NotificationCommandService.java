@@ -1,6 +1,5 @@
 package com.adit.backend.domain.notification.service.command;
 
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -14,10 +13,7 @@ import com.adit.backend.domain.notification.repository.NotificationRepository;
 import com.adit.backend.domain.notification.service.RedisMessageService;
 import com.adit.backend.domain.notification.service.SseEmitterService;
 import com.adit.backend.domain.notification.service.query.NotificationQueryService;
-import com.adit.backend.domain.place.entity.CommonPlace;
-import com.adit.backend.domain.place.entity.UserPlace;
 import com.adit.backend.domain.place.service.query.UserPlaceQueryService;
-import com.adit.backend.domain.user.entity.Friendship;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.domain.user.service.query.UserQueryService;
 
@@ -87,18 +83,4 @@ public class NotificationCommandService {
 
 		redisMessageService.publish(event.userEmail(), notificationConverter.toResponse(notification));
 	}
-
-	public void createNotificationOfAFriendRequest(Friendship savedForwardRequest) {
-		NotificationEvent event = notificationEventConverter.toRequestEvent(savedForwardRequest);
-		sendNotification(event);
-	}
-
-	@Async
-	public void createNotificationOfASavedPlace(User user, CommonPlace commonPlace, UserPlace userPlace) {
-		userPlaceQueryService.findRelatedUserPlace(user, commonPlace)
-			.stream()
-			.map(friendUserPlace -> notificationEventConverter.toSavedEvent(userPlace, friendUserPlace.getUser()))
-			.forEach(this::sendNotification);
-	}
-
 }
