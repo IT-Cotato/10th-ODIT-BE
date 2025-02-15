@@ -13,15 +13,18 @@ import com.adit.backend.domain.place.entity.UserPlace;
 import com.adit.backend.domain.user.entity.Friendship;
 import com.adit.backend.domain.user.entity.User;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class NotificationEventConverter {
 
-	private NotificationEvent createNotificationEvent(String userEmail, NotificationType type, String message) {
+	private NotificationEvent createNotificationEvent(String userEmail, NotificationType type, String content) {
 		return NotificationEvent.builder()
 			.userEmail(userEmail)
 			.category(type.getCategory())
 			.notificationType(type)
-			.message(message)
+			.content(content)
 			.build();
 	}
 
@@ -29,20 +32,20 @@ public class NotificationEventConverter {
 
 	/* PLACE_UNVISITED */
 	public NotificationEvent toUnvisitedEvent(UserPlace userPlace) {
-		String message = String.format("아직 '%s'에 방문하지 않으셨나요?", userPlace.getCommonPlace().getPlaceName());
-		return createNotificationEvent(userPlace.getUser().getEmail(), PLACE_UNVISITED, message);
+		String content = String.format("아직 '%s'에 방문하지 않으셨나요?", userPlace.getCommonPlace().getPlaceName());
+		return createNotificationEvent(userPlace.getUser().getEmail(), PLACE_UNVISITED, content);
 	}
 
 	/* EVENT_START_SOON */
 	public NotificationEvent toStartEvent(UserEvent userEvent, int remainingDays) {
-		String message = String.format("'%s'이 %d일 뒤 시작해요!", userEvent.getName(), remainingDays);
-		return createNotificationEvent(userEvent.getUser().getEmail(), EVENT_START_SOON, message);
+		String content = String.format("'%s'이 %d일 뒤 시작해요!", userEvent.getName(), remainingDays);
+		return createNotificationEvent(userEvent.getUser().getEmail(), EVENT_START_SOON, content);
 	}
 
 	/* EVENT_DURATION_MISSING */
 	public NotificationEvent toMissingEvent(UserEvent userEvent) {
-		String message = String.format("'%s' 기간을 아직 입력하지 않았어요!", userEvent.getName());
-		return createNotificationEvent(userEvent.getUser().getEmail(), EVENT_DURATION_MISSING, message);
+		String content = String.format("'%s' 기간을 아직 입력하지 않았어요!", userEvent.getName());
+		return createNotificationEvent(userEvent.getUser().getEmail(), EVENT_DURATION_MISSING, content);
 	}
 
 	/* EVENT_DURATION_MISSING - 복수 이벤트 옵션 */
@@ -52,26 +55,27 @@ public class NotificationEventConverter {
 		}
 		String primaryEventName = userEvents.get(0).getName();
 		int remainingCount = userEvents.size() - 1;
-		String message = String.format("'%s'외 %d개의 이벤트 기간을 아직 입력하지 않았어요!", primaryEventName, remainingCount);
-		return createNotificationEvent(userEvents.get(0).getUser().getEmail(), EVENT_DURATION_MISSING, message);
+		String content = String.format("'%s'외 %d개의 이벤트 기간을 아직 입력하지 않았어요!", primaryEventName, remainingCount);
+		return createNotificationEvent(userEvents.get(0).getUser().getEmail(), EVENT_DURATION_MISSING, content);
 	}
 
 	/* FRIEND_REQUEST_RECEIVED */
 	public NotificationEvent toRequestEvent(Friendship friendship) {
-		String message = String.format("%s님이 친구 맺기를 요청했어요!", friendship.getFromUser().getNickname());
-		return createNotificationEvent(friendship.getToUser().getEmail(), FRIEND_REQUEST_RECEIVED, message);
+		log.info("친구 요청 알림 생성");
+		String content = String.format("%s님이 친구 맺기를 요청했어요!", friendship.getFromUser().getNickname());
+		return createNotificationEvent(friendship.getToUser().getEmail(), FRIEND_REQUEST_RECEIVED, content);
 	}
 
 	/* FRIEND_REQUEST_ACCEPTED */
 	public NotificationEvent toAcceptEvent(Friendship friendship) {
-		String message = String.format("%s님이 친구 맺기를 수락했어요!", friendship.getToUser().getNickname());
-		return createNotificationEvent(friendship.getFromUser().getEmail(), FRIEND_REQUEST_ACCEPTED, message);
+		String content = String.format("%s님이 친구 맺기를 수락했어요!", friendship.getToUser().getNickname());
+		return createNotificationEvent(friendship.getFromUser().getEmail(), FRIEND_REQUEST_ACCEPTED, content);
 	}
 
 	/* FRIEND_SAVED_MY_PLACE */
 	public NotificationEvent toSavedEvent(UserPlace friendPlace, User user) {
-		String message = String.format("%s님도 '%s'를 저장했어요!", friendPlace.getUser().getNickname(),
+		String content = String.format("%s님도 '%s'를 저장했어요!", friendPlace.getUser().getNickname(),
 			friendPlace.getCommonPlace().getPlaceName());
-		return createNotificationEvent(user.getEmail(), FRIEND_SAVED_MY_PLACE, message);
+		return createNotificationEvent(user.getEmail(), FRIEND_SAVED_MY_PLACE, content);
 	}
 }

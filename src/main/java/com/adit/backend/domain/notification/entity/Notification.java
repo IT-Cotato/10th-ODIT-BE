@@ -17,15 +17,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Notification extends BaseEntity {
 
@@ -51,6 +48,14 @@ public class Notification extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
+
+	@Builder
+	public Notification(String message, NotificationType notificationType, String category, boolean isRead) {
+		this.message = message;
+		this.notificationType = notificationType;
+		this.category = category;
+		this.isRead = isRead;
+	}
 
 	//연관관계 메서드
 	public void assignUser(User user) {

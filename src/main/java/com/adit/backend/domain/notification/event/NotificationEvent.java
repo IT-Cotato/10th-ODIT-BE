@@ -9,7 +9,7 @@ import lombok.Builder;
 @Builder
 public record NotificationEvent(
 	String userEmail,
-	String message,
+	String content,
 	String category,
 	NotificationType notificationType,
 	LocalDateTime createdAt

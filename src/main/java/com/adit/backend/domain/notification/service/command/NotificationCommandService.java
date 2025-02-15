@@ -76,7 +76,7 @@ public class NotificationCommandService {
 	public void sendNotification(NotificationEvent event) {
 		User user = userQueryService.findUserByEmail(event.userEmail());
 
-		Notification notification = notificationConverter.toEntity(event.message(), event.notificationType());
+		Notification notification = notificationConverter.toEntity(event.content(), event.notificationType());
 		notification.assignUser(user);
 		notificationRepository.save(notification);
 

@@ -14,6 +14,7 @@ public class NotificationConverter {
 			.message(message)
 			.notificationType(notificationType)
 			.category(notificationType.getCategory())
+			.isRead(false)
 			.build();
 	}
 
@@ -24,7 +25,7 @@ public class NotificationConverter {
 			.notificationType(notification.getNotificationType())
 			.category(notification.getNotificationType().getCategory())
 			.isRead(notification.isRead())
-			.createdAt(notification.getCreatedAt())
+			.createdAt(notification.getCreatedAt().toLocalDate().toString())
 			.build();
 	}
 }
