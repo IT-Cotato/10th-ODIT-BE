@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.adit.backend.domain.place.entity.CommonPlace;
 import com.adit.backend.domain.place.entity.PlaceStatistics;
 
 @Repository

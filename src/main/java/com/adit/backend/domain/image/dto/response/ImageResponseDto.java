@@ -10,7 +10,6 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import lombok.Getter;
 
 /**
  * DTO for {@link Image}
@@ -19,7 +18,6 @@ import lombok.Getter;
 public record ImageResponseDto(@NotNull(message = "이미지 ID는 null일 수 없습니다.") Long id,
 							   @Nullable CommonPlace commonPlace,
 							   @Nullable UserPlace userPlace,
-
 							   @Nullable UserEvent userEvent,
 							   @Nullable CommonEvent commonEvent,
 							   @NotBlank(message = "이미지 주소는 공백일 수 없습니다.") String url) {

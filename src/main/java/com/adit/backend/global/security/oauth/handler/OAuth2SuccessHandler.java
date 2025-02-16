@@ -63,8 +63,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 		ZonedDateTime seoulTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
 		ZonedDateTime expirationTime = seoulTime.plusSeconds(refreshTokenExpirationAt);
 		cookie.setMaxAge((int)(expirationTime.toEpochSecond() - seoulTime.toEpochSecond()));
-		//cookie.setSecure(true);
-		//cookie.setHttpOnly(true);
+		cookie.setSecure(true);
+		cookie.setHttpOnly(true);
 		response.addCookie(cookie);
 
 		// Role 정보를 응답 본문에 추가

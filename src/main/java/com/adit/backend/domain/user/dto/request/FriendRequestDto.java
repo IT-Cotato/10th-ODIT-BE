@@ -1,7 +1,6 @@
 package com.adit.backend.domain.user.dto.request;
 
 import com.adit.backend.domain.user.entity.Friendship;
-import com.adit.backend.domain.user.entity.User;
 
 import jakarta.validation.constraints.NotNull;
 

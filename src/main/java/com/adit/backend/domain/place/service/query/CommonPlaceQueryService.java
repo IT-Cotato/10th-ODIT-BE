@@ -73,6 +73,4 @@ public class CommonPlaceQueryService {
 			.sorted((a1, b1) -> friendsCommonplace.get(b1) - friendsCommonplace.get(a1))
 			.toList();
 	}
-
-
 }

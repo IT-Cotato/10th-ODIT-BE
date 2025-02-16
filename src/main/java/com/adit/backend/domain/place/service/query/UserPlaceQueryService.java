@@ -4,7 +4,6 @@ import static com.adit.backend.global.error.GlobalErrorCode.*;
 import static com.adit.backend.global.util.MapUtil.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,11 +19,9 @@ import com.adit.backend.domain.place.entity.CommonPlace;
 import com.adit.backend.domain.place.entity.UserPlace;
 import com.adit.backend.domain.place.exception.PlaceException;
 import com.adit.backend.domain.place.repository.UserPlaceRepository;
-import com.adit.backend.domain.user.converter.UserConverter;
 import com.adit.backend.domain.user.dto.response.UserResponse;
-import com.adit.backend.domain.user.exception.UserException;
+import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.domain.user.repository.FriendshipRepository;
-import com.adit.backend.domain.user.repository.UserRepository;
 import com.adit.backend.domain.user.service.query.UserQueryService;
 
 import lombok.RequiredArgsConstructor;
@@ -128,5 +125,10 @@ public class UserPlaceQueryService {
 			response.put(commonPlaceConverter.commonPlaceToResponse(commonPlace), friendInfoList);
 		});
 		return response;
+	}
+
+	public List<UserPlace> findRelatedUserPlace(User user, CommonPlace commonPlace) {
+		return userPlaceRepository.findAllFriendsUserPlace(user.getId(), commonPlace.getId())
+			.orElseThrow(() -> new PlaceException(USER_PLACE_NOT_FOUND));
 	}
 }

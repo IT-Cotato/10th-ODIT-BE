@@ -3,7 +3,6 @@ package com.adit.backend.domain.user.dto.response;
 import java.io.Serializable;
 
 import com.adit.backend.domain.user.entity.Friendship;
-import com.adit.backend.domain.user.entity.User;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
