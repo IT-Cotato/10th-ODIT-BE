@@ -27,4 +27,4 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 30s
 redirect:
-  url: ${FRONT_LOCAL_URL}/login/kakao
+  url: ${FRONT_URL}/login/kakao
