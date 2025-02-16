@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -174,7 +175,7 @@ public class PlaceController {
 	@Operation(summary = "장소 이미지 수정", description = "userPlaceId에 해당하는 장소의 이미지 수정")
 	@PutMapping("/{userPlaceId}/image")
 	public ResponseEntity<ApiResponse<PlaceResponseDto>> updateUserPlaceImage(@PathVariable Long userPlaceId
-		, List<MultipartFile> multipartFile){
+		, @RequestPart List<MultipartFile> multipartFile){
 		PlaceResponseDto placeResponseDto = userPlaceCommandService.updateUserPlaceImage(userPlaceId, multipartFile);
 		return ResponseEntity.ok(ApiResponse.success(placeResponseDto));
 	}
