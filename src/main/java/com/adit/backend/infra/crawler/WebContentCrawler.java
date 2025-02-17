@@ -99,7 +99,6 @@ public class WebContentCrawler {
 	public static List<String> extractImageSrcList(Elements elements) {
 		if (elements == null) {
 			log.error("[Crawl] 이미지 추출을 위한 요소가 null");
-			throw new CrawlingException(GlobalErrorCode.IMAGE_EXTRACTION_FAILED);
 		}
 		try {
 			List<String> imageSrcList = new ArrayList<>();
