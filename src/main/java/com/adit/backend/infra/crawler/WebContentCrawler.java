@@ -187,7 +187,6 @@ public class WebContentCrawler {
 				log.debug("[Crawl] 제목 추출 완료: {}", title);
 			} else {
 				log.warn("[Crawl] 제목 추출 실패: {}", document.location());
-				throw new CrawlingException(GlobalErrorCode.TITLE_EXTRACTION_FAILED);
 			}
 		} catch (Exception e) {
 			log.error("[Crawl] 제목 추출 중 오류 발생: {}", e.getMessage());
