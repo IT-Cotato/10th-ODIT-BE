@@ -105,6 +105,7 @@ public class WebContentCrawler {
 			List<String> imageSrcList = new ArrayList<>();
 			Elements imgElements = elements.select("img");
 			for (Element img : imgElements) {
+				// 우선 data-lazy-src, data-origin, src 순으로 URL을 가져옵니다.
 				String highResUrl = img.attr("data-lazy-src");
 				if (highResUrl.isEmpty()) {
 					highResUrl = img.attr("data-origin");
@@ -112,8 +113,14 @@ public class WebContentCrawler {
 				if (highResUrl.isEmpty()) {
 					highResUrl = img.attr("src");
 				}
+				// URL에 "?type=" 파라미터가 있으면 제거
 				if (highResUrl.contains("?type=")) {
 					highResUrl = highResUrl.split("\\?type=")[0];
+				}
+				// 추출된 URL이 비어있지 않으면, 제외해야 할 패턴이면 건너뜁니다.
+				if (!highResUrl.isEmpty() && isExcludedUrl(highResUrl)) {
+					log.debug("[Crawl] 제외된 이미지 URL: {}", highResUrl);
+					continue;
 				}
 				if (!highResUrl.isEmpty()) {
 					imageSrcList.add(highResUrl + "?type=w966");
@@ -125,6 +132,14 @@ public class WebContentCrawler {
 			throw new CrawlingException(GlobalErrorCode.IMAGE_EXTRACTION_FAILED);
 		}
 	}
+
+	private static boolean isExcludedUrl(String url) {
+		return url.contains("dthumb-phinf.pstatic.net")
+			|| url.contains("blogimgs.pstatic.net/nblog/quickeditor")
+			|| url.contains("storep-phinf.pstatic.net")
+			|| url.contains("blogpfthumb-phinf.pstatic.net");
+	}
+
 
 	public static String extractPlaceInfo(Document document) {
 		StringBuilder placeBuilder = new StringBuilder();
@@ -187,7 +202,6 @@ public class WebContentCrawler {
 				log.debug("[Crawl] 제목 추출 완료: {}", title);
 			} else {
 				log.warn("[Crawl] 제목 추출 실패: {}", document.location());
-				throw new CrawlingException(GlobalErrorCode.TITLE_EXTRACTION_FAILED);
 			}
 		} catch (Exception e) {
 			log.error("[Crawl] 제목 추출 중 오류 발생: {}", e.getMessage());
