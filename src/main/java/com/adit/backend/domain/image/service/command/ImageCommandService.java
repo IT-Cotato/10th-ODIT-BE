@@ -94,4 +94,16 @@ public class ImageCommandService {
 		imageRepository.saveAll(imageList);
 
 	}
+
+	// toResponse 메서드 추가
+	public ImageResponseDto toResponse(Image image) {
+		return new ImageResponseDto(
+			image.getId(),
+			image.getCommonPlace(),
+			image.getUserPlace(),
+			image.getUserEvent(),
+			image.getCommonEvent(),
+			image.getUrl()
+		);
+	}
 }

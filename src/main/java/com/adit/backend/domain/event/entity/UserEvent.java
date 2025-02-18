@@ -100,4 +100,8 @@ public class UserEvent extends BaseEntity {
 		if (request.getVisited() != null)
 			this.visited = request.getVisited();
 	}
+
+	public void updateMemo(String memo) {
+		this.memo = memo;
+	}
 }
