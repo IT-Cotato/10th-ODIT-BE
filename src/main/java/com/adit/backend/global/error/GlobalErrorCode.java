@@ -114,6 +114,7 @@ public enum GlobalErrorCode implements ErrorCode {
 	EVENT_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EVN-003", "이벤트 생성에 실패했습니다."),
 	EVENT_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EVN-004", "이벤트 업데이트에 실패했습니다."),
 	EVENT_DELETION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EVN-005", "이벤트 삭제에 실패했습니다."),
+	EVENT_DELETE_FAILED (HttpStatus.INTERNAL_SERVER_ERROR,"EVN-006", "이벤트 삭제를 실패했습니다."),
 	COMMON_EVENT_NOT_FOUND(NOT_FOUND, "EVN-006", "해당 Common Event 를 찾을 수 없습니다."),
 
 	/********************************** Notification Domain **********************************/
@@ -121,6 +122,7 @@ public enum GlobalErrorCode implements ErrorCode {
 
 	/********************************** Image Domain **********************************/
 	IMAGE_NOT_FOUND(NOT_FOUND, "IMG-001", "이미지를 찾을 수 없습니다."),
+	IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "IMG-002", "이미지 삭제를 실패했습니다."),
 
 	/********************************** S3 **********************************/
 	S3_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-001", "S3 파일 업로드에 실패했습니다."),
@@ -128,6 +130,7 @@ public enum GlobalErrorCode implements ErrorCode {
 	S3_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-003", "S3 파일 삭제에 실패했습니다."),
 	S3_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-004", "이미지 업데이트에 실패했습니다."),
 	S3_IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"S3-005", "이벤트 삭제 중 이미지 삭제 실패.");
+
 
 	private final HttpStatus httpStatus;
 	private final String code;
