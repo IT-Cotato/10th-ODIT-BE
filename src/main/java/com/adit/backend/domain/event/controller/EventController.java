@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,13 +22,17 @@ import org.springframework.web.multipart.MultipartFile;
 import com.adit.backend.domain.event.dto.request.EventRequestDto;
 import com.adit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.adit.backend.domain.event.dto.response.EventResponseDto;
+import com.adit.backend.domain.event.service.EventImageService;
 import com.adit.backend.domain.event.service.command.UserEventCommandService;
 import com.adit.backend.domain.event.service.query.UserEventQueryService;
+import com.adit.backend.domain.image.dto.request.ImageUpdateRequestDto;
+import com.adit.backend.domain.image.dto.response.ImageResponseDto;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.global.common.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -39,6 +43,7 @@ public class EventController {
 
     private final UserEventCommandService commandService;
     private final UserEventQueryService queryService;
+    private final EventImageService eventimageService;
 
     @Operation(summary = "모든 이벤트 조회", description = "모든 이벤트 목록을 조회합니다.")
     @GetMapping
@@ -47,6 +52,7 @@ public class EventController {
         return ResponseEntity.ok(ApiResponse.success(events));
     }
 
+    //특정 ID로 이벤트 조회
     @Operation(summary = "ID로 이벤트 조회", description = "특정 ID에 해당하는 이벤트의 세부 정보를 조회합니다.")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<EventResponseDto>> getEventById(@PathVariable Long id) {
@@ -90,21 +96,53 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(event));
     }
 
-    @Operation(summary = "이벤트 수정", description = "기존 이벤트의 세부 정보를 수정합니다.")
-    @PatchMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<ApiResponse<EventResponseDto>> updateEvent(
-        @PathVariable Long id,
-        @RequestPart(value = "eventUpdateRequest") EventUpdateRequestDto request,  // JSON을 받기 위해 @RequestPart로 변경
-        @RequestPart(value = "file", required = false) List<MultipartFile> newImageList ) {
 
-        EventResponseDto event = commandService.updateEvent(id, request, newImageList);
-        return ResponseEntity.ok(ApiResponse.success(event));
+    @Operation(summary = "이벤트 기본 정보 수정", description = "기존 이벤트의 기본 정보를 수정합니다.")
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<EventResponseDto>> updateEventInfo(
+        @PathVariable Long id, @Valid @RequestBody EventUpdateRequestDto request) {
+
+        EventResponseDto updatedEvent = commandService.updateEventInfo(id, request);
+        return ResponseEntity.ok(ApiResponse.success(updatedEvent));
     }
+
 
     @Operation(summary = "이벤트 삭제", description = "이벤트 ID를 기반으로 해당 이벤트를 삭제합니다.")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long id) {
     commandService.deleteEvent(id);
     return ResponseEntity.noContent().build();
+    }
+
+
+    @Operation(summary = "이벤트 이미지 추가", description = "이벤트에 새로운 이미지를 추가합니다.")
+    @PostMapping("/{id}/images")
+    public ResponseEntity<ApiResponse<List<ImageResponseDto>>> addEventImages(
+        @PathVariable Long id,
+        @RequestPart List<MultipartFile> images) {
+
+        List<ImageResponseDto> uploadedImages = eventimageService.addEventImages(id, images);
+        return ResponseEntity.ok(ApiResponse.success(uploadedImages));
+    }
+
+
+    @Operation(summary = "이벤트 이미지 업데이트", description = "이벤트의 기존 이미지를 새로운 이미지로 교체합니다.")
+    @PutMapping("/{id}/images")
+    public ResponseEntity<ApiResponse<List<ImageResponseDto>>> updateEventImages(
+        @PathVariable Long id,
+        @Valid @RequestBody List<ImageUpdateRequestDto> imageUpdateRequests) {
+
+        List<ImageResponseDto> updatedImages = eventimageService.updateEventImages(id, imageUpdateRequests);
+        return ResponseEntity.ok(ApiResponse.success(updatedImages));
+    }
+
+    // 이벤트 이미지 삭제
+    @Operation(summary = "이벤트 이미지 삭제", description = "이벤트의 특정 이미지를 삭제합니다.")
+    @DeleteMapping("/{id}/images/{imageId}")
+    public ResponseEntity<ApiResponse<Void>> deleteEventImage(
+        @PathVariable Long id, @PathVariable Long imageId) {
+
+        eventimageService.deleteEventImage(id, imageId);
+        return ResponseEntity.noContent().build();
     }
 }
