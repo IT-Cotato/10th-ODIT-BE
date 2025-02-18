@@ -1,5 +1,6 @@
 package com.adit.backend.domain.user.controller;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,7 @@ public class FriendshipController {
 			.body(ApiResponse.success(savedForwardRequest));
 	}
 
-	 // 친구 요청 수락 API
+	// 친구 요청 수락 API
 	@Operation(summary = "친구 요청 수락", description = "requestId에 해당하는 요청을 true 로 저장")
 	@PostMapping("/accept")
 	public ResponseEntity<ApiResponse<String>> acceptFriendRequest(@RequestParam Long requestId) {
@@ -70,7 +71,7 @@ public class FriendshipController {
 	@Operation(summary = "친구 삭제", description = "friendId에 해당하는 친구를 삭제")
 	@DeleteMapping("/{friendId}")
 	public ResponseEntity<ApiResponse<String>> removeFriend(@PathVariable Long friendId,
-	@AuthenticationPrincipal (expression = "user") User user) {
+		@AuthenticationPrincipal(expression = "user") User user) {
 		// 친구 관계를 삭제
 		friendCommandService.removeFriend(user.getId(), friendId);
 		return ResponseEntity.ok(ApiResponse.success("Friend removed"));
@@ -79,20 +80,20 @@ public class FriendshipController {
 	//친구 요청 목록 확인 API
 	@Operation(summary = "친구 요청 목록 조회", description = "userId에 해당하는 사용자가 보내거나 받은 친구 요청 조회")
 	@GetMapping("/{userId}/check")
-	public ResponseEntity<ApiResponse<Map<String, List<UserResponse.InfoDto>>>> checkRequest(
-		@AuthenticationPrincipal (expression = "user") User user) {
+	public ResponseEntity<ApiResponse<List<FriendRequestResponseDto>>> checkRequest(
+		@AuthenticationPrincipal(expression = "user") User user) {
 		Map<String, List<UserResponse.InfoDto>> requests = friendQueryService.checkRequest(user.getId());
 		List<FriendRequestResponseDto> friendRequests = requests.entrySet().stream()
-											.map(entry -> new FriendRequestResponseDto(entry.getKey(), entry.getValue()))
-											.toList();
-		return ResponseEntity.ok(ApiResponse.success(requests));
+			.map(entry -> new FriendRequestResponseDto(entry.getKey(), entry.getValue()))
+			.toList();
+		return ResponseEntity.ok(ApiResponse.success(friendRequests));
 	}
 
 	//친구 목록 확인 API
 	@Operation(summary = "친구 목록 조회", description = "userId에 해당하는 사용자의 친구 조회")
 	@GetMapping("/{userId}")
 	public ResponseEntity<ApiResponse<List<UserResponse.InfoDto>>> findFriends(@AuthenticationPrincipal
-		(expression = "user") User user){
+		(expression = "user") User user) {
 		List<UserResponse.InfoDto> friendList = friendQueryService.findFriends(user.getId());
 		return ResponseEntity.ok(ApiResponse.success(friendList));
 	}
@@ -100,9 +101,14 @@ public class FriendshipController {
 	//사용자 검색 API
 	@Operation(summary = "사용자 검색", description = "해당 NickName 에 해당하는 사용자 조회")
 	@GetMapping("/search")
-	public ResponseEntity<ApiResponse<Map<String, UserResponse.InfoDto>>> findUser(@RequestParam String NickName,
-		@AuthenticationPrincipal (expression = "user") User user) {
-		Map<String, UserResponse.InfoDto> searchedUser = friendQueryService.findUser(NickName, user.getId());
+	public ResponseEntity<ApiResponse<List<FriendRequestResponseDto>>> findUser(@RequestParam String NickName,
+		@AuthenticationPrincipal(expression = "user") User user) {
+		Map<String, UserResponse.InfoDto> response = friendQueryService.findUser(NickName, user.getId());
+		List<FriendRequestResponseDto> searchedUser = response.entrySet().stream()
+			.map(entry -> new FriendRequestResponseDto(entry.getKey(),
+				Collections.singletonList(entry.getValue())))
+			.toList();
+
 		return ResponseEntity.ok(ApiResponse.success(searchedUser));
 	}
 }

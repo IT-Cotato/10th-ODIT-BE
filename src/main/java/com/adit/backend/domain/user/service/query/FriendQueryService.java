@@ -90,12 +90,12 @@ public class FriendQueryService {
 		Map<String, UserResponse.InfoDto> response = new HashMap<>();
 		// nickName 으로 검색된 사용자가 친구 요청 대기중이거나 이미 친구라면 메시지만 반환
 		if (friendsId.contains(searchedUser.getId()) || byUser != null) {
-			response.put("요청 대기중 이거나 이미 친구인 사용자 입니다", null);
+			response.put("Already processed friend", userConverter.InfoDto(searchedUser));
 			return response;
 		}
 		// 그렇지 않다면 검색된 사용자 정보 반환
 		else {
-			response.put("", userConverter.InfoDto(searchedUser));
+			response.put("unprocessed friend", userConverter.InfoDto(searchedUser));
 			return response;
 		}
 	}
