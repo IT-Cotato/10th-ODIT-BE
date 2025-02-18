@@ -179,4 +179,13 @@ public class PlaceController {
 		PlaceResponseDto placeResponseDto = userPlaceCommandService.updateUserPlaceImage(userPlaceId, multipartFile);
 		return ResponseEntity.ok(ApiResponse.success(placeResponseDto));
 	}
+
+	//북마크 장소 저장 API
+	@Operation(summary = "북마크 장소 저장", description = "commonPlaceId에 해당하는 장소를 userPlace 에 저장")
+	@PostMapping("/{commonPlaceId}/bookMark")
+	public ResponseEntity<ApiResponse<PlaceResponseDto>> savedCommonPlace(@PathVariable Long commonPlaceId ,
+		@AuthenticationPrincipal(expression = "user") User user){
+		PlaceResponseDto placeResponseDto = userPlaceCommandService.savedCommonPlace(commonPlaceId, user.getId());
+		return ResponseEntity.ok(ApiResponse.success(placeResponseDto));
+	}
 }

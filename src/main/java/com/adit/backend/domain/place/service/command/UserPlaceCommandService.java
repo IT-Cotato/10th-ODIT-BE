@@ -20,8 +20,11 @@ import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
 import com.adit.backend.domain.place.entity.CommonPlace;
 import com.adit.backend.domain.place.entity.UserPlace;
 import com.adit.backend.domain.place.exception.PlaceException;
+import com.adit.backend.domain.place.repository.CommonPlaceRepository;
 import com.adit.backend.domain.place.repository.UserPlaceRepository;
 import com.adit.backend.domain.user.entity.User;
+import com.adit.backend.domain.user.exception.UserException;
+import com.adit.backend.domain.user.repository.UserRepository;
 import com.adit.backend.domain.user.service.query.UserQueryService;
 import com.adit.backend.global.error.exception.BusinessException;
 
@@ -33,7 +36,8 @@ import lombok.RequiredArgsConstructor;
 public class UserPlaceCommandService {
 
 	private final UserPlaceRepository userPlaceRepository;
-
+	private final CommonPlaceRepository commonPlaceRepository;
+	private final UserRepository userRepository;
 	private final UserQueryService userQueryService;
 	private final CommonPlaceCommandService commonPlaceCommandService;
 	private final ImageCommandService imageCommandService;
@@ -46,9 +50,7 @@ public class UserPlaceCommandService {
 	// 장소 저장시, EventStatistics.bookmarkCount 증가
 	public PlaceResponseDto createUserPlace(Long userId, PlaceRequestDto request) {
 		//장소 중복 검사
-		if (!duplicatePlace(userId, request)) {
-			throw new PlaceException(USER_PLACE_DUPLICATE);
-		}
+		duplicatePlace(userId, request.url());
 		User user = userQueryService.findUserById(userId);
 		CommonPlace commonPlace = commonPlaceCommandService.saveOrFindCommonPlace(request);
 		UserPlace userPlace = userPlaceConverter.toEntity(request);
@@ -94,8 +96,10 @@ public class UserPlaceCommandService {
 		notificationGenerationService.createNotificationOfASavedPlace(user, commonPlace, userPlace);
 	}
 
-	public boolean duplicatePlace(Long userId, PlaceRequestDto request) {
-		return userPlaceRepository.findDuplicatePlace(userId, request.url()) == null;
+	public void duplicatePlace(Long userId, String requestUrl) {
+		if( userPlaceRepository.findDuplicatePlace(userId, requestUrl) != null){
+			throw new PlaceException(USER_PLACE_DUPLICATE);
+		}
 	}
 
 	public PlaceResponseDto updateUserPlaceImage(Long userPlaceId, List<MultipartFile> newImageList) {
@@ -130,5 +134,19 @@ public class UserPlaceCommandService {
 		}
 
 		return userPlaceConverter.toResponse(userPlace);
+	}
+
+	public PlaceResponseDto savedCommonPlace(Long commonPlaceId, Long userId) {
+		CommonPlace commonPlace = commonPlaceRepository.findById(commonPlaceId).orElseThrow(() -> new PlaceException(COMMON_PLACE_NOT_FOUND));
+		User user = userRepository.findById(userId).orElseThrow(() -> new UserException(USER_NOT_FOUND));
+		duplicatePlace(userId, commonPlace.getUrl());
+		UserPlace userPlace = userPlaceConverter.toEntity(commonPlace);
+		saveUserPlaceRelation(user, commonPlace, userPlace);
+		placeStatisticsCommandService.saveOrCount(commonPlace);
+		if (!commonPlace.getImages().stream().map(Image::getUrl).toList().isEmpty()) {
+			imageCommandService.addImageToUserPlace(commonPlace, user, userPlace);
+		}
+
+		return commonPlaceConverter.userPlaceToResponse(userPlace);
 	}
 }

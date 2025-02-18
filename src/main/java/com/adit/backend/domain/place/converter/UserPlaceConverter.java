@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 import com.adit.backend.domain.image.entity.Image;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
 import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
+import com.adit.backend.domain.place.entity.CommonPlace;
 import com.adit.backend.domain.place.entity.UserPlace;
+import com.adit.backend.domain.user.entity.User;
 
 @Component
 public class UserPlaceConverter {
@@ -17,6 +19,12 @@ public class UserPlaceConverter {
 	public UserPlace toEntity(PlaceRequestDto request) {
 		return UserPlace.builder()
 			.memo(request.memo())
+			.visited(false)
+			.build();
+	}
+
+	public UserPlace toEntity(CommonPlace commonPlace){
+		return UserPlace.builder()
 			.visited(false)
 			.build();
 	}
