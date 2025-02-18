@@ -144,6 +144,7 @@ public class UserPlaceCommandService {
 		}
 		UserPlace userPlace = userPlaceConverter.toEntity(commonPlace);
 		saveUserPlaceRelation(user, commonPlace, userPlace);
+		placeStatisticsCommandService.saveOrCount(commonPlace);
 
 		return commonPlaceConverter.userPlaceToResponse(userPlace);
 	}
