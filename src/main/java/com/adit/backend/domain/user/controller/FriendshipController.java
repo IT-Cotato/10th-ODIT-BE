@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.adit.backend.domain.user.dto.request.FriendRequestDto;
+import com.adit.backend.domain.user.dto.response.FriendRequestResponseDto;
 import com.adit.backend.domain.user.dto.response.FriendshipResponseDto;
 import com.adit.backend.domain.user.dto.response.UserResponse;
 import com.adit.backend.domain.user.entity.User;
@@ -81,6 +82,9 @@ public class FriendshipController {
 	public ResponseEntity<ApiResponse<Map<String, List<UserResponse.InfoDto>>>> checkRequest(
 		@AuthenticationPrincipal (expression = "user") User user) {
 		Map<String, List<UserResponse.InfoDto>> requests = friendQueryService.checkRequest(user.getId());
+		List<FriendRequestResponseDto> friendRequests = requests.entrySet().stream()
+											.map(entry -> new FriendRequestResponseDto(entry.getKey(), entry.getValue()))
+											.toList();
 		return ResponseEntity.ok(ApiResponse.success(requests));
 	}
 
