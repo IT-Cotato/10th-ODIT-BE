@@ -30,6 +30,7 @@ import com.adit.backend.global.security.jwt.util.JwtTokenProvider;
 import com.adit.backend.infra.oauth.KakaoOAuthService;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -57,9 +58,9 @@ public class AuthService {
 	private String refreshTokenCookieName;
 
 	//로그인
-	public LoginResponse login(KakaoRequest.AuthDto request, HttpServletResponse response) {
+	public LoginResponse login(KakaoRequest.AuthDto authRequest, HttpServletRequest request, HttpServletResponse response) {
 		try {
-			KakaoResponse.TokenInfoDto kakaoTokenInfo = kakaoOAuthService.requestTokenIssuance(request.code())
+			KakaoResponse.TokenInfoDto kakaoTokenInfo = kakaoOAuthService.requestTokenIssuance(request, authRequest.code())
 				.getBody();
 			OAuth2UserInfo oAuth2UserInfo = kakaoOAuthService.requestOAuth2UserInfo(kakaoTokenInfo.accessToken());
 			UserResponse.InfoDto infoDto = userCommandService.createOrUpdateUser(oAuth2UserInfo);

@@ -19,6 +19,7 @@ import com.adit.backend.global.common.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +34,9 @@ public class AuthController {
 
 	@OAuthLoginResponse
 	@GetMapping("/login")
-	public ResponseEntity<ApiResponse<LoginResponse>> oauthLogin(KakaoRequest.AuthDto code,
+	public ResponseEntity<ApiResponse<LoginResponse>> oauthLogin(KakaoRequest.AuthDto code, HttpServletRequest request,
 		HttpServletResponse response) {
-		return ResponseEntity.ok(ApiResponse.success(authService.login(code, response)));
+		return ResponseEntity.ok(ApiResponse.success(authService.login(code, request, response)));
 	}
 
 	@ReissueTokenResponse
