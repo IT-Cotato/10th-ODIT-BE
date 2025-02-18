@@ -99,7 +99,7 @@ public class UserPlaceCommandService {
 	public void duplicatePlace(Long userId, String requestUrl) {
 		if( userPlaceRepository.findDuplicatePlace(userId, requestUrl) != null){
 			throw new PlaceException(USER_PLACE_DUPLICATE);
-		};
+		}
 	}
 
 	public PlaceResponseDto updateUserPlaceImage(Long userPlaceId, List<MultipartFile> newImageList) {
