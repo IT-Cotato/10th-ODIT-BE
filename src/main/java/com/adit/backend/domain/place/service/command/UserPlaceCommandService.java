@@ -50,9 +50,7 @@ public class UserPlaceCommandService {
 	// 장소 저장시, EventStatistics.bookmarkCount 증가
 	public PlaceResponseDto createUserPlace(Long userId, PlaceRequestDto request) {
 		//장소 중복 검사
-		if (!duplicatePlace(userId, request.url())) {
-			throw new PlaceException(USER_PLACE_DUPLICATE);
-		}
+		duplicatePlace(userId, request.url());
 		User user = userQueryService.findUserById(userId);
 		CommonPlace commonPlace = commonPlaceCommandService.saveOrFindCommonPlace(request);
 		UserPlace userPlace = userPlaceConverter.toEntity(request);
@@ -98,8 +96,10 @@ public class UserPlaceCommandService {
 		notificationGenerationService.createNotificationOfASavedPlace(user, commonPlace, userPlace);
 	}
 
-	public boolean duplicatePlace(Long userId, String requestUrl) {
-		return userPlaceRepository.findDuplicatePlace(userId, requestUrl) == null;
+	public void duplicatePlace(Long userId, String requestUrl) {
+		if( userPlaceRepository.findDuplicatePlace(userId, requestUrl) != null){
+			throw new PlaceException(USER_PLACE_DUPLICATE);
+		};
 	}
 
 	public PlaceResponseDto updateUserPlaceImage(Long userPlaceId, List<MultipartFile> newImageList) {
@@ -139,12 +139,13 @@ public class UserPlaceCommandService {
 	public PlaceResponseDto savedCommonPlace(Long commonPlaceId, Long userId) {
 		CommonPlace commonPlace = commonPlaceRepository.findById(commonPlaceId).orElseThrow(() -> new PlaceException(COMMON_PLACE_NOT_FOUND));
 		User user = userRepository.findById(userId).orElseThrow(() -> new UserException(USER_NOT_FOUND));
-		if (!duplicatePlace(userId, commonPlace.getUrl())){
-			throw new PlaceException(USER_PLACE_DUPLICATE);
-		}
+		duplicatePlace(userId, commonPlace.getUrl());
 		UserPlace userPlace = userPlaceConverter.toEntity(commonPlace);
 		saveUserPlaceRelation(user, commonPlace, userPlace);
 		placeStatisticsCommandService.saveOrCount(commonPlace);
+		if (!commonPlace.getImages().stream().map(Image::getUrl).toList().isEmpty()) {
+			imageCommandService.addImageToUserPlace(commonPlace, user, userPlace);
+		}
 
 		return commonPlaceConverter.userPlaceToResponse(userPlace);
 	}

@@ -72,6 +72,14 @@ public class ImageCommandService {
 
 	}
 
+	//UserPlace에 이미지 연관관계 추가 후 저장 2
+	public void addImageToUserPlace(CommonPlace commonPlace, User user, UserPlace userPlace) {
+		List<Image> imageList = s3Service.uploadFile(commonPlace.getImages().stream().map(Image::getUrl).toList(), USER.getPath() + user.getId()).join();
+		imageList.forEach(userPlace::addImage);
+		imageRepository.saveAll(imageList);
+
+	}
+
 	// CommonPlace에 이미지 연관관계 추가 후 저장
 	public void addImageToCommonPlace(PlaceRequestDto request, CommonPlace commonPlace) {
 		List<Image> imageList = s3Service.uploadFile(request.imageUrlList(), PLACE.getPath()).join();
