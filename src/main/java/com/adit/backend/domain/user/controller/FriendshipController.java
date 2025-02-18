@@ -1,8 +1,6 @@
 package com.adit.backend.domain.user.controller;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -82,10 +80,8 @@ public class FriendshipController {
 	@GetMapping("/{userId}/check")
 	public ResponseEntity<ApiResponse<List<FriendRequestResponseDto>>> checkRequest(
 		@AuthenticationPrincipal(expression = "user") User user) {
-		Map<String, List<UserResponse.InfoDto>> requests = friendQueryService.checkRequest(user.getId());
-		List<FriendRequestResponseDto> friendRequests = requests.entrySet().stream()
-			.map(entry -> new FriendRequestResponseDto(entry.getKey(), entry.getValue()))
-			.toList();
+		List<FriendRequestResponseDto> friendRequests = friendQueryService.checkRequest(user.getId());
+
 		return ResponseEntity.ok(ApiResponse.success(friendRequests));
 	}
 
@@ -103,12 +99,8 @@ public class FriendshipController {
 	@GetMapping("/search")
 	public ResponseEntity<ApiResponse<List<FriendRequestResponseDto>>> findUser(@RequestParam String NickName,
 		@AuthenticationPrincipal(expression = "user") User user) {
-		Map<String, UserResponse.InfoDto> response = friendQueryService.findUser(NickName, user.getId());
-		List<FriendRequestResponseDto> searchedUser = response.entrySet().stream()
-			.map(entry -> new FriendRequestResponseDto(entry.getKey(),
-				Collections.singletonList(entry.getValue())))
-			.toList();
+		List<FriendRequestResponseDto> response = friendQueryService.findUser(NickName, user.getId());
 
-		return ResponseEntity.ok(ApiResponse.success(searchedUser));
+		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 }

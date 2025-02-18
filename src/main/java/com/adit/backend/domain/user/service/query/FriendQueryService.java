@@ -2,6 +2,7 @@ package com.adit.backend.domain.user.service.query;
 
 import static com.adit.backend.global.error.GlobalErrorCode.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.adit.backend.domain.user.converter.UserConverter;
+import com.adit.backend.domain.user.dto.response.FriendRequestResponseDto;
 import com.adit.backend.domain.user.dto.response.UserResponse;
 import com.adit.backend.domain.user.entity.Friendship;
 import com.adit.backend.domain.user.entity.User;
@@ -34,7 +36,7 @@ public class FriendQueryService {
 	/**
 	 * 친구 요청 목록 확인
 	 */
-	public Map<String, List<UserResponse.InfoDto>> checkRequest(Long userId) {
+	public List<FriendRequestResponseDto> checkRequest(Long userId) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new UserException(USER_NOT_FOUND));
 		List<Friendship> sentFriendRequests = user.getSentFriendRequests();
@@ -60,7 +62,10 @@ public class FriendQueryService {
 			.map(userConverter::InfoDto)
 			.toList());
 
-		return allRequests;
+		return allRequests.entrySet().stream()
+			.map(entry -> new FriendRequestResponseDto(entry.getKey(), entry.getValue()))
+			.toList();
+
 	}
 
 	/**
@@ -78,7 +83,7 @@ public class FriendQueryService {
 	/**
 	 * 사용자 검색
 	 */
-	public Map<String, UserResponse.InfoDto> findUser(String nickName, Long userId) {
+	public List<FriendRequestResponseDto> findUser(String nickName, Long userId) {
 		User searchedUser = userRepository.findByNickname(nickName)
 			.orElseThrow(() -> new UserException(USER_NOT_FOUND));
 		User user = userRepository.findById(userId)
@@ -91,13 +96,16 @@ public class FriendQueryService {
 		// nickName 으로 검색된 사용자가 친구 요청 대기중이거나 이미 친구라면 메시지만 반환
 		if (friendsId.contains(searchedUser.getId()) || byUser != null) {
 			response.put("Already processed friend", userConverter.InfoDto(searchedUser));
-			return response;
 		}
 		// 그렇지 않다면 검색된 사용자 정보 반환
 		else {
 			response.put("unprocessed friend", userConverter.InfoDto(searchedUser));
-			return response;
 		}
+		return response.entrySet().stream()
+			.map(entry -> new FriendRequestResponseDto(entry.getKey(),
+				Collections.singletonList(entry.getValue())))
+			.toList();
+
 	}
 
 }
