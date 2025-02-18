@@ -42,7 +42,6 @@ public class SecurityConfig {
 	private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
 	private static final String[] WHITE_LIST = {
-		"/",
 		"/login/**",
 		"/api/ai/**",
 		"/api/user/**",
@@ -67,6 +66,7 @@ public class SecurityConfig {
 	public WebSecurityCustomizer webSecurityCustomizer() {
 		return web -> web.ignoring()
 			.requestMatchers(
+				"/",
 				"/error",
 				"/favicon.ico",
 				"/v3/api-docs/**",

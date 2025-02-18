@@ -22,6 +22,7 @@ import com.adit.backend.domain.auth.dto.response.KakaoResponse;
 import com.adit.backend.domain.auth.exception.AuthException;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class KakaoOAuthService {
-	public static final String KAKAO_ACCOUNT_PATH = "kakao_account";
+	private static final String FRONT_LOCAL_HOST = "localhost:3000";
+	private static final String KAKAO_ACCOUNT_PATH = "kakao_account";
+	private static final String FRONT_LOCAL_REDIRECT_URL = "http://localhost:3000/login/kakao";
 	private final RestTemplate restTemplate;
 
 	@Value("${spring.security.oauth2.client.registration.kakao.client-id}")
@@ -55,16 +58,23 @@ public class KakaoOAuthService {
 		return headers;
 	}
 
-	public ResponseEntity<KakaoResponse.TokenInfoDto> requestTokenIssuance(String code) {
+	public ResponseEntity<KakaoResponse.TokenInfoDto> requestTokenIssuance(HttpServletRequest request, String code) {
+		String dynamicRedirectUri = determineRedirectUri(request);
 		HttpHeaders headers = createHeaders();
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("grant_type", "authorization_code");
 		params.add("client_id", clientId);
 		params.add("client_secret", clientSecret);
-		params.add("redirect_uri", redirectUri);
+		params.add("redirect_uri", dynamicRedirectUri);
 		params.add("code", code);
-		log.info("[User] 인가코드 -> 카카오 액세스 토큰 발급 완료");
+		log.info("[User] 인가코드 -> 카카오 액세스 토큰 발급 요청 (redirect_uri: {})", dynamicRedirectUri);
 		return request(tokenUri, new HttpEntity<>(params, headers), KakaoResponse.TokenInfoDto.class);
+	}
+
+	private String determineRedirectUri(HttpServletRequest request) {
+		String host = request.getServerName() + ":" + request.getServerPort();
+		log.info("[User] HOST : {}", host);
+		return FRONT_LOCAL_HOST.equals(host) ? FRONT_LOCAL_REDIRECT_URL : redirectUri;
 	}
 
 	private <T> ResponseEntity<T> request(String url, HttpEntity<?> entity, Class<T> responseType) {
