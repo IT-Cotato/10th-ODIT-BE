@@ -106,6 +106,15 @@ public class EventController {
         return ResponseEntity.ok(ApiResponse.success(updatedEvent));
     }
 
+    @Operation(summary = "이벤트 메모 수정", description = "기존 이벤트의 메모를 수정합니다.")
+    @PatchMapping("/{id}/memo")
+    public ResponseEntity<ApiResponse<EventResponseDto>> updateEventInfo(
+        @PathVariable Long id, @RequestParam String memo) {
+
+        EventResponseDto updatedEvent = commandService.updateUserEventMemo(id, memo);
+        return ResponseEntity.ok(ApiResponse.success(updatedEvent));
+    }
+
 
     @Operation(summary = "이벤트 삭제", description = "이벤트 ID를 기반으로 해당 이벤트를 삭제합니다.")
     @DeleteMapping("/{id}")

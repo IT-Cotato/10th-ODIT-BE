@@ -48,7 +48,6 @@ public class UserEventCommandService {
 		return userEventConverter.toResponse(userEvent);
 	}
 
-
 	private void saveUserEventRelation(CommonEvent commonEvent, UserEvent userEvent, User user) {
 		commonEvent.addUserEvent(userEvent);
 		user.addUserEvent(userEvent);
@@ -65,6 +64,16 @@ public class UserEventCommandService {
 		userEventConverter.updateEntity(userEvent, request);
 		userEventRepository.save(userEvent);
 
+		return userEventConverter.toResponse(userEvent);
+	}
+
+	/**
+	 * 이벤트 메모 수정
+	 */
+	public EventResponseDto updateUserEventMemo(Long id, String memo) {
+		UserEvent userEvent = userEventRepository.findById(id)
+			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
+		userEvent.updateMemo(memo);
 		return userEventConverter.toResponse(userEvent);
 	}
 
@@ -90,4 +99,5 @@ public class UserEventCommandService {
 			throw new EventException(EVENT_DELETE_FAILED); // 실패 시 예외 발생 → 트랜잭션 롤백
 		}
 	}
+
 }
