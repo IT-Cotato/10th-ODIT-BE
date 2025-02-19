@@ -36,9 +36,9 @@ public class PlaceImageService {
 	private final ImageRepository imageRepository;
 
 	/**
-	 * 이벤트에 새로운 이미지 추가
+	 * 장소에 새로운 이미지 추가
 	 */
-	public List<ImageResponseDto> addEventImages(Long userPlaceId, List<MultipartFile> images) {
+	public List<ImageResponseDto> addPlaceImages(Long userPlaceId, List<MultipartFile> images) {
 		UserPlace userPlace = userPlaceRepository.findById(userPlaceId)
 			.orElseThrow(() -> new PlaceException(USER_PLACE_NOT_FOUND));
 
@@ -55,9 +55,9 @@ public class PlaceImageService {
 	}
 
 	/**
-	 * 기존 이벤트 이미지 업데이트 (기존 이미지 교체)
+	 * 기존 장소 이미지 업데이트 (기존 이미지 교체)
 	 */
-	public List<ImageResponseDto> updateEventImages(Long userPlaceId, List<ImageUpdateRequestDto> imageUpdateRequests) {
+	public List<ImageResponseDto> updatePlaceImages(Long userPlaceId, List<ImageUpdateRequestDto> imageUpdateRequests) {
 		UserPlace userPlace = userPlaceRepository.findById(userPlaceId)
 			.orElseThrow(() -> new PlaceException(USER_PLACE_NOT_FOUND));
 
@@ -67,9 +67,9 @@ public class PlaceImageService {
 	}
 
 	/**
-	 * 이벤트 이미지 삭제 (DB에서도 삭제)
+	 * 장소 이미지 삭제 (DB에서도 삭제)
 	 */
-	public void deleteEventImage(Long userPlaceId, Long imageId) {
+	public void deletePlaceImage(Long userPlaceId, Long imageId) {
 		UserPlace userPlace = userPlaceRepository.findById(userPlaceId)
 			.orElseThrow(() -> new PlaceException(USER_PLACE_NOT_FOUND));
 
@@ -83,15 +83,15 @@ public class PlaceImageService {
 			// 1. S3에서 이미지 삭제
 			imageCommandService.deleteImage(image.getId());
 
-			// 2. UserEvent에서 이미지 제거 (메모리 상 제거)
+			// 2. UserPlace 에서 이미지 제거 (메모리 상 제거)
 			userPlace.getImages().remove(image);
 
 			// 3. DB에서 이미지 삭제
 			imageRepository.delete(image);
-			log.info("[이벤트 이미지 삭제 완료] userPlaceId = {}, imageId = {}", userPlaceId, imageId);
+			log.info("[장소 이미지 삭제 완료] userPlaceId = {}, imageId = {}", userPlaceId, imageId);
 
 		} catch (Exception e) {
-			log.error("[이벤트 이미지 삭제 실패] userPlaceId = {}, imageId = {}, 이유: {}", userPlaceId, imageId, e.getMessage(), e);
+			log.error("[장소 이미지 삭제 실패] userPlaceId = {}, imageId = {}, 이유: {}", userPlaceId, imageId, e.getMessage(), e);
 			throw new PlaceException(IMAGE_DELETE_FAILED);
 		}
 	}
