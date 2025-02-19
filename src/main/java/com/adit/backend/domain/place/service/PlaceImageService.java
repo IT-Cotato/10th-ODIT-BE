@@ -8,9 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.adit.backend.domain.event.entity.UserEvent;
-import com.adit.backend.domain.event.exception.EventException;
-import com.adit.backend.domain.event.repository.UserEventRepository;
 import com.adit.backend.domain.image.dto.request.ImageUpdateRequestDto;
 import com.adit.backend.domain.image.dto.response.ImageResponseDto;
 import com.adit.backend.domain.image.entity.Image;

@@ -191,7 +191,6 @@ public class PlaceController {
 	public ResponseEntity<ApiResponse<List<ImageResponseDto>>> updatePlaceImages(
 		@PathVariable Long userPlaceId,
 		@Valid @RequestBody List<ImageUpdateRequestDto> imageUpdateRequests) {
-
 		List<ImageResponseDto> updatedImages = placeImageService.updatePlaceImages(userPlaceId, imageUpdateRequests);
 		return ResponseEntity.ok(ApiResponse.success(updatedImages));
 	}
@@ -212,7 +211,6 @@ public class PlaceController {
 	@DeleteMapping("/{userPlaceId}/placeImages/{imageId}")
 	public ResponseEntity<ApiResponse<Void>> deletePlaceImage(
 		@PathVariable Long userPlaceId, @PathVariable Long imageId) {
-
 		placeImageService.deletePlaceImage(userPlaceId, imageId);
 		return ResponseEntity.noContent().build();
 	}
