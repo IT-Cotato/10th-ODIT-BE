@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.adit.backend.domain.notification.service.NotificationGenerationService;
-import com.adit.backend.domain.notification.service.command.NotificationCommandService;
 import com.adit.backend.domain.user.converter.FriendConverter;
 import com.adit.backend.domain.user.dto.request.FriendRequestDto;
 import com.adit.backend.domain.user.dto.response.FriendshipResponseDto;
@@ -18,6 +17,7 @@ import com.adit.backend.domain.user.exception.FriendShipException;
 import com.adit.backend.domain.user.exception.UserException;
 import com.adit.backend.domain.user.repository.FriendshipRepository;
 import com.adit.backend.domain.user.repository.UserRepository;
+import com.adit.backend.domain.user.service.query.FriendQueryService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,20 +31,24 @@ public class FriendCommandService {
 
 	private final UserRepository userRepository;
 	private final FriendshipRepository friendshipRepository;
-	private final NotificationCommandService notificationCommandService;
 	private final FriendConverter friendConverter;
 	private final NotificationGenerationService notificationGenerationService;
+	private final FriendQueryService friendQueryService;
 
 	// 친구 요청 보내기
 	public FriendshipResponseDto sendFriendRequest(FriendRequestDto requestDto) {
-		User FromUser = userRepository.findById(requestDto.fromUserId())
+		if (friendQueryService.isExistsFriendship(requestDto.fromUserId(), requestDto.toUserId())) {
+			throw new FriendShipException(FRIENDSHIP_ALREADY_EXISTS);
+		}
+		User fromUser = userRepository.findById(requestDto.fromUserId())
 			.orElseThrow(() -> new UserException(USER_NOT_FOUND));
 		User toUser = userRepository.findById(requestDto.toUserId())
 			.orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
 		// 친구 요청(정방향)
-		Friendship forwardRequest = friendConverter.toEntity(FromUser, toUser, true);
+		Friendship forwardRequest = friendConverter.toEntity(fromUser, toUser, true);
 		// 친구 요청(역방향)
-		Friendship reverseRequest = friendConverter.toEntity(toUser, FromUser, false);
+		Friendship reverseRequest = friendConverter.toEntity(toUser, fromUser, false);
 
 		Friendship savedForwardRequest = friendshipRepository.save(forwardRequest);
 		friendshipRepository.save(reverseRequest);

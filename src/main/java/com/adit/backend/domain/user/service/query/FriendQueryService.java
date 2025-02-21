@@ -15,6 +15,7 @@ import com.adit.backend.domain.user.dto.response.FriendRequestResponseDto;
 import com.adit.backend.domain.user.dto.response.UserResponse;
 import com.adit.backend.domain.user.entity.Friendship;
 import com.adit.backend.domain.user.entity.User;
+import com.adit.backend.domain.user.exception.FriendShipException;
 import com.adit.backend.domain.user.exception.UserException;
 import com.adit.backend.domain.user.repository.FriendshipRepository;
 import com.adit.backend.domain.user.repository.UserRepository;
@@ -106,6 +107,32 @@ public class FriendQueryService {
 				Collections.singletonList(entry.getValue())))
 			.toList();
 
+	}
+
+	public boolean isExistsFriendship(Long fromUserId, Long toUserId) {
+		Friendship forward = getFriendshipOrDefault(fromUserId, toUserId);
+		Friendship reverse = getFriendshipOrDefault(toUserId, fromUserId);
+
+		boolean isForwardApproved = forward.getStatus();
+		boolean isReverseApproved = reverse.getStatus();
+
+		// A → B 요청이 이미 있으나, 상대방(B)은 수락하지 않은 경우: 중복 요청 금지
+		if (isForwardApproved && !isReverseApproved) {
+			throw new FriendShipException(ALREADY_REQUESTED);
+		}
+
+		// A가 요청을 보내지 않은 상태에서, B가 보낸 요청이 아직 수락되지 않은 경우
+		if (!isForwardApproved && !isReverseApproved) {
+			throw new FriendShipException(PENDING_REQUEST);
+		}
+
+		// 양측 모두 승인된 경우에만 친구 관계가 완성된 것으로 판단
+		return isForwardApproved && isReverseApproved;
+	}
+
+	public Friendship getFriendshipOrDefault(Long requestor, Long responder) {
+		return friendshipRepository.findByFromUser_IdAndToUser_Id(requestor, responder)
+			.orElse(Friendship.builder().status(false).build());
 	}
 
 }

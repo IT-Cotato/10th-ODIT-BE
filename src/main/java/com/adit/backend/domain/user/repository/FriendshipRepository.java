@@ -1,6 +1,7 @@
 package com.adit.backend.domain.user.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -21,7 +22,7 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 		")")
 	List<Long> findFriends(@Param("userId") Long userId);
 
-	@Query("SELECT fs FROM Friendship fs where fs.fromUser = :toUser AND fs.toUser = :fromUser")
+	@Query("SELECT fs FROM Friendship fs WHERE fs.fromUser = :fromUser AND fs.toUser = :toUser")
 	Friendship findByUser(@Param("fromUser") User fromUser, @Param("toUser") User toUser);
 
 
@@ -30,4 +31,5 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 		+ " OR fs.fromUser.id = :friendId AND fs.toUser.id = :userId")
 	void deleteFriend(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
+	Optional<Friendship> findByFromUser_IdAndToUser_Id(Long fromUserId, Long toUserId);
 }
