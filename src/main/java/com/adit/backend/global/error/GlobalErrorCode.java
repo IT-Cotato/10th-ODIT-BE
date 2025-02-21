@@ -59,7 +59,6 @@ public enum GlobalErrorCode implements ErrorCode {
 	NICKNAME_ALREADY_EXIST(BAD_REQUEST, "USR-002", "이미 존재하는 닉네임입니다."),
 	NICKNAME_NULL(NOT_FOUND, "USR-003", "닉네임이 비어있습니다."),
 
-
 	/********************************** Kakao Domain **********************************/
 	KAKAO_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "KKO-001", "카카오 서버에 에러가 발생했습니다."),
 	KAKAO_SERVER_CONNECTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "KKO-002", "카카오 서버에 연결을 실패했습니다."),
@@ -69,6 +68,9 @@ public enum GlobalErrorCode implements ErrorCode {
 
 	/********************************** Friend Domain **********************************/
 	FRIEND_REQUEST_NOT_FOUND(NOT_FOUND, "FRD-001", "친구 요청을 찾지 못했습니다."),
+	FRIENDSHIP_ALREADY_EXISTS(BAD_REQUEST, "FRD-002", "이미 등록된 친구 관계입니다."),
+	ALREADY_REQUESTED(BAD_REQUEST, "FRD-003", "이미 요청된 친구입니다."),
+	PENDING_REQUEST(BAD_REQUEST, "FRD-004", "대기 중인 친구 요청입니다."),
 
 	/********************************** Crawling Domain **********************************/
 	INVALID_URL(BAD_REQUEST, "CRW-001", "유효하지 않은 URL입니다."),
@@ -106,7 +108,7 @@ public enum GlobalErrorCode implements ErrorCode {
 	/********************************** AI Domain **********************************/
 	AI_PROCESSING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI-001", "AI 처리에 실패했습니다."),
 	AI_RESPONSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI-002", "AI 응답 변환에 실패했습니다."),
-	EXCEEDING_TOKEN_USAGE(HttpStatus.INTERNAL_SERVER_ERROR,"AI-003" , "토큰 사용량을 초과했습니다."),
+	EXCEEDING_TOKEN_USAGE(HttpStatus.INTERNAL_SERVER_ERROR, "AI-003", "토큰 사용량을 초과했습니다."),
 
 	/********************************** Event Domain **********************************/
 	EVENT_NOT_FOUND(NOT_FOUND, "EVN-001", "이벤트를 찾을 수 없습니다."),
@@ -114,7 +116,7 @@ public enum GlobalErrorCode implements ErrorCode {
 	EVENT_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EVN-003", "이벤트 생성에 실패했습니다."),
 	EVENT_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EVN-004", "이벤트 업데이트에 실패했습니다."),
 	EVENT_DELETION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EVN-005", "이벤트 삭제에 실패했습니다."),
-	EVENT_DELETE_FAILED (HttpStatus.INTERNAL_SERVER_ERROR,"EVN-006", "이벤트 삭제를 실패했습니다."),
+	EVENT_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EVN-006", "이벤트 삭제를 실패했습니다."),
 	COMMON_EVENT_NOT_FOUND(NOT_FOUND, "EVN-006", "해당 Common Event 를 찾을 수 없습니다."),
 
 	/********************************** Notification Domain **********************************/
@@ -129,8 +131,7 @@ public enum GlobalErrorCode implements ErrorCode {
 	S3_INVALID_FILE(HttpStatus.BAD_REQUEST, "S3-002", "잘못된 형식의 파일입니다."),
 	S3_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-003", "S3 파일 삭제에 실패했습니다."),
 	S3_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-004", "이미지 업데이트에 실패했습니다."),
-	S3_IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,"S3-005", "이벤트 삭제 중 이미지 삭제 실패.");
-
+	S3_IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-005", "이벤트 삭제 중 이미지 삭제 실패.");
 
 	private final HttpStatus httpStatus;
 	private final String code;
