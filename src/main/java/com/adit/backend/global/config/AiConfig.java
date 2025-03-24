@@ -57,7 +57,7 @@ public class AiConfig {
 		// OpenAiAPi 모델 기본 설정 (모델, 최대 토큰수)
 		OpenAiChatOptions chatOptions = OpenAiChatOptions.builder()
 			.model(defaultModel)
-			.maxCompletionTokens(maxCompletionToken)
+			// .maxCompletionTokens(maxCompletionToken)
 			.build();
 
 		// ChatModel 생성 (1.0.0-M6)
