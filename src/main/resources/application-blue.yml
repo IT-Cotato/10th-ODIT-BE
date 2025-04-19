@@ -1,11 +1,15 @@
-# 서버환경입니다. application-dev.yml
+# 서버환경입니다. application-blue.yml
 
 server:
   shutdown: graceful
+  port: 8080
+  address: 0.0.0.0
 
 spring:
   config:
     import: optional:file:/home/${EC2_USERNAME}/.env[.properties]
+    activate:
+      on-profile: blue
   datasource:
     url: ${SERVER_DB_URL}
     username: ${SERVER_DB_USERNAME}
@@ -26,5 +30,10 @@ spring:
         default_batch_fetch_size: 1000
   lifecycle:
     timeout-per-shutdown-phase: 30s
+  ai:
+    vectorstore:
+      chroma:
+        client:
+
 redirect:
   url: ${FRONT_BASE_URL}/login/kakao
