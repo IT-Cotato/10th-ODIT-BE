@@ -100,6 +100,18 @@ tasks.withType(JavaCompile) {
     options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
 }
 
+bootJar {
+    archiveBaseName = 'odit'
+    archiveVersion = 'server'
+}
+
+task buildDocker(type: Jar) {
+    dependsOn bootJar
+    archiveBaseName.set('odit')
+    archiveVersion.set('server')
+    destinationDirectory.set(file("$buildDir/libs"))
+}
+
 clean.doLast {
     file(querydslDir).deleteDir()
 }
