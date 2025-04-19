@@ -1,0 +1,145 @@
+name: docker_deploy
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Create .env file
+        run: |
+          touch .env
+          echo "SERVER_DB_URL=${{ secrets.SERVER_DB_URL }}" >> .env
+          echo "SERVER_DB_USERNAME=${{ secrets.SERVER_DB_USERNAME }}" >> .env
+          echo "SERVER_DB_PASSWORD=${{ secrets.SERVER_DB_PASSWORD }}" >> .env
+          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
+          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+          echo "SPRING_AI_OPENAI_API_KEY=${{ secrets.SPRING_AI_OPENAI_API_KEY }}" >> .env
+          echo "JWT_KEY=${{ secrets.JWT_KEY }}" >> .env
+          echo "JWT_ACCESS_TOKEN_EXPIRATION=${{ secrets.JWT_ACCESS_TOKEN_EXPIRATION }}" >> .env
+          echo "JWT_REFRESH_TOKEN_EXPIRATION=${{ secrets.JWT_REFRESH_TOKEN_EXPIRATION }}" >> .env
+          echo "SERVER_BASE_URL=${{ secrets.SERVER_BASE_URL }}" >> .env
+          echo "SCRAPER_API_TOKEN=${{ secrets.SCRAPER_API_TOKEN }}" >> .env
+          echo "SCRAPER_BASE_URL=${{ secrets.SCRAPER_BASE_URL }}" >> .env
+          echo "SCRAPER_OUTPUT_URL=${{ secrets.SCRAPER_OUTPUT_URL }}" >> .env
+          echo "S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}" >> .env
+          echo "S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}" >> .env
+          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
+          echo "FRONT_LOCAL_URL=${{ secrets.FRONT_LOCAL_URL }}" >> .env
+          echo "FRONT_BASE_URL=${{ secrets.FRONT_BASE_URL }}" >> .env
+          echo "SPRING_AI_MAX_TOKENS=${{ secrets.SPRING_AI_MAX_TOKENS }}" >> .env
+        shell: bash
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: clean build -x test
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OditServer
+          path: build/libs/*.jar
+          retention-days: 1
+          compression-level: 0
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker
+        run: docker build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/live_server .
+
+      - name: Push Docker
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 현재 서비스 상태 확인
+      - name: Set target IP and determine upstream
+        id: set-upstream
+        run: |
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}/env" || echo "000")
+          if [ "$STATUS" = "200" ]; then
+            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.EC2_HOST }}/env")
+          else
+            CURRENT_UPSTREAM=green
+          fi
+          echo "CURRENT_UPSTREAM=$CURRENT_UPSTREAM" >> $GITHUB_ENV
+          if [ "$CURRENT_UPSTREAM" = "blue" ]; then
+            echo "CURRENT_PORT=8080" >> $GITHUB_ENV
+            echo "TARGET_UPSTREAM=green" >> $GITHUB_ENV
+            echo "TARGET_PORT=8081" >> $GITHUB_ENV
+          elif [ "$CURRENT_UPSTREAM" = "green" ]; then
+            echo "CURRENT_PORT=8081" >> $GITHUB_ENV
+            echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
+            echo "TARGET_PORT=8080" >> $GITHUB_ENV
+          else
+            echo "error: unknown upstream"
+            exit 1
+          fi
+
+      # 2. 기존 컨테이너 완전 종료(포트 충돌 방지)
+      - name: Stop and Remove Previous Container
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.EC2_HOST }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            sudo docker stop ${{ env.CURRENT_UPSTREAM }} || true
+            sudo docker rm ${{ env.CURRENT_UPSTREAM }} || true
+
+      # 3. 새 컨테이너 실행
+      - name: Docker compose up new
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.EC2_HOST }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
+            sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
+
+      # 4. 새 컨테이너 health check
+      - name: Check deploy server URL
+        uses: jtalk/url-health-check-action@v3
+        with:
+          url: http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/env
+          max-attempts: 10
+          retry-delay: 10s
+
+      # 5. nginx 업스트림 전환
+      - name: Change nginx upstream
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.EC2_HOST }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            sudo docker exec -i nginxserver bash -c 'echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
