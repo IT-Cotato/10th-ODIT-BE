@@ -15,12 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # 자바 17 세팅
       - name: Install JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
+      # .env 파일 생성 (모든 환경변수 포함)
       - name: Create .env file
         run: |
           touch .env
@@ -45,14 +47,17 @@ jobs:
           echo "SPRING_AI_MAX_TOKENS=${{ secrets.SPRING_AI_MAX_TOKENS }}" >> .env
         shell: bash
 
+      # gradlew 실행 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # gradle 빌드
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
           arguments: clean build -x test
 
+      # 빌드 결과물 업로드
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -61,15 +66,18 @@ jobs:
           retention-days: 1
           compression-level: 0
 
+      # 도커허브 로그인
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 도커 이미지 빌드
       - name: Build Docker
         run: docker build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/live_server .
 
+      # 도커 이미지 푸시
       - name: Push Docker
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
 
@@ -101,7 +109,17 @@ jobs:
             exit 1
           fi
 
-      # 2. 기존 컨테이너 완전 종료(포트 충돌 방지)
+      # 2. .env 파일을 EC2 서버로 복사
+      - name: Copy .env to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: .env
+          target: /home/ubuntu/
+
+      # 3. 기존 컨테이너 완전 종료(포트 충돌 방지)
       - name: Stop and Remove Previous Container
         uses: appleboy/ssh-action@master
         with:
@@ -113,7 +131,7 @@ jobs:
             sudo docker stop ${{ env.CURRENT_UPSTREAM }} || true
             sudo docker rm ${{ env.CURRENT_UPSTREAM }} || true
 
-      # 3. 새 컨테이너 실행
+      # 4. 새 컨테이너 실행 (compose-blue/green.yml에서 .env 사용)
       - name: Docker compose up new
         uses: appleboy/ssh-action@master
         with:
@@ -123,9 +141,10 @@ jobs:
           script_stop: true
           script: |
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
+            cd /home/ubuntu
             sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
 
-      # 4. 새 컨테이너 health check
+      # 5. 새 컨테이너 health check
       - name: Check deploy server URL
         uses: jtalk/url-health-check-action@v3
         with:
@@ -133,7 +152,7 @@ jobs:
           max-attempts: 10
           retry-delay: 10s
 
-      # 5. nginx 업스트림 전환
+      # 6. nginx 업스트림 전환
       - name: Change nginx upstream
         uses: appleboy/ssh-action@master
         with:
