@@ -89,9 +89,9 @@ jobs:
       - name: Set target IP and determine upstream
         id: set-upstream
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}/env" || echo "000")
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}/swagger-ui/index.html" || echo "000")
           if [ "$STATUS" = "200" ]; then
-            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.EC2_HOST }}/env")
+            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.EC2_HOST }}/swagger-ui/index.html")
           else
             CURRENT_UPSTREAM=green
           fi
@@ -137,10 +137,9 @@ jobs:
       - name: Check deploy server URL
         uses: jtalk/url-health-check-action@v3
         with:
-          url: http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/env
+          url: http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/swagger-ui/index.html
           max-attempts: 10
           retry-delay: 10s
-        continue-on-error: true
 
       # 5. nginx 업스트림 전환
       - name: Change nginx upstream
