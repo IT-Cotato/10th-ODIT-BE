@@ -13,11 +13,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # 자바 17 세팅
       - name: Install JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -52,7 +52,7 @@ jobs:
 
       # gradle 빌드
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: clean build -x test
 
@@ -67,7 +67,7 @@ jobs:
 
       # 도커허브 로그인
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -104,7 +104,7 @@ jobs:
             DETECTED="unknown"
           fi
           
-          echo "detected=$DETECTED" >> $GITHUB_OUTPUT
+          echo "detected=$DETECTED" >> "$GITHUB_OUTPUT"
 
       # 2. 상태 파일 확인 (백업 방식)
       - name: Check status file
@@ -119,7 +119,7 @@ jobs:
             else
               CURRENT="unknown"
             fi
-            echo "current=$CURRENT" >> $GITHUB_OUTPUT
+            echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
         id: status-file
 
       # 3. 최종 현재 환경 결정 (포트 감지 > 상태 파일 > 기본값)
@@ -191,7 +191,7 @@ jobs:
       # 6. 새 컨테이너 헬스 체크
       - name: Health check new deployment
         id: health_check
-        uses: jtalk/url-health-check-action@v3
+        uses: jtalk/url-health-check-action@v4
         with:
           url: http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/actuator/health
           max-attempts: 10
