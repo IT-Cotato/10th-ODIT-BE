@@ -1,4 +1,4 @@
-name: docker_deploy
+name: blue_green_deploy
 
 on:
   push:
@@ -45,7 +45,6 @@ jobs:
           echo "FRONT_LOCAL_URL=${{ secrets.FRONT_LOCAL_URL }}" >> .env
           echo "FRONT_BASE_URL=${{ secrets.FRONT_BASE_URL }}" >> .env
           echo "SPRING_AI_MAX_TOKENS=${{ secrets.SPRING_AI_MAX_TOKENS }}" >> .env
-        shell: bash
 
       # gradlew 실행 권한 부여
       - name: Grant execute permission for gradlew
@@ -68,7 +67,7 @@ jobs:
 
       # 도커허브 로그인
       - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -85,69 +84,149 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      # 1. 현재 서비스 상태 확인
-      - name: Set target IP and determine upstream
-        id: set-upstream
+      # 1. 포트 기반 직접 감지 + 상태 파일 백업
+      - name: Detect current upstream
+        id: detect-upstream
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}/swagger-ui/index.html" || echo "000")
-          if [ "$STATUS" = "200" ]; then
-            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.EC2_HOST }}/swagger-ui/index.html")
+          # 1) 포트 기반 확인 (8080=blue, 8081=green)
+          BLUE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:8080/actuator/health" || echo "000")
+          GREEN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:8081/actuator/health" || echo "000")
+          
+          echo "Port 8080 (blue) status: $BLUE_STATUS"
+          echo "Port 8081 (green) status: $GREEN_STATUS"
+          
+          # 2) 포트 상태에 따라 현재 환경 결정
+          if [ "$BLUE_STATUS" = "200" ]; then
+            DETECTED="blue"
+          elif [ "$GREEN_STATUS" = "200" ]; then
+            DETECTED="green"
           else
-            CURRENT_UPSTREAM=green
+            DETECTED="unknown"
           fi
+          
+          echo "detected=$DETECTED" >> $GITHUB_OUTPUT
+
+      # 2. 상태 파일 확인 (백업 방식)
+      - name: Check status file
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            if [ -f "/home/ubuntu/.current_upstream" ]; then
+              CURRENT=$(cat /home/ubuntu/.current_upstream)
+            else
+              CURRENT="unknown"
+            fi
+            echo "current=$CURRENT" >> $GITHUB_OUTPUT
+        id: status-file
+
+      # 3. 최종 현재 환경 결정 (포트 감지 > 상태 파일 > 기본값)
+      - name: Determine final current upstream
+        id: final-upstream
+        run: |
+          DETECTED=${{ steps.detect-upstream.outputs.detected }}
+          FILE_UPSTREAM=${{ steps.status-file.outputs.current }}
+          
+          # 포트 감지가 성공하면 그 값 사용
+          if [ "$DETECTED" != "unknown" ]; then
+            CURRENT_UPSTREAM=$DETECTED
+            echo "Using port detection result: $CURRENT_UPSTREAM"
+          # 포트 감지 실패 시 상태 파일 확인
+          elif [ "$FILE_UPSTREAM" != "unknown" ]; then
+            CURRENT_UPSTREAM=$FILE_UPSTREAM
+            echo "Using status file: $CURRENT_UPSTREAM"
+          # 둘 다 실패 시 기본값 사용
+          else
+            CURRENT_UPSTREAM="green"
+            echo "Using default value: $CURRENT_UPSTREAM"
+          fi
+          
           echo "CURRENT_UPSTREAM=$CURRENT_UPSTREAM" >> $GITHUB_ENV
+          
+          # 타겟 환경 설정
           if [ "$CURRENT_UPSTREAM" = "blue" ]; then
-            echo "CURRENT_PORT=8080" >> $GITHUB_ENV
-            echo "TARGET_UPSTREAM=green" >> $GITHUB_ENV
-            echo "TARGET_PORT=8081" >> $GITHUB_ENV
-          elif [ "$CURRENT_UPSTREAM" = "green" ]; then
-            echo "CURRENT_PORT=8081" >> $GITHUB_ENV
-            echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
-            echo "TARGET_PORT=8080" >> $GITHUB_ENV
+          TARGET="green"
+          echo "CURRENT_PORT=8080" >> $GITHUB_ENV
+          echo "TARGET_UPSTREAM=$TARGET" >> $GITHUB_ENV
+          echo "TARGET_PORT=8081" >> $GITHUB_ENV
           else
-            echo "error: unknown upstream"
-            exit 1
+          TARGET="blue"
+          echo "CURRENT_PORT=8081" >> $GITHUB_ENV
+          echo "TARGET_UPSTREAM=$TARGET" >> $GITHUB_ENV
+          echo "TARGET_PORT=8080" >> $GITHUB_ENV
           fi
+          
+          echo "Switching from $CURRENT_UPSTREAM to $TARGET"
 
-      # 2. 기존 컨테이너 완전 종료(포트 충돌 방지)
-      - name: Stop and Remove Previous Container
+      # 4. 기존 컨테이너 중단 (docker-compose down 사용)
+      - name: Stop target containers
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo docker stop ${{ env.CURRENT_UPSTREAM }} || true
-            sudo docker rm ${{ env.CURRENT_UPSTREAM }} || true
+            set -e
+            cd /home/ubuntu
+            # 타겟 컨테이너 정리 (기존에 있다면)
+            sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml down || true
+            echo "Cleaned up previous ${{ env.TARGET_UPSTREAM }} deployment"
 
-
-      # 3. 새 컨테이너 실행 (compose-blue/green.yml에서 .env 사용)
-      - name: Docker compose up new
+      # 5. 새 도커 이미지 풀 및 새 컨테이너 시작
+      - name: Start new containers
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
             cd /home/ubuntu
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
             sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
+            echo "Started ${{ env.TARGET_UPSTREAM }} environment on port ${{ env.TARGET_PORT }}"
 
-      # 4. (최초 배포 예외) 새 컨테이너 health check
-      - name: Check deploy server URL
+      # 6. 새 컨테이너 헬스 체크
+      - name: Health check new deployment
+        id: health_check
         uses: jtalk/url-health-check-action@v3
         with:
-          url: http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/swagger-ui/index.html
+          url: http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/actuator/health
           max-attempts: 10
           retry-delay: 10s
+          follow-redirect: true
+          # 실패 시 워크플로우 중단
 
-      # 5. nginx 업스트림 전환
-      - name: Change nginx upstream
+      # 7. Nginx upstream 전환
+      - name: Switch Nginx upstream
         uses: appleboy/ssh-action@master
         with:
-          username: ubuntu
           host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
           script: |
+            set -e
+            # nginx 설정 파일에 현재 서비스 업데이트
             sudo docker exec -i nginxserver bash -c 'echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
+            echo "Nginx switched to ${{ env.TARGET_UPSTREAM }}"
+
+      # 8. 상태 파일 업데이트
+      - name: Update deployment status file
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            echo "${{ env.TARGET_UPSTREAM }}" > /home/ubuntu/.current_upstream
+            chmod 644 /home/ubuntu/.current_upstream
+            echo "Updated status file to: ${{ env.TARGET_UPSTREAM }}"
+
+      # 9. 배포 결과 알림
+      - name: Deployment result
+        run: |
+          echo "✅ Successfully deployed to ${{ env.TARGET_UPSTREAM }} environment"
+          echo "🔄 Switched from ${{ env.CURRENT_UPSTREAM }} (${{ env.CURRENT_PORT }}) to ${{ env.TARGET_UPSTREAM }} (${{ env.TARGET_PORT }})"
