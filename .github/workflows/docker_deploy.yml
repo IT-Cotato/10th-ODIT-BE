@@ -104,22 +104,22 @@ jobs:
             DETECTED="unknown"
           fi
           
-          echo "detected=$DETECTED" >> "$GITHUB_OUTPUT"
+          echo "$DETECTED"
 
       # 2. 상태 파일 확인 (백업 방식)
       - name: Check status file
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             if [ -f "/home/ubuntu/.current_upstream" ]; then
               CURRENT=$(cat /home/ubuntu/.current_upstream)
-            else
+            else  
               CURRENT="unknown"
             fi
-            echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+            echo "$CURRENT"
         id: status-file
 
       # 3. 최종 현재 환경 결정 (포트 감지 > 상태 파일 > 기본값)
@@ -165,7 +165,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
@@ -179,7 +179,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
@@ -204,7 +204,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
@@ -217,7 +217,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
