@@ -18,6 +18,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.filter.CorsFilter;
 
+import com.adit.backend.domain.auth.handler.DelegatingOAuth2LoginSuccessHandler;
+import com.adit.backend.domain.auth.service.CustomUserService;
 import com.adit.backend.global.security.jwt.filter.JwtAuthorizationFilter;
 import com.adit.backend.global.security.jwt.filter.TokenExceptionFilter;
 import com.adit.backend.global.security.jwt.handler.CustomAccessDeniedHandler;
@@ -40,7 +42,6 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
-
 	private static final String[] WHITE_LIST = {
 		"/login/**",
 		"/api/ai/**",
@@ -49,12 +50,15 @@ public class SecurityConfig {
 		"/webjars/**",
 		"/api/scraper/**",
 		"/oauth2/**",
+		"/naver/userinfo"
 	};
+	private final DelegatingOAuth2LoginSuccessHandler delegatingOAuth2LoginSuccessHandler;
 	private final CorsFilter corsFilter;
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
 	private final OAuth2FailureHandler oAuth2FailureHandler;
 	private final JwtAuthorizationFilter jwtAuthorizationFilter;
+	private final CustomUserService customUserService;
 	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
 	String frontRedirectUrl;
 
@@ -118,7 +122,12 @@ public class SecurityConfig {
 			)
 
 			// OAuth2 로그인 설정
-			.oauth2Login(AbstractHttpConfigurer::disable
+			.oauth2Login(oauth2 -> oauth2
+				.userInfoEndpoint(userInfo -> userInfo
+					.userService(customUserService) // ✅ 사용자 정보 로딩 시
+				)
+				.successHandler(delegatingOAuth2LoginSuccessHandler) // ✅ 로그인 성공 후
+
 				// .authorizationEndpoint(authEndpoint -> authEndpoint
 				// 	.baseUri("/oauth2/authorization")
 				// 	.authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository))
