@@ -80,107 +80,107 @@ jobs:
       - name: Push Docker
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
 
-deploy:
-  needs: build
-  runs-on: ubuntu-latest
-  steps:
-    # 1. 포트 기반 환경 감지 (401도 up으로 간주)
-    - name: Detect active environment
-      run: |
-        BLUE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:8080/actuator/health" || echo "000")
-        GREEN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:8081/actuator/health" || echo "000")
-
-        if [[ "$BLUE_STATUS" =~ ^(200|401)$ ]]; then
-          CURRENT_UPSTREAM=blue; CURRENT_PORT=8080; TARGET_UPSTREAM=green; TARGET_PORT=8081
-        else
-          CURRENT_UPSTREAM=green; CURRENT_PORT=8081; TARGET_UPSTREAM=blue; TARGET_PORT=8080
-        fi
-
-        echo "CURRENT_UPSTREAM=$CURRENT_UPSTREAM" >> $GITHUB_ENV
-        echo "CURRENT_PORT=$CURRENT_PORT"     >> $GITHUB_ENV
-        echo "TARGET_UPSTREAM=$TARGET_UPSTREAM" >> $GITHUB_ENV
-        echo "TARGET_PORT=$TARGET_PORT"       >> $GITHUB_ENV
-        echo "::debug::Detected $CURRENT_UPSTREAM (port $CURRENT_PORT), targeting $TARGET_UPSTREAM (port $TARGET_PORT)"
-
-    # 2. 기존 타겟 컨테이너 정리
-    - name: Cleanup previous target
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd /home/ubuntu
-          sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml down || true
-          sudo docker network prune -f
-
-    # 3. 새 컨테이너 배포
-    - name: Deploy new target
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd /home/ubuntu
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
-          sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
-
-    # 4. 헬스 체크 (200 또는 401을 성공으로 간주)
-    - name: Health check new target
-      run: |
-        for i in {1..12}; do
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/actuator/health" || echo "000")
-          if [[ "$HTTP_CODE" =~ ^(200|401)$ ]]; then
-            echo "::debug::Health check passed with code $HTTP_CODE"
-            exit 0
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 포트 기반 환경 감지 (401도 up으로 간주)
+      - name: Detect active environment
+        run: |
+          BLUE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:8080/actuator/health" || echo "000")
+          GREEN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:8081/actuator/health" || echo "000")
+          
+          if [[ "$BLUE_STATUS" =~ ^(200|401)$ ]]; then
+            CURRENT_UPSTREAM=blue; CURRENT_PORT=8080; TARGET_UPSTREAM=green; TARGET_PORT=8081
+          else
+            CURRENT_UPSTREAM=green; CURRENT_PORT=8081; TARGET_UPSTREAM=blue; TARGET_PORT=8080
           fi
-          sleep 10
-        done
-        echo "::error::Health check failed after retries"
-        exit 1
+          
+          echo "CURRENT_UPSTREAM=$CURRENT_UPSTREAM" >> $GITHUB_ENV
+          echo "CURRENT_PORT=$CURRENT_PORT"     >> $GITHUB_ENV
+          echo "TARGET_UPSTREAM=$TARGET_UPSTREAM" >> $GITHUB_ENV
+          echo "TARGET_PORT=$TARGET_PORT"       >> $GITHUB_ENV
+          echo "::debug::Detected $CURRENT_UPSTREAM (port $CURRENT_PORT), targeting $TARGET_UPSTREAM (port $TARGET_PORT)"
 
-    # 5. Nginx upstream 전환
-    - name: Switch Nginx upstream
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          sudo docker exec nginxserver bash -c \
-            'echo "set \$service_url '"${{ env.TARGET_UPSTREAM }}"';" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
+      # 2. 기존 타겟 컨테이너 정리
+      - name: Cleanup previous target
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml down || true
+            sudo docker network prune -f
 
-    # 6. 상태 파일 업데이트
-    - name: Update upstream status file
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          echo "${{ env.TARGET_UPSTREAM }}" > /home/ubuntu/.current_upstream
-          chmod 644 /home/ubuntu/.current_upstream
+      # 3. 새 컨테이너 배포
+      - name: Deploy new target
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
+            sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
 
-    # 7. 이전 컨테이너 정리 (선택적)
-    - name: Cleanup old environment
-      if: success()
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd /home/ubuntu
-          sudo docker-compose -f docker-compose-${{ env.CURRENT_UPSTREAM }}.yml down || true
+      # 4. 헬스 체크 (200 또는 401을 성공으로 간주)
+      - name: Health check new target
+        run: |
+          for i in {1..12}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/actuator/health" || echo "000")
+            if [[ "$HTTP_CODE" =~ ^(200|401)$ ]]; then
+              echo "::debug::Health check passed with code $HTTP_CODE"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Health check failed after retries"
+          exit 1
 
-    # 8. 최종 알림
-    - name: Deployment result
-      run: |
-        echo "✅ Deployed to ${{ env.TARGET_UPSTREAM }} (was ${{ env.CURRENT_UPSTREAM }})"
-        echo "Ports: ${{ env.CURRENT_PORT }} → ${{ env.TARGET_PORT }}"
-        # 9. 배포 결과 알림
-        - name: Deployment result
-          run: |
-            echo "✅ Successfully deployed to ${{ env.TARGET_UPSTREAM }} environment"
-            echo "🔄 Switched from ${{ env.CURRENT_UPSTREAM }} (${{ env.CURRENT_PORT }}) to ${{ env.TARGET_UPSTREAM }} (${{ env.TARGET_PORT }})"
+      # 5. Nginx upstream 전환
+      - name: Switch Nginx upstream
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo docker exec nginxserver bash -c \
+              'echo "set \$service_url '"${{ env.TARGET_UPSTREAM }}"';" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
+
+      # 6. 상태 파일 업데이트
+      - name: Update upstream status file
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "${{ env.TARGET_UPSTREAM }}" > /home/ubuntu/.current_upstream
+            chmod 644 /home/ubuntu/.current_upstream
+
+      # 7. 이전 컨테이너 정리
+      - name: Cleanup old environment
+        if: success()
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            sudo docker-compose -f docker-compose-${{ env.CURRENT_UPSTREAM }}.yml down || true
+
+      # 8. 최종 알림
+      - name: Deployment result
+        run: |
+          echo "✅ Deployed to ${{ env.TARGET_UPSTREAM }} (was ${{ env.CURRENT_UPSTREAM }})"
+          echo "Ports: ${{ env.CURRENT_PORT }} → ${{ env.TARGET_PORT }}"
+          # 9. 배포 결과 알림
+          - name: Deployment result
+            run: |
+              echo "✅ Successfully deployed to ${{ env.TARGET_UPSTREAM }} environment"
+              echo "🔄 Switched from ${{ env.CURRENT_UPSTREAM }} (${{ env.CURRENT_PORT }}) to ${{ env.TARGET_UPSTREAM }} (${{ env.TARGET_PORT }})"
