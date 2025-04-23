@@ -48,7 +48,7 @@ public class SecurityConfig {
 		"/api/auth/**",
 		"/webjars/**",
 		"/api/scraper/**",
-		"/oauth2/**",
+		"/oauth2/**"
 	};
 	private final CorsFilter corsFilter;
 	private final CustomOAuth2UserService customOAuth2UserService;

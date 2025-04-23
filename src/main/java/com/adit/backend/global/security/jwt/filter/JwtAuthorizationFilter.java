@@ -40,7 +40,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 		"/swagger-resources/**",
 		"/v3/api-docs/**",
 		"/webjars/**",
-		"/favicon.ico"
+		"/favicon.ico",
+		"/actuator/health"
 	};
 
 	private final JwtTokenProvider tokenProvider;

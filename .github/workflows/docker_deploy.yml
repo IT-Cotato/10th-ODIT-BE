@@ -1,4 +1,4 @@
-name: docker_deploy
+name: blue_green_deploy
 
 on:
   push:
@@ -13,17 +13,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: 리포지토리 체크아웃
+        uses: actions/checkout@v4
 
-      # 자바 17 세팅
-      - name: Install JDK 17
-        uses: actions/setup-java@v3
+      - name: JDK 17 설치
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # .env 파일 생성 (모든 환경변수 포함)
-      - name: Create .env file
+      - name: 환경변수(.env) 파일 생성
         run: |
           touch .env
           echo "SERVER_DB_URL=${{ secrets.SERVER_DB_URL }}" >> .env
@@ -45,20 +44,16 @@ jobs:
           echo "FRONT_LOCAL_URL=${{ secrets.FRONT_LOCAL_URL }}" >> .env
           echo "FRONT_BASE_URL=${{ secrets.FRONT_BASE_URL }}" >> .env
           echo "SPRING_AI_MAX_TOKENS=${{ secrets.SPRING_AI_MAX_TOKENS }}" >> .env
-        shell: bash
 
-      # gradlew 실행 권한 부여
-      - name: Grant execute permission for gradlew
+      - name: gradlew 실행권한 설정
         run: chmod +x gradlew
 
-      # gradle 빌드
-      - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2
+      - name: Gradle 빌드
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: clean build -x test
 
-      # 빌드 결과물 업로드
-      - name: Upload build artifact
+      - name: 빌드 아티팩트 업로드
         uses: actions/upload-artifact@v4
         with:
           name: OditServer
@@ -66,64 +61,53 @@ jobs:
           retention-days: 1
           compression-level: 0
 
-      # 도커허브 로그인
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 도커 이미지 빌드
-      - name: Build Docker
+      - name: Docker 이미지 빌드
         run: docker build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/live_server .
 
-      # 도커 이미지 푸시
-      - name: Push Docker
+      - name: Docker 이미지 푸시
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
+
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      # 1. 현재 서비스 상태 확인
-      - name: Set target IP and determine upstream
-        id: set-upstream
+      - name: Blue/Green 활성 환경 감지 (포트 8080/8081)
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}/swagger-ui/index.html" || echo "000")
-          if [ "$STATUS" = "200" ]; then
-            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.EC2_HOST }}/swagger-ui/index.html")
+          BLUE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:8080/actuator/health" || echo "000")
+          GREEN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:8081/actuator/health" || echo "000")
+          
+          if [[ "$BLUE_STATUS" =~ ^(200|401)$ ]]; then
+            CURRENT_UPSTREAM=blue; CURRENT_PORT=8080; TARGET_UPSTREAM=green; TARGET_PORT=8081
           else
-            CURRENT_UPSTREAM=green
+            CURRENT_UPSTREAM=green; CURRENT_PORT=8081; TARGET_UPSTREAM=blue; TARGET_PORT=8080
           fi
+          
           echo "CURRENT_UPSTREAM=$CURRENT_UPSTREAM" >> $GITHUB_ENV
-          if [ "$CURRENT_UPSTREAM" = "blue" ]; then
-            echo "CURRENT_PORT=8080" >> $GITHUB_ENV
-            echo "TARGET_UPSTREAM=green" >> $GITHUB_ENV
-            echo "TARGET_PORT=8081" >> $GITHUB_ENV
-          elif [ "$CURRENT_UPSTREAM" = "green" ]; then
-            echo "CURRENT_PORT=8081" >> $GITHUB_ENV
-            echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
-            echo "TARGET_PORT=8080" >> $GITHUB_ENV
-          else
-            echo "error: unknown upstream"
-            exit 1
-          fi
+          echo "CURRENT_PORT=$CURRENT_PORT"     >> $GITHUB_ENV
+          echo "TARGET_UPSTREAM=$TARGET_UPSTREAM" >> $GITHUB_ENV
+          echo "TARGET_PORT=$TARGET_PORT"       >> $GITHUB_ENV
+          echo "::debug::Detected $CURRENT_UPSTREAM (port $CURRENT_PORT), targeting $TARGET_UPSTREAM (port $TARGET_PORT)"
 
-      # 2. 기존 컨테이너 완전 종료(포트 충돌 방지)
-      - name: Stop and Remove Previous Container
-        uses: appleboy/ssh-action@master
+      - name: 이전 대상 컨테이너 정리
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo docker stop ${{ env.CURRENT_UPSTREAM }} || true
-            sudo docker rm ${{ env.CURRENT_UPSTREAM }} || true
+            cd /home/ubuntu
+            sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml down || true
+            sudo docker network prune -f
 
-
-      # 3. 새 컨테이너 실행 (compose-blue/green.yml에서 .env 사용)
-      - name: Docker compose up new
-        uses: appleboy/ssh-action@master
+      - name: 새 대상 컨테이너 배포
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
@@ -133,21 +117,52 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
             sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
 
-      # 4. (최초 배포 예외) 새 컨테이너 health check
-      - name: Check deploy server URL
-        uses: jtalk/url-health-check-action@v3
-        with:
-          url: http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/swagger-ui/index.html
-          max-attempts: 10
-          retry-delay: 10s
+      - name: 새 컨테이너 헬스 체크
+        run: |
+          for i in {1..12}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/actuator/health" || echo "000")
+            if [[ "$HTTP_CODE" =~ ^(200|401)$ ]]; then
+              echo "::debug::Health check passed with code $HTTP_CODE"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Health check failed after retries"
+          exit 1
 
-      # 5. nginx 업스트림 전환
-      - name: Change nginx upstream
-        uses: appleboy/ssh-action@master
+      - name: Nginx 업스트림 전환
+        uses: appleboy/ssh-action@v0.1.10
         with:
-          username: ubuntu
           host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
           script: |
-            sudo docker exec -i nginxserver bash -c 'echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
+            sudo docker exec nginxserver bash -c \
+              'echo "set \$service_url '"${{ env.TARGET_UPSTREAM }}"';" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
+
+      - name: 상태 파일 동기화
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "${{ env.TARGET_UPSTREAM }}" > /home/ubuntu/.current_upstream
+            chmod 644 /home/ubuntu/.current_upstream
+
+      - name: 이전 컨테이너 정리
+        if: success()
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            sudo docker-compose -f docker-compose-${{ env.CURRENT_UPSTREAM }}.yml down || true
+
+      # 8. 최종 알림
+      - name: Blue/Green 배포 완료 알림
+        run: |
+          echo "✅ Deployed to ${{ env.TARGET_UPSTREAM }} (was ${{ env.CURRENT_UPSTREAM }})"
+          echo "Ports: ${{ env.CURRENT_PORT }} → ${{ env.TARGET_PORT }}"
