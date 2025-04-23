@@ -109,28 +109,25 @@ jobs:
             exit 1
           fi
 
-      # (이전 2번 스텝) .env 복사 스텝 제거 — 수동으로 /home/ubuntu/.env 에 배치
-
       # 2. 기존 컨테이너 완전 종료(포트 충돌 방지)
       - name: Stop and Remove Previous Container
         uses: appleboy/ssh-action@master
         with:
-          username: ubuntu
           host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
           script: |
             sudo docker stop ${{ env.CURRENT_UPSTREAM }} || true
             sudo docker rm ${{ env.CURRENT_UPSTREAM }} || true
+
 
       # 3. 새 컨테이너 실행 (compose-blue/green.yml에서 .env 사용)
       - name: Docker compose up new
         uses: appleboy/ssh-action@master
         with:
-          username: ubuntu
           host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
           script: |
             cd /home/ubuntu
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
