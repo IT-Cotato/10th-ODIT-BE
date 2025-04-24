@@ -71,7 +71,10 @@ public class SecurityConfig {
 				"/favicon.ico",
 				"/v3/api-docs/**",
 				"/swagger-ui/**",
-				"/swagger-resources/**");
+				"/swagger-resources/**",
+				"/actuator",
+				"/actuator/**"
+			);
 	}
 
 	/**
