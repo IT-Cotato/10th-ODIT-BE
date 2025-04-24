@@ -41,7 +41,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 		"/v3/api-docs/**",
 		"/webjars/**",
 		"/favicon.ico",
-		"/actuator/health"
+		"/actuator/**",
+		"/actuator"
 	};
 
 	private final JwtTokenProvider tokenProvider;
