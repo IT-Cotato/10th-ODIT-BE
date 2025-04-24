@@ -49,8 +49,7 @@ public class SecurityConfig {
 		"/api/auth/**",
 		"/webjars/**",
 		"/api/scraper/**",
-		"/oauth2/**",
-		"/naver/userinfo"
+		"/oauth2/**"
 	};
 	private final DelegatingOAuth2LoginSuccessHandler delegatingOAuth2LoginSuccessHandler;
 	private final CorsFilter corsFilter;

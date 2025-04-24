@@ -1,13 +1,17 @@
 package com.adit.backend.domain.auth.handler;
 
+import static com.adit.backend.global.error.GlobalErrorCode.*;
+
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import com.adit.backend.domain.auth.exception.AuthException;
 import com.adit.backend.domain.auth.service.GoogleOAuth2UserService;
 import com.adit.backend.domain.auth.service.KakaoOAuth2UserService;
 import com.adit.backend.domain.auth.service.NaverOAuth2UserService;
@@ -37,10 +41,12 @@ public class DelegatingOAuth2LoginSuccessHandler implements AuthenticationSucces
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 		Authentication authentication) throws IOException, ServletException {
 		if (!(authentication instanceof OAuth2AuthenticationToken oAuth2Token)) {
-			throw new IllegalArgumentException("OAuth2AuthenticationToken required");
+			throw new AuthException(INVALID_AUTHENTICATION_TYPE);
 		}
 		String registrationId = oAuth2Token.getAuthorizedClientRegistrationId();
-		AuthenticationSuccessHandler delegate = handlerMap.get(registrationId);
+		AuthenticationSuccessHandler delegate = Optional.ofNullable(handlerMap)
+			.map(v -> v.get(registrationId))
+			.orElseThrow(() -> new AuthException(PROVIDER_NOT_FOUND));
 
 		if (delegate == null) {
 			throw new IllegalArgumentException("No handler for provider: " + registrationId);
