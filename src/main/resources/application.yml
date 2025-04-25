@@ -45,7 +45,7 @@ spring:
           max-tokens: ${SPRING_AI_MAX_TOKENS}
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
 
   servlet:
