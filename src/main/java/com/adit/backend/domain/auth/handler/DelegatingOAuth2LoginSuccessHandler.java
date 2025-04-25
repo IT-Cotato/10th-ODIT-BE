@@ -48,9 +48,6 @@ public class DelegatingOAuth2LoginSuccessHandler implements AuthenticationSucces
 			.map(v -> v.get(registrationId))
 			.orElseThrow(() -> new AuthException(PROVIDER_NOT_FOUND));
 
-		if (delegate == null) {
-			throw new IllegalArgumentException("No handler for provider: " + registrationId);
-		}
 		delegate.onAuthenticationSuccess(request, response, authentication);
 	}
 }

@@ -23,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class CustomUserService extends DefaultOAuth2UserService {
 
-	private static final String NaverRegistrationId = "naver";
+	private static final String NAVER_REGISTRATION_ID = "naver";
 
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -34,17 +34,17 @@ public class CustomUserService extends DefaultOAuth2UserService {
 
 		OAuth2User oAuth2User;
 		// 기본 정보 먼저 로딩
-		if ("naver".equals(registrationId)) {
+		if (NAVER_REGISTRATION_ID.equals(registrationId)) {
 			oAuth2User = loadNaverUser(userRequest);
 		} else {
 			oAuth2User = super.loadUser(userRequest);
 		}
-		System.out.println(oAuth2User.getAuthorities());
+
 		Map<String, Object> attributes = oAuth2User.getAttributes();
 		Set<GrantedAuthority> authorities = new HashSet<>(oAuth2User.getAuthorities());
 
 		// ✅ 네이버만 별도 처리
-		if (NaverRegistrationId.equals(registrationId)) {
+		if (NAVER_REGISTRATION_ID.equals(registrationId)) {
 			if (attributes.get("id") == null) {
 				throw new OAuth2AuthenticationException("네이버 응답에 id 없음");
 			}
