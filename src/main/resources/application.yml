@@ -56,12 +56,14 @@ spring:
 # spring actuator
 management:
   endpoint:
+    logfile:
+      external-file: ./logs/odit.log
     health:
       show-details: always
   endpoints:
     web:
       exposure:
-        include: health, info, metrics, prometheus
+        include: health, info, metrics, prometheus, logfile
   metrics:
     tags:
       application: ${spring.application.name}
