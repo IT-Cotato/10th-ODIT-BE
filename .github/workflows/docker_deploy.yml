@@ -91,7 +91,7 @@ jobs:
           echo "CURRENT_PORT=$CURRENT_PORT"     >> $GITHUB_ENV
           echo "TARGET_UPSTREAM=$TARGET_UPSTREAM" >> $GITHUB_ENV
           echo "TARGET_PORT=$TARGET_PORT"       >> $GITHUB_ENV
-          echo "::debug::Detected $CURRENT_UPSTREAM (port $CURRENT_PORT), targeting $TARGET_UPSTREAM (port $TARGET_PORT)"
+          echo "::debug::현재 활성화된 환경: $CURRENT_UPSTREAM (포트 $CURRENT_PORT), 배포 대상: $TARGET_UPSTREAM (포트 $TARGET_PORT)"
 
       - name: 이전 대상 컨테이너 정리
         uses: appleboy/ssh-action@v0.1.10
@@ -117,15 +117,20 @@ jobs:
 
       - name: 새 컨테이너 헬스 체크
         run: |
-          for i in {1..12}; do
+          for i in {1..6}; do
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/actuator/health" || echo "000")
-            if [[ "$HTTP_CODE" =~ ^(200|401)$ ]]; then
-              echo "::debug::Health check passed with code $HTTP_CODE"
+            if [[ "$HTTP_CODE" == "200" ]]; then
+              echo "✅ [${i}회차] 헬스체크 성공 (HTTP 200) - 서비스가 정상적으로 동작 중입니다."
               exit 0
+            elif [[ "$HTTP_CODE" == "401" ]]; then
+              echo "⚠️ [${i}회차] 헬스체크 인증 필요 (HTTP 401) - 인증이 필요하지만 서버는 응답 중입니다."
+              exit 0
+            else
+              echo "❌ [${i}회차] 헬스체크 실패 (HTTP 코드: $HTTP_CODE) - 30초 후 재시도합니다."
             fi
-            sleep 10
+            sleep 30
           done
-          echo "::error::Health check failed after retries"
+          echo "🛑 헬스체크 6회 시도 후 실패 - 서비스가 정상적으로 기동되지 않았습니다."
           exit 1
 
       - name: Nginx 업스트림 전환
@@ -162,5 +167,5 @@ jobs:
       # 8. 최종 알림
       - name: Blue/Green 배포 완료 알림
         run: |
-          echo "✅ Deployed to ${{ env.TARGET_UPSTREAM }} (was ${{ env.CURRENT_UPSTREAM }})"
-          echo "Ports: ${{ env.CURRENT_PORT }} → ${{ env.TARGET_PORT }}"
+          echo "✅ Blue/Green 배포가 완료되었습니다! (신규: ${{ env.TARGET_UPSTREAM }}, 이전: ${{ env.CURRENT_UPSTREAM }})"
+          echo "포트 변경: ${{ env.CURRENT_PORT }} → ${{ env.TARGET_PORT }}"
