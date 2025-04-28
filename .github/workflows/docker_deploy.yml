@@ -101,8 +101,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu
-            sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml down --remove-orphans || true
-            sudo docker network prune -f
+            sudo docker rm -f live_server || true
+            sudo docker image prune -f
 
       - name: 새 대상 컨테이너 배포
         uses: appleboy/ssh-action@v0.1.10
@@ -154,7 +154,7 @@ jobs:
             chmod 644 /home/ubuntu/.current_upstream
 
       - name: 이전 컨테이너 정리
-        if: success()
+        if: ${{ success() }}
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -164,7 +164,6 @@ jobs:
             cd /home/ubuntu
             sudo docker-compose -f docker-compose-${{ env.CURRENT_UPSTREAM }}.yml down || true
 
-      # 8. 최종 알림
       - name: Blue/Green 배포 완료 알림
         run: |
           echo "✅ Blue/Green 배포가 완료되었습니다! (신규: ${{ env.TARGET_UPSTREAM }}, 이전: ${{ env.CURRENT_UPSTREAM }})"
