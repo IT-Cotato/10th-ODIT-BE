@@ -16,14 +16,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "user_place")
 public class UserPlace extends BaseEntity {
 
 	@Id
@@ -35,22 +40,14 @@ public class UserPlace extends BaseEntity {
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "common_place_id", nullable = false)
-	private CommonPlace commonPlace;
+	@JoinColumn(name = "place_id", nullable = false)
+	private Place place;
 
 	@OneToMany(mappedBy = "userPlace", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
 	private String memo;
 	private Boolean visited;
-
-	@Builder
-	public UserPlace(User user, CommonPlace commonPlace, String memo, Boolean visited) {
-		this.user = user;
-		this.commonPlace = commonPlace;
-		this.memo = memo;
-		this.visited = visited;
-	}
 
 	public void updatedMemo(String memo) {
 		this.memo = memo;
@@ -66,8 +63,8 @@ public class UserPlace extends BaseEntity {
 		image.assignUserPlace(this);
 	}
 
-	public void assignedCommonPlace(CommonPlace commonPlace) {
-		this.commonPlace = commonPlace;
+	public void assignedPlace(Place place) {
+		this.place = place;
 	}
 
 	public void assignedUser(User user) {

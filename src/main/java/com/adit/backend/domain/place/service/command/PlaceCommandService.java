@@ -7,41 +7,41 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.adit.backend.domain.image.service.command.ImageCommandService;
-import com.adit.backend.domain.place.converter.CommonPlaceConverter;
+import com.adit.backend.domain.place.converter.PlaceConverter;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
 import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
-import com.adit.backend.domain.place.entity.CommonPlace;
-import com.adit.backend.domain.place.repository.CommonPlaceRepository;
-import com.adit.backend.domain.place.service.query.CommonPlaceQueryService;
+import com.adit.backend.domain.place.entity.Place;
+import com.adit.backend.domain.place.repository.PlaceRepository;
+import com.adit.backend.domain.place.service.query.PlaceQueryService;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CommonPlaceCommandService {
+public class PlaceCommandService {
 
-	private final CommonPlaceRepository commonPlaceRepository;
-	private final CommonPlaceQueryService commonPlaceQueryService;
+	private final PlaceRepository placeRepository;
+	private final PlaceQueryService placeQueryService;
 	private final ImageCommandService imageCommandService;
-	private final CommonPlaceConverter commonPlaceConverter;
+	private final PlaceConverter placeConverter;
 
 	// 카카오맵 url -> 기존 공통 장소 반환 or 새로운 공통 장소 생성
-	public CommonPlace saveOrFindCommonPlace(PlaceRequestDto request) {
-		Long commonPlaceId = extractTrailingDigits(request.url());
-		return commonPlaceRepository.findById(commonPlaceId).orElseGet(() -> {
-			CommonPlace commonPlace = commonPlaceConverter.toEntity(request, commonPlaceId);
+	public Place saveOrFindPlace(PlaceRequestDto request) {
+		Long placeId = extractTrailingDigits(request.url());
+		return placeRepository.findById(placeId).orElseGet(() -> {
+			Place place = placeConverter.toEntity(request, placeId);
 			if (!request.imageUrlList().isEmpty()) {
-				imageCommandService.addImageToCommonPlace(request, commonPlace);
+				imageCommandService.addImageToPlace(request, place);
 			}
-			return commonPlaceRepository.save(commonPlace);
+			return placeRepository.save(place);
 		});
 	}
 
 	public PlaceResponseDto updatePlace(Long placeId, PlaceRequestDto requestDto) {
-		CommonPlace place = commonPlaceQueryService.getCommonPlaceById(placeId);
+		Place place = placeQueryService.getPlaceById(placeId);
 		place.updatePlace(requestDto);
-		return commonPlaceConverter.commonPlaceToResponse(place);
+		return placeConverter.placeToResponse(place);
 	}
 
 	public long extractTrailingDigits(String url) {

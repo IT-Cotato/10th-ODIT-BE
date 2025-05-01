@@ -25,9 +25,9 @@ import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
 import com.adit.backend.domain.place.dto.response.FriendPlaceResponseDto;
 import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
 import com.adit.backend.domain.place.service.PlaceImageService;
-import com.adit.backend.domain.place.service.command.CommonPlaceCommandService;
+import com.adit.backend.domain.place.service.command.PlaceCommandService;
 import com.adit.backend.domain.place.service.command.UserPlaceCommandService;
-import com.adit.backend.domain.place.service.query.CommonPlaceQueryService;
+import com.adit.backend.domain.place.service.query.PlaceQueryService;
 import com.adit.backend.domain.place.service.query.UserPlaceQueryService;
 import com.adit.backend.domain.user.dto.response.UserResponse;
 import com.adit.backend.domain.user.entity.User;
@@ -49,14 +49,14 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Place API", description = "장소 생성, 수정, 삭제, 조회할 수 있는 API 입니다")
 public class PlaceController {
 
-	private final CommonPlaceCommandService commonPlaceCommandService;
-	private final CommonPlaceQueryService commonPlaceQueryService;
+	private final PlaceCommandService placeCommandService;
+	private final PlaceQueryService placeQueryService;
 	private final UserPlaceCommandService userPlaceCommandService;
 	private final UserPlaceQueryService userPlaceQueryService;
 	private final PlaceImageService placeImageService;
 
 	// 장소 생성 API
-	@Operation(summary = "장소 생성", description = "카카오 맵 키워드 검색 후 CommonPlace, UserPlace 에 장소를 저장합니다")
+	@Operation(summary = "장소 생성", description = "카카오 맵 키워드 검색 후 Place, UserPlace 에 장소를 저장합니다")
 	@PostMapping()
 	public ResponseEntity<ApiResponse<PlaceResponseDto>> createPlace(
 		@Valid @RequestBody PlaceRequestDto requestDto, @AuthenticationPrincipal(expression = "user") User user) {
@@ -66,14 +66,14 @@ public class PlaceController {
 	}
 
 	// 장소 수정 API
-	@Operation(summary = "장소 수정", description = "Commonplace 의 장소를 수정합니다")
+	@Operation(summary = "장소 수정", description = "Place 의 장소를 수정합니다")
 	@PutMapping("/{placeId}")
 	public ResponseEntity<ApiResponse<PlaceResponseDto>> updatePlace(@PathVariable @Min(1) Long placeId,
 		@Valid @RequestBody PlaceRequestDto requestDto) {
 		// ID로 기존 장소를 찾아 수정
-		PlaceResponseDto commonPlace = commonPlaceCommandService.updatePlace(placeId, requestDto);
+		PlaceResponseDto response = placeCommandService.updatePlace(placeId, requestDto);
 		// 수정된 장소를 응답으로 반환
-		return ResponseEntity.ok(ApiResponse.success(commonPlace));
+		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 
 	// 장소 삭제 API
@@ -101,7 +101,7 @@ public class PlaceController {
 	@Operation(summary = "인기순으로 장소 조회", description = "전체 장소 중 bookmarkCount 가 높은 순서대로 1~5위 장소 조회")
 	@GetMapping("/popular")
 	public ResponseEntity<ApiResponse<List<PlaceResponseDto>>> getPlaceByPopular() {
-		List<PlaceResponseDto> placeByPopular = commonPlaceQueryService.getPlaceByPopular();
+		List<PlaceResponseDto> placeByPopular = placeQueryService.getPlaceByPopular();
 		return ResponseEntity.ok(ApiResponse.success(placeByPopular));
 	}
 
@@ -119,7 +119,7 @@ public class PlaceController {
 	@GetMapping("/detail")
 	public ResponseEntity<ApiResponse<PlaceResponseDto>> getDetailedPlace(@RequestParam String placeName) {
 
-		PlaceResponseDto detailedPlace = commonPlaceQueryService.getDetailedPlace(placeName);
+		PlaceResponseDto detailedPlace = placeQueryService.getDetailedPlace(placeName);
 		return ResponseEntity.ok(ApiResponse.success(detailedPlace));
 	}
 
@@ -177,11 +177,11 @@ public class PlaceController {
 	}
 
 	//북마크 장소 저장 API
-	@Operation(summary = "북마크 장소 저장", description = "commonPlaceId에 해당하는 장소를 userPlace 에 저장")
-	@PostMapping("/{commonPlaceId}/bookMark")
-	public ResponseEntity<ApiResponse<PlaceResponseDto>> savedCommonPlace(@PathVariable Long commonPlaceId,
+	@Operation(summary = "북마크 장소 저장", description = "placeId에 해당하는 장소를 userPlace 에 저장")
+	@PostMapping("/{placeId}/bookMark")
+	public ResponseEntity<ApiResponse<PlaceResponseDto>> savedPlace(@PathVariable Long placeId,
 		@AuthenticationPrincipal(expression = "user") User user) {
-		PlaceResponseDto placeResponseDto = userPlaceCommandService.savedCommonPlace(commonPlaceId, user.getId());
+		PlaceResponseDto placeResponseDto = userPlaceCommandService.savedPlace(placeId, user.getId());
 		return ResponseEntity.ok(ApiResponse.success(placeResponseDto));
 	}
 

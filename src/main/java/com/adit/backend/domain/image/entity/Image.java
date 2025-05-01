@@ -2,7 +2,7 @@ package com.adit.backend.domain.image.entity;
 
 import com.adit.backend.domain.event.entity.CommonEvent;
 import com.adit.backend.domain.event.entity.UserEvent;
-import com.adit.backend.domain.place.entity.CommonPlace;
+import com.adit.backend.domain.place.entity.Place;
 import com.adit.backend.domain.place.entity.UserPlace;
 import com.adit.backend.global.entity.BaseEntity;
 
@@ -32,8 +32,8 @@ public class Image extends BaseEntity {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "common_place_id")
-	private CommonPlace commonPlace;
+	@JoinColumn(name = "place_id")
+	private Place place;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_place_id")
@@ -55,8 +55,8 @@ public class Image extends BaseEntity {
 		this.userEvent = userEvent;
 	}
 
-	public void assignCommonPlace(CommonPlace commonPlace) {
-		this.commonPlace = commonPlace;
+	public void assignPlace(Place place) {
+		this.place = place;
 	}
 
 	public void assignUserPlace(UserPlace userPlace) {

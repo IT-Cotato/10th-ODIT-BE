@@ -13,27 +13,26 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CommonPlace extends BaseEntity {
+@Table(name = "place")
+public class Place extends BaseEntity {
 
 	@Id
 	private Long id;
 
 	@Column(nullable = false)
 	private String placeName;
-
 
 	@Column(precision = 38, scale = 7)
 	private BigDecimal latitude;
@@ -48,11 +47,11 @@ public class CommonPlace extends BaseEntity {
 	private String url;
 
 	@Builder.Default
-	@OneToMany(mappedBy = "commonPlace", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
 	@Builder.Default
-	@OneToMany(mappedBy = "commonPlace", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserPlace> userPlaces = new ArrayList<>();
 
 	public void updatePlace(PlaceRequestDto requestDto) {
@@ -68,12 +67,12 @@ public class CommonPlace extends BaseEntity {
 	//연관관계 메서드
 	public void addUserPlace(UserPlace userPlace) {
 		this.userPlaces.add(userPlace);
-		userPlace.assignedCommonPlace(this);
+		userPlace.assignedPlace(this);
 	}
 
 	public void addImage(Image image) {
 		this.images.add(image);
-		image.assignCommonPlace(this);
+		image.assignPlace(this);
 	}
 
 }

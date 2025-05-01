@@ -17,7 +17,7 @@ public class ImageConverter {
 	public ImageResponseDto toResponse(Image image) {
 		return ImageResponseDto.builder()
 			.id(image.getId())
-			.commonPlace(image.getCommonPlace())
+			.place(image.getPlace())
 			.userPlace(image.getUserPlace())
 			.userEvent(image.getUserEvent())
 			.commonEvent(image.getCommonEvent())

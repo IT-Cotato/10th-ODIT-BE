@@ -32,7 +32,7 @@ public class NotificationEventConverter {
 
 	/* PLACE_UNVISITED */
 	public NotificationEvent toUnvisitedEvent(UserPlace userPlace) {
-		String content = String.format("아직 '%s'에 방문하지 않으셨나요?", userPlace.getCommonPlace().getPlaceName());
+		String content = String.format("아직 '%s'에 방문하지 않으셨나요?", userPlace.getPlace().getPlaceName());
 		return createNotificationEvent(userPlace.getUser().getEmail(), PLACE_UNVISITED, content);
 	}
 
@@ -75,7 +75,7 @@ public class NotificationEventConverter {
 	/* FRIEND_SAVED_MY_PLACE */
 	public NotificationEvent toSavedEvent(UserPlace friendPlace, User user) {
 		String content = String.format("%s님도 '%s'를 저장했어요!", friendPlace.getUser().getNickname(),
-			friendPlace.getCommonPlace().getPlaceName());
+			friendPlace.getPlace().getPlaceName());
 		return createNotificationEvent(user.getEmail(), FRIEND_SAVED_MY_PLACE, content);
 	}
 }

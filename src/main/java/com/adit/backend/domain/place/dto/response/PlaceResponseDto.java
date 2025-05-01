@@ -12,7 +12,7 @@ import lombok.Builder;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record PlaceResponseDto(@NotNull(message = "commonPlace ID must not be null") Long commonPlaceId,
+public record PlaceResponseDto(@NotNull(message = "place ID must not be null") Long placeId,
 							   @Nullable Long userPlaceId,
 							   @Nullable String memo,
 							   @Nullable Boolean visited, String placeName,

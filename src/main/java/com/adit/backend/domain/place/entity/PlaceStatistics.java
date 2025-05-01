@@ -11,16 +11,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "place_statistics")
 public class PlaceStatistics extends BaseEntity {
 
 	@Id
@@ -28,8 +31,8 @@ public class PlaceStatistics extends BaseEntity {
 	private Long id;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "common_place_id", nullable = false)
-	private CommonPlace commonPlace;
+	@JoinColumn(name = "place_id", nullable = false)
+	private Place place;
 
 	@ColumnDefault("0")
 	private int bookmarkCount;
@@ -37,14 +40,7 @@ public class PlaceStatistics extends BaseEntity {
 	@ColumnDefault("0")
 	private Integer visitCount;
 
-	@Builder
-	public PlaceStatistics(CommonPlace commonPlace, int bookmarkCount, Integer visitCount){
-		this.commonPlace = commonPlace;
-		this.bookmarkCount = bookmarkCount;
-		this.visitCount = visitCount;
-	}
-
-	public void updateBookMarkCount(){
-		this.bookmarkCount += 1;
+	public void updateBookMarkCount() {
+		this.bookmarkCount++;
 	}
 }

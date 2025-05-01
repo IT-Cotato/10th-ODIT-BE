@@ -12,8 +12,8 @@ import com.adit.backend.domain.place.entity.PlaceStatistics;
 @Repository
 public interface PlaceStatisticsRepository extends JpaRepository<PlaceStatistics, Long> {
 
-	@Query("SELECT ps FROM PlaceStatistics ps where ps.commonPlace.id = :id")
-	Optional<PlaceStatistics> findByCommonPlaceId(@Param("id") Long id);
+	@Query("SELECT ps FROM PlaceStatistics ps where ps.place.id = :id")
+	Optional<PlaceStatistics> findByPlaceId(@Param("id") Long id);
 
 
 }

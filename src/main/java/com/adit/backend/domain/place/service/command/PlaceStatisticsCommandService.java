@@ -2,7 +2,7 @@ package com.adit.backend.domain.place.service.command;
 
 import org.springframework.stereotype.Service;
 
-import com.adit.backend.domain.place.entity.CommonPlace;
+import com.adit.backend.domain.place.entity.Place;
 import com.adit.backend.domain.place.entity.PlaceStatistics;
 import com.adit.backend.domain.place.repository.PlaceStatisticsRepository;
 
@@ -14,16 +14,16 @@ import lombok.RequiredArgsConstructor;
 public class PlaceStatisticsCommandService {
 
 	private final PlaceStatisticsRepository placeStatisticsRepository;
-	public void saveOrCount(CommonPlace commonPlace) {
 
-		PlaceStatistics place = placeStatisticsRepository.findByCommonPlaceId(commonPlace.getId())
+	public void saveOrCount(Place place) {
+
+		PlaceStatistics foundPlace = placeStatisticsRepository.findByPlaceId(place.getId())
 			.orElseGet(() -> PlaceStatistics.builder()
-							.commonPlace(commonPlace)
-				   			.build());
+				.place(place)
+				.build());
 
-		place.updateBookMarkCount();
-		placeStatisticsRepository.save(place);
+		foundPlace.updateBookMarkCount();
+		placeStatisticsRepository.save(foundPlace);
 	}
-
 
 }

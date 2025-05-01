@@ -18,7 +18,7 @@ import com.adit.backend.domain.image.enums.Directory;
 import com.adit.backend.domain.image.repository.ImageRepository;
 import com.adit.backend.domain.image.service.query.ImageQueryService;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
-import com.adit.backend.domain.place.entity.CommonPlace;
+import com.adit.backend.domain.place.entity.Place;
 import com.adit.backend.domain.place.entity.UserPlace;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.infra.s3.service.AwsS3Service;
@@ -73,17 +73,18 @@ public class ImageCommandService {
 	}
 
 	//UserPlace에 이미지 연관관계 추가 후 저장 2
-	public void addImageToUserPlace(CommonPlace commonPlace, User user, UserPlace userPlace) {
-		List<Image> imageList = s3Service.uploadFile(commonPlace.getImages().stream().map(Image::getUrl).toList(), USER.getPath() + user.getId()).join();
+	public void addImageToUserPlace(Place place, User user, UserPlace userPlace) {
+		List<Image> imageList = s3Service.uploadFile(
+			place.getImages().stream().map(Image::getUrl).toList(), USER.getPath() + user.getId()).join();
 		imageList.forEach(userPlace::addImage);
 		imageRepository.saveAll(imageList);
 
 	}
 
-	// CommonPlace에 이미지 연관관계 추가 후 저장
-	public void addImageToCommonPlace(PlaceRequestDto request, CommonPlace commonPlace) {
+	// Place에 이미지 연관관계 추가 후 저장
+	public void addImageToPlace(PlaceRequestDto request, Place place) {
 		List<Image> imageList = s3Service.uploadFile(request.imageUrlList(), PLACE.getPath()).join();
-		imageList.forEach(commonPlace::addImage);
+		imageList.forEach(place::addImage);
 		imageRepository.saveAll(imageList);
 	}
 
@@ -107,7 +108,7 @@ public class ImageCommandService {
 	public ImageResponseDto toResponse(Image image) {
 		return new ImageResponseDto(
 			image.getId(),
-			image.getCommonPlace(),
+			image.getPlace(),
 			image.getUserPlace(),
 			image.getUserEvent(),
 			image.getCommonEvent(),
