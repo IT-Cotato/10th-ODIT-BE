@@ -107,7 +107,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu
-            sudo docker rm -f live_server || true
+            sudo docker rm -f blue  || true
+            sudo docker rm -f green || true
+
+            # 사용하지 않는 이미지 정리
             sudo docker image prune -f
 
       - name: 새 대상 컨테이너 배포
