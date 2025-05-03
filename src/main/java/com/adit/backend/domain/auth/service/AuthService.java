@@ -7,19 +7,12 @@ import java.time.ZonedDateTime;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.adit.backend.domain.auth.dto.OAuth2UserInfo;
-import com.adit.backend.domain.auth.dto.request.KakaoRequest;
-import com.adit.backend.domain.auth.dto.response.KakaoResponse;
-import com.adit.backend.domain.auth.dto.response.LoginResponse;
 import com.adit.backend.domain.auth.dto.response.ReissueResponse;
-import com.adit.backend.domain.user.dto.response.UserResponse;
 import com.adit.backend.domain.user.exception.UserException;
 import com.adit.backend.domain.user.principal.PrincipalDetails;
-import com.adit.backend.domain.user.service.command.UserCommandService;
 import com.adit.backend.global.security.jwt.entity.RefreshToken;
 import com.adit.backend.global.security.jwt.entity.Token;
 import com.adit.backend.global.security.jwt.exception.TokenException;
@@ -27,10 +20,8 @@ import com.adit.backend.global.security.jwt.repository.BlackListRepository;
 import com.adit.backend.global.security.jwt.repository.RefreshTokenRepository;
 import com.adit.backend.global.security.jwt.service.JwtTokenService;
 import com.adit.backend.global.security.jwt.util.JwtTokenProvider;
-import com.adit.backend.infra.oauth.KakaoOAuthService;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthService {
 	private final JwtTokenProvider tokenProvider;
 	private final JwtTokenService jwtTokenService;
-	private final KakaoOAuthService kakaoOAuthService;
-	private final UserCommandService userCommandService;
 	private final BlackListRepository blackListRepository;
 	private final RefreshTokenRepository refreshTokenRepository;
 
@@ -56,35 +45,6 @@ public class AuthService {
 
 	@Value("${token.refresh.cookie.name}")
 	private String refreshTokenCookieName;
-
-	//로그인
-	public LoginResponse login(KakaoRequest.AuthDto authRequest, HttpServletRequest request, HttpServletResponse response) {
-		try {
-			KakaoResponse.TokenInfoDto kakaoTokenInfo = kakaoOAuthService.requestTokenIssuance(request, authRequest.code())
-				.getBody();
-			OAuth2UserInfo oAuth2UserInfo = kakaoOAuthService.requestOAuth2UserInfo(kakaoTokenInfo.accessToken());
-			UserResponse.InfoDto infoDto = userCommandService.createOrUpdateUser(oAuth2UserInfo);
-
-			Token token = tokenProvider.createToken(infoDto.Id(), infoDto.role());
-			String newAccessToken = token.getAccessToken();
-			String newRefreshToken = token.getRefreshToken();
-
-			Authentication authentication = tokenProvider.getAuthentication(newAccessToken);
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-			response.setHeader(accessTokenHeader, "Bearer " + newAccessToken);
-
-			RefreshToken refreshToken = new RefreshToken(infoDto.Id(), newRefreshToken);
-			refreshTokenRepository.save(refreshToken);
-			addRefreshTokenToCookie(newRefreshToken, response);
-
-			log.info("[Auth] 카카오 로그인 성공 - userId: {}", infoDto.Id());
-			log.debug("[Token] 새로운 토큰 발급 완료 - accessToken: {}, refreshToken: {}", newAccessToken, newRefreshToken);
-			return LoginResponse.from(infoDto.role());
-		} catch (Exception e) {
-			log.error("[Auth] 로그인 실패: {}", e.getMessage());
-			throw new UserException(LOGIN_FAILED);
-		}
-	}
 
 	// 토큰 재발급
 	public ReissueResponse reIssue(String refreshToken, HttpServletResponse response) {
