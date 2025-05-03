@@ -42,6 +42,12 @@ jobs:
           echo "FRONT_LOCAL_URL=${{ secrets.FRONT_LOCAL_URL }}" >> .env
           echo "FRONT_BASE_URL=${{ secrets.FRONT_BASE_URL }}" >> .env
           echo "SPRING_AI_MAX_TOKENS=${{ secrets.SPRING_AI_MAX_TOKENS }}" >> .env
+          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}" >> .env
+          echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" >> .env
+          echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> .env
+          echo "NAVER_REDIRECT_URI=${{ secrets.NAVER_REDIRECT_URI }}" >> .env
 
       - name: gradlew 실행권한 설정
         run: chmod +x gradlew
