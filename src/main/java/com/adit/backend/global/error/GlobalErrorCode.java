@@ -53,6 +53,8 @@ public enum GlobalErrorCode implements ErrorCode {
 	KAKAO_LOGIN_FAILED(UNAUTHORIZED, "AUTH-013", "카카오 로그인에 실패했습니다."),
 	REFRESH_TOKEN_BLACKLISTED(UNAUTHORIZED, "AUTH-014", "블랙리스트에 등록된 리프레시 토큰입니다."),
 	REFRESH_TOKEN_MISMATCH(UNAUTHORIZED, "AUTH-015", "리프레시 토큰이 일치하지 않습니다."),
+	INVALID_AUTHENTICATION_TYPE(UNAUTHORIZED, "AUTH-016", "Authentication 객체 타입이 올바르지 않습니다."),
+	PROVIDER_NOT_FOUND(NOT_FOUND, "AUTH-017", "provider 를 찾지 못했습니다."),
 
 	/********************************** User Domain **********************************/
 	USER_NOT_FOUND(NOT_FOUND, "USR-001", "사용자를 찾지 못했습니다."),
