@@ -14,6 +14,6 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
 	@Query("SELECT ps.place.id FROM PlaceStatistics ps ORDER BY ps.bookmarkCount DESC")
 	List<Long> findByPopular(Pageable pageable);
 
-	@Query("SELECT cp FROM Place cp where cp.placeName LIKE %:placeName%")
+	@Query("SELECT p FROM Place p where p.placeName LIKE %:placeName%")
 	Optional<Place> findByBusinessName(@Param("placeName") String businessName);
 }

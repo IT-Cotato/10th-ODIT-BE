@@ -21,7 +21,7 @@ public interface UserPlaceRepository extends JpaRepository<UserPlace, Long> {
 	@Query("SELECT up FROM UserPlace up where up.place.addressName LIKE %:partialAddress% AND up.user.id = :userId")
 	List<UserPlace> findByAddress(@Param("partialAddress") String partialAddress, @Param("userId") Long userId);
 
-	@Query("SELECT up FROM UserPlace up where up.user.id = :id AND up.place = (SELECT cp FROM Place cp where cp.url = :url)")
+	@Query("SELECT up FROM UserPlace up where up.user.id = :id AND up.place = (SELECT p FROM Place p where p.url = :url)")
 	UserPlace findDuplicatePlace(@Param("id") Long userId, @Param("url") String requestUrl);
 
 	@Query("SELECT up.user.id FROM UserPlace up where up.place.id = :id")
