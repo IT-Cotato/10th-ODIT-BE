@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.adit.backend.domain.event.dto.request.EventRequestDto;
-import com.adit.backend.domain.event.entity.CommonEvent;
+import com.adit.backend.domain.event.entity.Event;
 import com.adit.backend.domain.event.entity.UserEvent;
 import com.adit.backend.domain.image.converter.ImageConverter;
 import com.adit.backend.domain.image.dto.response.ImageResponseDto;
@@ -88,10 +88,10 @@ public class ImageCommandService {
 		imageRepository.saveAll(imageList);
 	}
 
-	// CommonEvent에 이미지 연관관계 추가 후 저장
-	public void addImageToCommonEvent(EventRequestDto request, CommonEvent commonEvent) {
+	// Event에 이미지 연관관계 추가 후 저장
+	public void addImageToEvent(EventRequestDto request, Event event) {
 		List<Image> imageList = s3Service.uploadFile(request.imageUrlList(), EVENT.getPath()).join();
-		imageList.forEach(commonEvent::addImage);
+		imageList.forEach(event::addImage);
 		imageRepository.saveAll(imageList);
 
 	}
@@ -111,7 +111,7 @@ public class ImageCommandService {
 			image.getPlace(),
 			image.getUserPlace(),
 			image.getUserEvent(),
-			image.getCommonEvent(),
+			image.getEvent(),
 			image.getUrl()
 		);
 	}

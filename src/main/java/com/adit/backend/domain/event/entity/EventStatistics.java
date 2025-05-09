@@ -28,7 +28,7 @@ public class EventStatistics extends BaseEntity {
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "common_event_id", nullable = false)
-	private CommonEvent commonEvent;
+	private Event event;
 
 	@Column(nullable = false)
 	private Integer bookmarkCount = 0; // 기본값 추가

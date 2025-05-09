@@ -1,6 +1,6 @@
 package com.adit.backend.domain.image.entity;
 
-import com.adit.backend.domain.event.entity.CommonEvent;
+import com.adit.backend.domain.event.entity.Event;
 import com.adit.backend.domain.event.entity.UserEvent;
 import com.adit.backend.domain.place.entity.Place;
 import com.adit.backend.domain.place.entity.UserPlace;
@@ -45,7 +45,7 @@ public class Image extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "common_event_id")
-	private CommonEvent commonEvent;
+	private Event event;
 
 	@Column(nullable = false)
 	private String url;
@@ -63,8 +63,8 @@ public class Image extends BaseEntity {
 		this.userPlace = userPlace;
 	}
 
-	public void assignCommonEvent(CommonEvent commonEvent) {
-		this.commonEvent = commonEvent;
+	public void assignEvent(Event event) {
+		this.event = event;
 	}
 
 	public void updateUrl(String newImageUrl) {

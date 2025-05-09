@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 import com.adit.backend.domain.event.dto.request.EventRequestDto;
 import com.adit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.adit.backend.domain.event.dto.response.EventResponseDto;
-import com.adit.backend.domain.event.entity.CommonEvent;
+import com.adit.backend.domain.event.entity.Event;
 import com.adit.backend.domain.image.entity.Image;
 
 @Component
-public class CommonEventConverter {
+public class EventConverter {
 
-	public CommonEvent toEntity(EventRequestDto request) {
-		return CommonEvent.createEvent(
+	public Event toEntity(EventRequestDto request) {
+		return Event.createEvent(
 			request.name(),
 			request.category(),
 			request.startDate(),
@@ -25,15 +25,15 @@ public class CommonEventConverter {
 		);
 	}
 
-	public EventResponseDto toResponse(CommonEvent commonEvent) {
+	public EventResponseDto toResponse(Event event) {
 		return EventResponseDto.builder()
-			.id(commonEvent.getId())
-			.name(commonEvent.getName())
-			.category(commonEvent.getCategory())
-			.startDate(commonEvent.getStartDate())
-			.endDate(commonEvent.getEndDate())
-			.memo(commonEvent.getMemo())
-			.imageUrlList(Optional.ofNullable(commonEvent.getImages())
+			.id(event.getId())
+			.name(event.getName())
+			.category(event.getCategory())
+			.startDate(event.getStartDate())
+			.endDate(event.getEndDate())
+			.memo(event.getMemo())
+			.imageUrlList(Optional.ofNullable(event.getImages())
 				.orElse(Collections.emptyList())
 				.stream()
 				.map(Image::getUrl)
@@ -41,7 +41,7 @@ public class CommonEventConverter {
 			.build();
 	}
 
-	public void updateEntity(CommonEvent commonEvent, EventUpdateRequestDto updateRequest) {
-		commonEvent.updateEvent(updateRequest);  // Event 엔터티의 update 메서드 호출
+	public void updateEntity(Event event, EventUpdateRequestDto updateRequest) {
+		event.updateEvent(updateRequest);  // Event 엔터티의 update 메서드 호출
 	}
 }

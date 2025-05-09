@@ -20,7 +20,7 @@ public class ImageConverter {
 			.place(image.getPlace())
 			.userPlace(image.getUserPlace())
 			.userEvent(image.getUserEvent())
-			.commonEvent(image.getCommonEvent())
+			.event(image.getEvent())
 			.url(image.getUrl())
 			.build();
 	}

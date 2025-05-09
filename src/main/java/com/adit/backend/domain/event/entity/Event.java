@@ -15,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +27,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CommonEvent extends BaseEntity {
+@Table(name = "event")
+public class Event extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,33 +45,32 @@ public class CommonEvent extends BaseEntity {
 	private String memo;
 
 	@Builder.Default
-	@OneToMany(mappedBy = "commonEvent", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+	List<UserEvent> userEvents = new ArrayList<>();
+	@Builder.Default
+	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
-	@Builder.Default
-	@OneToMany(mappedBy = "commonEvent", cascade = CascadeType.ALL, orphanRemoval = true)
-	List<UserEvent> userEvents = new ArrayList<>();
-
-	public static CommonEvent createEvent(String name, String category, LocalDateTime startDate, LocalDateTime endDate,
+	public static Event createEvent(String name, String category, LocalDateTime startDate, LocalDateTime endDate,
 		String memo) {
-		CommonEvent commonEvent = new CommonEvent();
-		commonEvent.name = name;
-		commonEvent.category = category;
-		commonEvent.startDate = startDate;
-		commonEvent.endDate = endDate;
-		commonEvent.memo = memo;
-		return commonEvent;
+		Event event = new Event();
+		event.name = name;
+		event.category = category;
+		event.startDate = startDate;
+		event.endDate = endDate;
+		event.memo = memo;
+		return event;
 	}
 
 	//연관관계 메서드
 	public void addUserEvent(UserEvent userEvent) {
 		this.userEvents.add(userEvent);
-		userEvent.assignCommonEvent(this);
+		userEvent.assignEvent(this);
 	}
 
 	public void addImage(Image image) {
 		this.images.add(image);
-		image.assignCommonEvent(this);
+		image.assignEvent(this);
 	}
 
 	public void updateEvent(EventUpdateRequestDto updateRequest) {

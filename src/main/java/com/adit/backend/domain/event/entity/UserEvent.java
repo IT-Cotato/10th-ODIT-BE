@@ -42,7 +42,7 @@ public class UserEvent extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "common_event_id")
-	private CommonEvent commonEvent;
+	private Event event;
 
 	@Column(nullable = false)
 	private String name;
@@ -77,8 +77,8 @@ public class UserEvent extends BaseEntity {
 		image.assignEvent(this);
 	}
 
-	public void assignCommonEvent(CommonEvent commonEvent) {
-		this.commonEvent = commonEvent;
+	public void assignEvent(Event event) {
+		this.event = event;
 	}
 
 	public void assignUser(User user) {
