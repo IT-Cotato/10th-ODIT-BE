@@ -27,9 +27,6 @@ import com.adit.backend.global.security.oauth.handler.OAuth2FailureHandler;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-/**
- * The type Security config.
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -55,7 +52,7 @@ public class SecurityConfig {
 		"/oauth2/**",
 		"/login/**",
 
-		//ap
+		// API
 		"/api/auth/**",
 		"/api/user/**",
 		"/api/ai/**",
