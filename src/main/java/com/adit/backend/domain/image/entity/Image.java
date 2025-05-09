@@ -44,7 +44,7 @@ public class Image extends BaseEntity {
 	private UserEvent userEvent;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "common_event_id")
+	@JoinColumn(name = "event_id")
 	private Event event;
 
 	@Column(nullable = false)

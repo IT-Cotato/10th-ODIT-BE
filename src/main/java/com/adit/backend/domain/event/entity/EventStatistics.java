@@ -27,7 +27,7 @@ public class EventStatistics extends BaseEntity {
 	private Long id;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "common_event_id", nullable = false)
+	@JoinColumn(name = "event_id", nullable = false)
 	private Event event;
 
 	@Column(nullable = false)
