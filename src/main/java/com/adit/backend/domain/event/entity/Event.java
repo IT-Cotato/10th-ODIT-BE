@@ -40,25 +40,26 @@ public class Event extends BaseEntity {
 	@Column(nullable = false)
 	private String category;
 
+	@Column(nullable = false)
 	private LocalDateTime startDate;
+
+	@Column(nullable = false)
 	private LocalDateTime endDate;
-	private String memo;
 
 	@Builder.Default
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	List<UserEvent> userEvents = new ArrayList<>();
+
 	@Builder.Default
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Image> images = new ArrayList<>();
 
-	public static Event createEvent(String name, String category, LocalDateTime startDate, LocalDateTime endDate,
-		String memo) {
+	public static Event createEvent(String name, String category, LocalDateTime startDate, LocalDateTime endDate) {
 		Event event = new Event();
 		event.name = name;
 		event.category = category;
 		event.startDate = startDate;
 		event.endDate = endDate;
-		event.memo = memo;
 		return event;
 	}
 
@@ -82,7 +83,5 @@ public class Event extends BaseEntity {
 			this.startDate = updateRequest.getStartDate();
 		if (updateRequest.getEndDate() != null)
 			this.endDate = updateRequest.getEndDate();
-		if (updateRequest.getMemo() != null)
-			this.memo = updateRequest.getMemo();
 	}
 }

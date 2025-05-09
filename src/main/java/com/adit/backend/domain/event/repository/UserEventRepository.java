@@ -13,12 +13,12 @@ import com.adit.backend.domain.event.entity.UserEvent;
 @Repository
 public interface UserEventRepository extends JpaRepository<UserEvent, Long> {
 
-	@Query("SELECT e FROM UserEvent e WHERE DATE(e.startDate) = :date")
+	@Query("SELECT ue FROM UserEvent ue WHERE DATE(ue.customStartDate) = :date")
 	List<UserEvent> findByDate(@Param("date") LocalDate date);
 
-	@Query("SELECT e FROM UserEvent e WHERE e.startDate IS NULL AND e.endDate IS NULL")
+	@Query("SELECT ue FROM UserEvent ue WHERE ue.customStartDate IS NULL AND ue.customEndDate IS NULL")
 	List<UserEvent> findNoDateEvents();
 
-	@Query("SELECT e FROM UserEvent e ORDER BY e.visited DESC")
+	@Query("SELECT ue FROM UserEvent ue ORDER BY ue.visited DESC")
 	List<UserEvent> findPopularEvents();
 }

@@ -2,7 +2,6 @@ package com.adit.backend.domain.event.converter;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -20,8 +19,7 @@ public class EventConverter {
 			request.name(),
 			request.category(),
 			request.startDate(),
-			request.endDate(),
-			request.memo()
+			request.endDate()
 		);
 	}
 
@@ -32,12 +30,11 @@ public class EventConverter {
 			.category(event.getCategory())
 			.startDate(event.getStartDate())
 			.endDate(event.getEndDate())
-			.memo(event.getMemo())
 			.imageUrlList(Optional.ofNullable(event.getImages())
 				.orElse(Collections.emptyList())
 				.stream()
 				.map(Image::getUrl)
-				.collect(Collectors.toList()))
+				.toList())
 			.build();
 	}
 
