@@ -6,11 +6,16 @@ import java.util.List;
 import jakarta.validation.constraints.NotBlank;
 
 public record EventRequestDto(
-    @NotBlank String name,
-    @NotBlank String category,
-    LocalDateTime startDate,
-    LocalDateTime endDate,
-    String memo,
-    Boolean visited,
+	@NotBlank(message = "이벤트명은 필수 입력값입니다.")
+	String name,
+
+	@NotBlank(message = "카테고리는 필수 입력값입니다.")
+	String category,
+
+	LocalDateTime startDate,
+	LocalDateTime endDate,
+	String memo,
+	Boolean visited,
 	List<String> imageUrlList
-) {}
+) {
+}

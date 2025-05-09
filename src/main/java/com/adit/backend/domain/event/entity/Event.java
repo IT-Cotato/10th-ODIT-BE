@@ -40,10 +40,10 @@ public class Event extends BaseEntity {
 	@Column(nullable = false)
 	private String category;
 
-	@Column(nullable = false)
+	@Column(nullable = false, name = "start_date")
 	private LocalDateTime startDate;
 
-	@Column(nullable = false)
+	@Column(nullable = false, name = "end_date")
 	private LocalDateTime endDate;
 
 	@Builder.Default
@@ -75,13 +75,13 @@ public class Event extends BaseEntity {
 	}
 
 	public void updateEvent(EventUpdateRequestDto updateRequest) {
-		if (updateRequest.getName() != null)
-			this.name = updateRequest.getName();
-		if (updateRequest.getCategory() != null)
-			this.category = updateRequest.getCategory();
-		if (updateRequest.getStartDate() != null)
-			this.startDate = updateRequest.getStartDate();
-		if (updateRequest.getEndDate() != null)
-			this.endDate = updateRequest.getEndDate();
+		if (updateRequest.name() != null)
+			this.name = updateRequest.name();
+		if (updateRequest.category() != null)
+			this.category = updateRequest.category();
+		if (updateRequest.startDate() != null)
+			this.startDate = updateRequest.startDate();
+		if (updateRequest.endDate() != null)
+			this.endDate = updateRequest.endDate();
 	}
 }

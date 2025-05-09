@@ -46,10 +46,10 @@ public class UserEvent extends BaseEntity {
 	@JoinColumn(name = "common_event_id")
 	private Event event;
 
-	@Column(nullable = false, name = "custom_start_date")
+	@Column(name = "custom_start_date")
 	private LocalDateTime customStartDate;
 
-	@Column(nullable = false, name = "custom_end_date")
+	@Column(name = "custom_end_date")
 	private LocalDateTime customEndDate;
 
 	private String memo;
@@ -86,14 +86,14 @@ public class UserEvent extends BaseEntity {
 
 	// 업데이트 메서드
 	public void updateEvent(EventUpdateRequestDto request) {
-		if (request.getStartDate() != null)
-			this.customStartDate = request.getStartDate();
-		if (request.getEndDate() != null)
-			this.customEndDate = request.getEndDate();
-		if (request.getMemo() != null)
-			this.memo = request.getMemo();
-		if (request.getVisited() != null)
-			this.visited = request.getVisited();
+		if (request.startDate() != null)
+			this.customStartDate = request.startDate();
+		if (request.endDate() != null)
+			this.customEndDate = request.endDate();
+		if (request.memo() != null)
+			this.memo = request.memo();
+		if (request.visited() != null)
+			this.visited = request.visited();
 	}
 
 	public void updateMemo(String memo) {
