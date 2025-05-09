@@ -38,7 +38,7 @@ public class PlaceStatistics extends BaseEntity {
 	private int bookmarkCount;
 
 	@ColumnDefault("0")
-	private Integer visitCount;
+	private int visitCount;
 
 	public void updateBookMarkCount() {
 		this.bookmarkCount++;

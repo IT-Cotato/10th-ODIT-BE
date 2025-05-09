@@ -34,16 +34,22 @@ public class Place extends BaseEntity {
 	@Column(nullable = false)
 	private String placeName;
 
-	@Column(precision = 38, scale = 7)
+	@Column(nullable = false, precision = 38, scale = 7)
 	private BigDecimal latitude;
-	
-	@Column(precision = 38, scale = 7)
+
+	@Column(nullable = false, precision = 38, scale = 7)
 	private BigDecimal longitude;
 
+	@Column(nullable = false)
 	private String addressName;
+
+	@Column(nullable = false)
 	private String roadAddressName;
+
+	@Column(nullable = false)
 	private String subCategory;
 
+	@Column(nullable = false)
 	private String url;
 
 	@Builder.Default
