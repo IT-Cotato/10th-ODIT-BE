@@ -1,6 +1,5 @@
 package com.adit.backend.global.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,7 +7,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,9 +23,6 @@ import com.adit.backend.global.security.jwt.filter.TokenExceptionFilter;
 import com.adit.backend.global.security.jwt.handler.CustomAccessDeniedHandler;
 import com.adit.backend.global.security.jwt.handler.CustomAuthenticationEntryPoint;
 import com.adit.backend.global.security.oauth.handler.OAuth2FailureHandler;
-import com.adit.backend.global.security.oauth.handler.OAuth2SuccessHandler;
-import com.adit.backend.global.security.oauth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
-import com.adit.backend.global.security.oauth.service.CustomOAuth2UserService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -41,44 +36,36 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class SecurityConfig {
 
-	private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 	private static final String[] WHITE_LIST = {
+		// Web
+		"/",
+		"/error",
+		"/favicon.ico",
+
+		// Swagger
+		"/v3/api-docs/**",
+		"/swagger-ui/**",
+		"/swagger-resources/**",
+
+		// Actuator
+		"/actuator",
+		"/actuator/**",
+
+		// OAuth2
+		"/oauth2/**",
 		"/login/**",
-		"/api/ai/**",
-		"/api/user/**",
+
+		//ap
 		"/api/auth/**",
-		"/webjars/**",
-		"/api/scraper/**",
-		"/oauth2/**"
+		"/api/user/**",
+		"/api/ai/**",
+		"/api/scraper/**"
 	};
 	private final DelegatingOAuth2LoginSuccessHandler delegatingOAuth2LoginSuccessHandler;
 	private final CorsFilter corsFilter;
-	private final CustomOAuth2UserService customOAuth2UserService;
-	private final OAuth2SuccessHandler oAuth2SuccessHandler;
 	private final OAuth2FailureHandler oAuth2FailureHandler;
 	private final JwtAuthorizationFilter jwtAuthorizationFilter;
 	private final CustomUserService customUserService;
-	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
-	String frontRedirectUrl;
-
-	/**
-	 * 보안 검사를 무시할 웹 리소스 설정
-	 * 주로 정적 리소스나 API 문서에 대한 접근을 허용
-	 */
-	@Bean
-	public WebSecurityCustomizer webSecurityCustomizer() {
-		return web -> web.ignoring()
-			.requestMatchers(
-				"/",
-				"/error",
-				"/favicon.ico",
-				"/v3/api-docs/**",
-				"/swagger-ui/**",
-				"/swagger-resources/**",
-				"/actuator",
-				"/actuator/**"
-			);
-	}
 
 	/**
 	 * AuthenticationManager 빈 설정
@@ -129,16 +116,7 @@ public class SecurityConfig {
 					.userService(customUserService) // ✅ 사용자 정보 로딩 시
 				)
 				.successHandler(delegatingOAuth2LoginSuccessHandler) // ✅ 로그인 성공 후
-
-				// .authorizationEndpoint(authEndpoint -> authEndpoint
-				// 	.baseUri("/oauth2/authorization")
-				// 	.authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository))
-				// .redirectionEndpoint(redirect -> redirect
-				// 	.baseUri("/api/auth/login"))
-				// .userInfoEndpoint(userInfo -> userInfo
-				// 	.userService(customOAuth2UserService))
-				// .successHandler(oAuth2SuccessHandler)
-				// .failureHandler(oAuth2FailureHandler)
+				.failureHandler(oAuth2FailureHandler)
 			)
 
 			// JWT 관련 필터 추가
