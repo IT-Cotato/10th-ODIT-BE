@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.adit.backend.domain.image.converter.ImageConverter;
 import com.adit.backend.domain.image.dto.request.ImageUpdateRequestDto;
 import com.adit.backend.domain.image.entity.PlaceImage;
 import com.adit.backend.domain.image.entity.UserPlaceImage;
@@ -37,6 +38,7 @@ public class UserPlaceImageCommandService {
 	private final AwsS3Service s3Service;
 	private final UserPlaceImageRepository userPlaceImageRepository;
 	private final UserPlaceImageQueryService userPlaceImageQueryService;
+	private final ImageConverter imageConverter;
 
 	public void addNewUserPlaceImage(PlaceRequestDto request, User user, UserPlace userPlace) {
 		List<UserPlaceImage> imageList = s3Service.uploadFile(request.imageUrlList(), USER.getPath() + user.getId())
@@ -78,7 +80,7 @@ public class UserPlaceImageCommandService {
 		userPlaceRepository.save(userPlace);
 
 		return uploadedImages.stream()
-			.map(UserPlaceImageResponseDto::of)
+			.map(imageConverter::toResponse)
 			.toList();
 	}
 
@@ -95,7 +97,7 @@ public class UserPlaceImageCommandService {
 		UserPlaceImage image = userPlaceImageQueryService.getImageById(imageId);
 		String newImageUrl = s3Service.updateImage(image.getUrl(), multipartFile).join();
 		image.updateUrl(newImageUrl);
-		return UserPlaceImageResponseDto.of(image);
+		return imageConverter.toResponse(image);
 	}
 
 	/**
@@ -126,4 +128,3 @@ public class UserPlaceImageCommandService {
 		}
 	}
 }
-

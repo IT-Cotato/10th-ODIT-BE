@@ -1,7 +1,5 @@
 package com.adit.backend.domain.event.dto.response;
 
-import com.adit.backend.domain.image.entity.UserEventImage;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -14,11 +12,4 @@ public record UserEventImageResponseDto(
 	Long userEventId,
 	@NotBlank(message = "URL은 비어 있을 수 없습니다.")
 	String url) {
-	public static UserEventImageResponseDto of(UserEventImage userEventImage) {
-		return UserEventImageResponseDto.builder()
-			.id(userEventImage.getId())
-			.userEventId(userEventImage.getUserEvent().getId())
-			.url(userEventImage.getUrl())
-			.build();
-	}
 }

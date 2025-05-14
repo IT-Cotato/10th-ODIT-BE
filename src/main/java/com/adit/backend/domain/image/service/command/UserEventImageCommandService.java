@@ -12,6 +12,7 @@ import com.adit.backend.domain.event.dto.response.UserEventImageResponseDto;
 import com.adit.backend.domain.event.entity.UserEvent;
 import com.adit.backend.domain.event.exception.EventException;
 import com.adit.backend.domain.event.repository.UserEventRepository;
+import com.adit.backend.domain.image.converter.ImageConverter;
 import com.adit.backend.domain.image.dto.request.ImageUpdateRequestDto;
 import com.adit.backend.domain.image.entity.UserEventImage;
 import com.adit.backend.domain.image.enums.Directory;
@@ -32,6 +33,7 @@ public class UserEventImageCommandService {
 	private final AwsS3Service s3Service;
 	private final UserEventRepository userEventRepository;
 	private final UserEventImageQueryService userEventImageQueryService;
+	private final ImageConverter imageConverter;
 
 	/**
 	 * 이벤트에 새로운 이미지 추가
@@ -47,7 +49,7 @@ public class UserEventImageCommandService {
 		userEventRepository.save(userEvent);
 
 		return uploadedImages.stream()
-			.map(UserEventImageResponseDto::of)
+			.map(imageConverter::toResponse)
 			.toList();
 	}
 
@@ -77,7 +79,7 @@ public class UserEventImageCommandService {
 		UserEventImage image = userEventImageQueryService.getImageById(imageId);
 		String newImageUrl = s3Service.updateImage(image.getUrl(), multipartFile).join();
 		image.updateUrl(newImageUrl);
-		return UserEventImageResponseDto.of(image);
+		return imageConverter.toResponse(image);
 	}
 
 	/**
