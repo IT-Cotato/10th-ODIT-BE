@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.adit.backend.domain.event.dto.request.EventUpdateRequestDto;
-import com.adit.backend.domain.image.entity.Image;
+import com.adit.backend.domain.image.entity.EventImage;
 import com.adit.backend.global.entity.BaseEntity;
 
 import jakarta.persistence.CascadeType;
@@ -52,7 +52,7 @@ public class Event extends BaseEntity {
 
 	@Builder.Default
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Image> images = new ArrayList<>();
+	private List<EventImage> images = new ArrayList<>();
 
 	public static Event createEvent(String name, String category, LocalDateTime startDate, LocalDateTime endDate) {
 		Event event = new Event();
@@ -69,7 +69,7 @@ public class Event extends BaseEntity {
 		userEvent.assignEvent(this);
 	}
 
-	public void addImage(Image image) {
+	public void addImage(EventImage image) {
 		this.images.add(image);
 		image.assignEvent(this);
 	}

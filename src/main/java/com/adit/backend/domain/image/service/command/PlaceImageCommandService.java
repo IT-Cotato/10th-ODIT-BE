@@ -1,4 +1,4 @@
-package com.adit.backend.domain.image.service;
+package com.adit.backend.domain.image.service.command;
 
 import static com.adit.backend.domain.image.enums.Directory.*;
 
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Transactional
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public class PlaceImageService {
+public class PlaceImageCommandService {
 
 	private final AwsS3Service s3Service;
 	private final PlaceImageRepository placeImageRepository;

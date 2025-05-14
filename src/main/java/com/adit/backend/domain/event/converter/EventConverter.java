@@ -9,7 +9,7 @@ import com.adit.backend.domain.event.dto.request.EventRequestDto;
 import com.adit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.adit.backend.domain.event.dto.response.EventResponseDto;
 import com.adit.backend.domain.event.entity.Event;
-import com.adit.backend.domain.image.entity.Image;
+import com.adit.backend.domain.image.entity.EventImage;
 
 @Component
 public class EventConverter {
@@ -33,7 +33,7 @@ public class EventConverter {
 			.imageUrlList(Optional.ofNullable(event.getImages())
 				.orElse(Collections.emptyList())
 				.stream()
-				.map(Image::getUrl)
+				.map(EventImage::getUrl)
 				.toList())
 			.build();
 	}

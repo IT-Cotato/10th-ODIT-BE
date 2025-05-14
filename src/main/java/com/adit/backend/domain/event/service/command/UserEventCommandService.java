@@ -13,8 +13,8 @@ import com.adit.backend.domain.event.entity.Event;
 import com.adit.backend.domain.event.entity.UserEvent;
 import com.adit.backend.domain.event.exception.EventException;
 import com.adit.backend.domain.event.repository.UserEventRepository;
-import com.adit.backend.domain.image.entity.Image;
-import com.adit.backend.domain.image.service.command.ImageCommandService;
+import com.adit.backend.domain.image.entity.UserEventImage;
+import com.adit.backend.domain.image.service.command.UserEventImageCommandService;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.domain.user.service.query.UserQueryService;
 
@@ -32,7 +32,7 @@ public class UserEventCommandService {
 	private final UserEventConverter userEventConverter;
 	private final UserQueryService userQueryService;
 	private final EventCommandService eventCommandService;
-	private final ImageCommandService imageCommandService;
+	private final UserEventImageCommandService userEventImageCommandService;
 
 	/**
 	 * 새로운 이벤트 생성
@@ -42,7 +42,6 @@ public class UserEventCommandService {
 		Event event = eventCommandService.saveOrFindEvent(request);
 		UserEvent userEvent = userEventConverter.toEntity(request);
 
-		//연관 관계 설정
 		saveUserEventRelation(event, userEvent, user);
 
 		return userEventConverter.toResponse(userEvent);
@@ -86,8 +85,8 @@ public class UserEventCommandService {
 
 		try {
 			// 1. 이미지 삭제 (모든 이미지 삭제 성공 시 이벤트 삭제 진행)
-			for (Image image : userEvent.getImages()) {
-				imageCommandService.deleteImage(image.getId());
+			for (UserEventImage image : userEvent.getImages()) {
+				userEventImageCommandService.deleteImage(image.getId());
 			}
 
 			// 2. 이벤트 삭제

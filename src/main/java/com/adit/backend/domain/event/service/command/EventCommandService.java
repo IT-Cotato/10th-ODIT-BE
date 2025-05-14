@@ -7,7 +7,7 @@ import com.adit.backend.domain.event.converter.EventConverter;
 import com.adit.backend.domain.event.dto.request.EventRequestDto;
 import com.adit.backend.domain.event.entity.Event;
 import com.adit.backend.domain.event.repository.EventRepository;
-import com.adit.backend.domain.image.service.command.ImageCommandService;
+import com.adit.backend.domain.image.service.command.EventImageCommandService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +20,13 @@ import lombok.extern.slf4j.Slf4j;
 public class EventCommandService {
 	private final EventRepository eventRepository;
 	private final EventConverter eventConverter;
-	private final ImageCommandService imageCommandService;
+	private final EventImageCommandService eventImageCommandService;
 
 	public Event saveOrFindEvent(EventRequestDto request) {
 		return eventRepository.findByName(request.name()).orElseGet(() -> {
 			Event event = eventConverter.toEntity(request);
 			if (!request.imageUrlList().isEmpty()) {
-				imageCommandService.addImageToEvent(request, event);
+				eventImageCommandService.addImageToEvent(request, event);
 			}
 			return eventRepository.save(event);
 		});

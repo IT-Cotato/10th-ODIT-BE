@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.adit.backend.domain.image.service.PlaceImageService;
+import com.adit.backend.domain.image.service.command.PlaceImageCommandService;
 import com.adit.backend.domain.place.converter.PlaceConverter;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
 import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
@@ -24,7 +24,7 @@ public class PlaceCommandService {
 	private final PlaceRepository placeRepository;
 	private final PlaceQueryService placeQueryService;
 	private final PlaceConverter placeConverter;
-	private final PlaceImageService placeImageService;
+	private final PlaceImageCommandService placeImageCommandService;
 
 	// 카카오맵 url -> 기존 공통 장소 반환 or 새로운 공통 장소 생성
 	public Place saveOrFindPlace(PlaceRequestDto request) {
@@ -32,7 +32,7 @@ public class PlaceCommandService {
 		return placeRepository.findById(placeId).orElseGet(() -> {
 			Place place = placeConverter.toEntity(request, placeId);
 			if (!request.imageUrlList().isEmpty()) {
-				placeImageService.addNewPlaceImage(request, place);
+				placeImageCommandService.addNewPlaceImage(request, place);
 			}
 			return placeRepository.save(place);
 		});

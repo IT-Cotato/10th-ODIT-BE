@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.adit.backend.domain.event.dto.request.EventUpdateRequestDto;
-import com.adit.backend.domain.image.entity.Image;
+import com.adit.backend.domain.image.entity.UserEventImage;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.global.entity.BaseEntity;
 
@@ -57,7 +57,7 @@ public class UserEvent extends BaseEntity {
 	private Boolean visited;
 
 	@OneToMany(mappedBy = "userEvent", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Image> images = new ArrayList<>();
+	private List<UserEventImage> images = new ArrayList<>();
 
 	// 팩토리 메서드
 	public static UserEvent createEvent(LocalDateTime startDate, LocalDateTime endDate,
@@ -71,7 +71,7 @@ public class UserEvent extends BaseEntity {
 	}
 
 	// 연관관계 메서드
-	public void addImage(Image image) {
+	public void addImage(UserEventImage image) {
 		this.images.add(image);
 		image.assignEvent(this);
 	}
