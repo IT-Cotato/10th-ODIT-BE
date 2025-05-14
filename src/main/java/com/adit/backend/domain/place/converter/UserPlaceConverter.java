@@ -6,7 +6,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.adit.backend.domain.image.entity.Image;
+import com.adit.backend.domain.image.entity.PlaceImage;
+import com.adit.backend.domain.image.entity.UserPlaceImage;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
 import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
 import com.adit.backend.domain.place.entity.Place;
@@ -22,7 +23,7 @@ public class UserPlaceConverter {
 			.build();
 	}
 
-	public UserPlace toEntity(Place place){
+	public UserPlace toEntity(Place place) {
 		return UserPlace.builder()
 			.visited(false)
 			.build();
@@ -49,7 +50,7 @@ public class UserPlaceConverter {
 			.imageUrlList(Optional.ofNullable(userPlace.getImages())
 				.orElse(Collections.emptyList())
 				.stream()
-				.map(Image::getUrl)
+				.map(UserPlaceImage::getUrl)
 				.collect(Collectors.toList()))
 			.build();
 	}
@@ -71,7 +72,7 @@ public class UserPlaceConverter {
 			.addressName(userPlace.getPlace().getAddressName())
 			.url(userPlace.getPlace().getUrl())
 			.imageUrlList(userPlace.getPlace().getImages().stream()
-				.map(Image::getUrl)
+				.map(PlaceImage::getUrl)
 				.collect(Collectors.toList()))
 			.friendUserId(userPlace.getUser().getId())
 			.profile(userPlace.getUser().getProfile())

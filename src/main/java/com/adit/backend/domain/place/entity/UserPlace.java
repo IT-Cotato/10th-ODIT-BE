@@ -3,7 +3,7 @@ package com.adit.backend.domain.place.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.adit.backend.domain.image.entity.Image;
+import com.adit.backend.domain.image.entity.UserPlaceImage;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.global.entity.BaseEntity;
 
@@ -44,7 +44,7 @@ public class UserPlace extends BaseEntity {
 	private Place place;
 
 	@OneToMany(mappedBy = "userPlace", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Image> images = new ArrayList<>();
+	private List<UserPlaceImage> images = new ArrayList<>();
 
 	private String memo;
 	private Boolean visited;
@@ -57,12 +57,6 @@ public class UserPlace extends BaseEntity {
 		this.visited = true;
 	}
 
-	//연관관계 메서드
-	public void addImage(Image image) {
-		this.images.add(image);
-		image.assignUserPlace(this);
-	}
-
 	public void assignedPlace(Place place) {
 		this.place = place;
 	}
@@ -70,4 +64,10 @@ public class UserPlace extends BaseEntity {
 	public void assignedUser(User user) {
 		this.user = user;
 	}
+
+	public void addImage(UserPlaceImage image) {
+		this.images.add(image);
+		image.assignUserPlace(this);
+	}
+
 }

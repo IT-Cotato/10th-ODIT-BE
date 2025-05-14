@@ -17,7 +17,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.adit.backend.domain.image.entity.Image;
 import com.adit.backend.global.util.ImageUtil;
 import com.adit.backend.infra.s3.exception.S3Exception;
 import com.amazonaws.services.s3.AmazonS3;
@@ -45,21 +44,21 @@ public class AwsS3Service {
 	private String bucket;
 
 	@Async("imageUploadExecutor")
-	public CompletableFuture<List<Image>> uploadFile(List<String> imageUrlList, String dirName) {
+	public CompletableFuture<List<String>> uploadFile(List<String> imageUrlList, String dirName) {
 		log.info("[S3] 파일 업로드 시작 : {}", imageUrlList);
 
-		List<CompletableFuture<Image>> futureList = imageUrlList.stream()
+		List<CompletableFuture<String>> futureList = imageUrlList.stream()
 			.map(imageUrl -> CompletableFuture.supplyAsync(() -> {
 				try {
 					// URL 연결 설정
-					String normalizedUrl = ImageUtil.normalizeUrl(imageUrl);
+					String normalizedUrl = normalizeUrl(imageUrl);
 					URL url = new URL(normalizedUrl);
 					URLConnection connection = url.openConnection();
 					connection.setConnectTimeout(5000);
 					connection.setReadTimeout(5000);
 
 					String contentType = connection.getContentType();
-					String originalFilename = ImageUtil.extractFileName(normalizedUrl);
+					String originalFilename = extractFileName(normalizedUrl);
 					String fileName = createFileName(originalFilename, dirName, contentType);
 
 					// ObjectMetadata 설정
@@ -76,9 +75,7 @@ public class AwsS3Service {
 							.withCannedAcl(CannedAccessControlList.PublicRead));
 						log.info("[S3] 파일 업로드 성공: 파일명 = {}", fileName);
 					}
-
-					String imageUrlFromBucket = getUrlFromBucket(fileName);
-					return Image.builder().url(imageUrlFromBucket).build();
+					return getUrlFromBucket(fileName);
 
 				} catch (IOException e) {
 					log.error("[S3] 파일 업로드 실패: URL = {}, dirName = {}", imageUrl, dirName, e);
@@ -95,10 +92,10 @@ public class AwsS3Service {
 	}
 
 	@Async("imageUploadExecutor")
-	public CompletableFuture<List<Image>> uploadFiles(List<MultipartFile> newFiles, String dirName) {
+	public CompletableFuture<List<String>> uploadFiles(List<MultipartFile> newFiles, String dirName) {
 		log.info("[S3] MultipartFile 업로드 시작: {}", newFiles.size());
 
-		List<CompletableFuture<Image>> futureList = newFiles.stream()
+		List<CompletableFuture<String>> futureList = newFiles.stream()
 			.map(file -> CompletableFuture.supplyAsync(() -> {
 				try {
 					// S3 파일명 생성
@@ -113,7 +110,7 @@ public class AwsS3Service {
 					amazonS3.putObject(new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata)
 						.withCannedAcl(CannedAccessControlList.PublicRead));
 
-					return Image.builder().url(getUrlFromBucket(fileName)).build();
+					return getUrlFromBucket(fileName);
 				} catch (Exception e) {
 					throw new S3Exception(S3_UPLOAD_FAILED);
 				}
@@ -173,7 +170,8 @@ public class AwsS3Service {
 
 					// 기존 이미지의 폴더 유지
 					String dirName = ImageUtil.extractPathWithoutFileName(oldKey);
-					String newKey = createFileName(newImages.get(i).getOriginalFilename(), dirName, newImages.get(i).getContentType());
+					String newKey = createFileName(newImages.get(i).getOriginalFilename(), dirName,
+						newImages.get(i).getContentType());
 
 					ObjectMetadata metadata = new ObjectMetadata();
 					metadata.setContentType(newImages.get(i).getContentType());
@@ -195,7 +193,6 @@ public class AwsS3Service {
 				.toList()
 			);
 	}
-
 
 	public void deleteFile(String fileUrl) {
 		try {

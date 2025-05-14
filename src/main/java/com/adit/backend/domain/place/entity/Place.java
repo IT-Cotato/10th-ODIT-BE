@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.adit.backend.domain.image.entity.Image;
+import com.adit.backend.domain.image.entity.PlaceImage;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
 import com.adit.backend.global.entity.BaseEntity;
 
@@ -54,7 +54,7 @@ public class Place extends BaseEntity {
 
 	@Builder.Default
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Image> images = new ArrayList<>();
+	private List<PlaceImage> images = new ArrayList<>();
 
 	@Builder.Default
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -76,7 +76,7 @@ public class Place extends BaseEntity {
 		userPlace.assignedPlace(this);
 	}
 
-	public void addImage(Image image) {
+	public void addImage(PlaceImage image) {
 		this.images.add(image);
 		image.assignPlace(this);
 	}

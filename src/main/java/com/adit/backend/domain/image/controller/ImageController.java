@@ -1,3 +1,4 @@
+/*
 package com.adit.backend.domain.image.controller;
 
 import org.springframework.http.HttpStatus;
@@ -65,3 +66,4 @@ public class ImageController {
 		return ResponseEntity.ok(ApiResponse.success(imageCommandService.updateImage(imageId, newImage)));
 	}
 }
+*/

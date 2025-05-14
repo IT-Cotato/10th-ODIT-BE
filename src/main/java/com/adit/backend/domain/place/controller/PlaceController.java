@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.adit.backend.domain.image.dto.request.ImageUpdateRequestDto;
-import com.adit.backend.domain.image.dto.response.ImageResponseDto;
+import com.adit.backend.domain.image.service.command.UserPlaceImageCommandService;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
 import com.adit.backend.domain.place.dto.response.FriendPlaceResponseDto;
 import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
-import com.adit.backend.domain.place.service.PlaceImageService;
+import com.adit.backend.domain.place.dto.response.UserPlaceImageResponseDto;
 import com.adit.backend.domain.place.service.command.PlaceCommandService;
 import com.adit.backend.domain.place.service.command.UserPlaceCommandService;
 import com.adit.backend.domain.place.service.query.PlaceQueryService;
@@ -53,7 +53,7 @@ public class PlaceController {
 	private final PlaceQueryService placeQueryService;
 	private final UserPlaceCommandService userPlaceCommandService;
 	private final UserPlaceQueryService userPlaceQueryService;
-	private final PlaceImageService placeImageService;
+	private final UserPlaceImageCommandService userPlaceImageCommandService;
 
 	// 장소 생성 API
 	@Operation(summary = "장소 생성", description = "카카오 맵 키워드 검색 후 Place, UserPlace 에 장소를 저장합니다")
@@ -188,21 +188,22 @@ public class PlaceController {
 	//장소 이미지 수정 API
 	@Operation(summary = "장소 이미지 업데이트", description = "장소의 기존 이미지를 새로운 이미지로 교체합니다.")
 	@PutMapping("/{userPlaceId}/placeImages")
-	public ResponseEntity<ApiResponse<List<ImageResponseDto>>> updatePlaceImages(
-		@PathVariable Long userPlaceId,
+	public ResponseEntity<ApiResponse<List<UserPlaceImageResponseDto>>> updatePlaceImages(
+		@PathVariable long userPlaceId,
 		@Valid @RequestBody List<ImageUpdateRequestDto> imageUpdateRequests) {
-		List<ImageResponseDto> updatedImages = placeImageService.updatePlaceImages(userPlaceId, imageUpdateRequests);
+		List<UserPlaceImageResponseDto> updatedImages = userPlaceImageCommandService.updatePlaceImages(
+			imageUpdateRequests);
 		return ResponseEntity.ok(ApiResponse.success(updatedImages));
 	}
 
 	//장소 이미지 추가 API
 	@Operation(summary = "장소 이미지 추가", description = "userPlaceId에 해당하는 장소의 이미지 추가")
 	@PostMapping("/{userPlaceId}/placeImages")
-	public ResponseEntity<ApiResponse<List<ImageResponseDto>>> addPlaceImages(
+	public ResponseEntity<ApiResponse<List<UserPlaceImageResponseDto>>> addPlaceImages(
 		@PathVariable Long userPlaceId,
 		@RequestPart List<MultipartFile> images) {
-
-		List<ImageResponseDto> uploadedImages = placeImageService.addPlaceImages(userPlaceId, images);
+		List<UserPlaceImageResponseDto> uploadedImages = userPlaceImageCommandService.addUserPlaceImages(userPlaceId,
+			images);
 		return ResponseEntity.ok(ApiResponse.success(uploadedImages));
 	}
 
@@ -211,7 +212,7 @@ public class PlaceController {
 	@DeleteMapping("/{userPlaceId}/placeImages/{imageId}")
 	public ResponseEntity<ApiResponse<Void>> deletePlaceImage(
 		@PathVariable Long userPlaceId, @PathVariable Long imageId) {
-		placeImageService.deletePlaceImage(userPlaceId, imageId);
+		userPlaceImageCommandService.deletePlaceImage(userPlaceId, imageId);
 		return ResponseEntity.noContent().build();
 	}
 }

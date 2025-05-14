@@ -6,7 +6,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.adit.backend.domain.image.entity.Image;
+import com.adit.backend.domain.image.entity.PlaceImage;
+import com.adit.backend.domain.image.entity.UserPlaceImage;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
 import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
 import com.adit.backend.domain.place.entity.Place;
@@ -41,7 +42,7 @@ public class PlaceConverter {
 			.imageUrlList(Optional.ofNullable(place.getImages())
 				.orElse(Collections.emptyList())
 				.stream()
-				.map(Image::getUrl)
+				.map(PlaceImage::getUrl)
 				.collect(Collectors.toList()))
 			.build();
 	}
@@ -59,7 +60,7 @@ public class PlaceConverter {
 			.imageUrlList(Optional.ofNullable(userPlace.getImages())
 				.orElse(Collections.emptyList())
 				.stream()
-				.map(Image::getUrl)
+				.map(UserPlaceImage::getUrl)
 				.collect(Collectors.toList()))
 			.longitude(userPlace.getPlace().getLongitude())
 			.latitude(userPlace.getPlace().getLatitude())
@@ -79,7 +80,7 @@ public class PlaceConverter {
 			.imageUrlList(Optional.ofNullable(userPlace.getImages())
 				.orElse(Collections.emptyList())
 				.stream()
-				.map(Image::getUrl)
+				.map(UserPlaceImage::getUrl)
 				.collect(Collectors.toList()))
 			.friendUserId(userPlace.getUser().getId())
 			.profile(userPlace.getUser().getProfile())
