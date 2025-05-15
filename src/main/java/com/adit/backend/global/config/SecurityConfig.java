@@ -105,6 +105,7 @@ public class SecurityConfig {
 			.formLogin(AbstractHttpConfigurer::disable)
 			// 로그아웃 기능 비활성화
 			.logout(AbstractHttpConfigurer::disable)
+
 			// X-Frame-Options 헤더 설정 비활성화
 			.headers(c -> c.frameOptions(
 				HeadersConfigurer.FrameOptionsConfig::disable).disable())

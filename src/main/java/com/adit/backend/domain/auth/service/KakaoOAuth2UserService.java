@@ -1,6 +1,7 @@
 package com.adit.backend.domain.auth.service;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,13 +37,17 @@ public class KakaoOAuth2UserService extends AbstractOAuth2UserService {
 
 		//oauth 프로필 추출
 		OAuth2User oAuth2User = (OAuth2User)authentication.getPrincipal();
-		String name = oAuth2User.getAttribute("nickname");
-		String profile = oAuth2User.getAttribute("profile_image_url");
-		String email = oAuth2User.getAttribute("email");
+		Map<String, Object> kakaoAccount = oAuth2User.getAttribute("kakao_account");
+		Map<String, Object> profile = (Map<String, Object>)kakaoAccount.get("profile");
+
+		String email = (String)kakaoAccount.get("email");
+		String name = (String)profile.get("nickname");
+		String profileImage = (String)profile.get("profile_image_url");
+
 		OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfo.builder()
 			.name(name)
 			.email(email)
-			.profile(profile)
+			.profile(profileImage)
 			.build();
 		UserResponse.InfoDto infoDto = userCommandService.createOrUpdateUser(oAuth2UserInfo);
 
