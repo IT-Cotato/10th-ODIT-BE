@@ -107,8 +107,21 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu
-            sudo docker rm -f live_server || true
+      
+            # 1) blue, green 컨테이너 중 실제로 존재하는 ID만 조회
+            CONTAINERS=$(sudo docker ps -aq --filter "name=^blue$" --filter "name=^green$")
+      
+            # 2) 컨테이너가 있을 때만 강제 삭제
+            if [ -n "$CONTAINERS" ]; then
+              echo "🗑️ 삭제 중인 컨테이너: $CONTAINERS"
+              sudo docker rm -f $CONTAINERS
+            else
+              echo "ℹ️ 삭제할 blue/green 컨테이너가 존재하지 않습니다."
+            fi
+      
+            # 3) 사용하지 않는 이미지 정리
             sudo docker image prune -f
+
 
       - name: 새 대상 컨테이너 배포
         uses: appleboy/ssh-action@v0.1.10
