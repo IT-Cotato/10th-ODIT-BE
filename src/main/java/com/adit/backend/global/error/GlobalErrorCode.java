@@ -100,7 +100,7 @@ public enum GlobalErrorCode implements ErrorCode {
 	FIELD_NOT_FOUND(NOT_FOUND, "SCR-002", "해당 필드를 찾지 못했습니다"),
 
 	/********************************** Place Domain **********************************/
-	COMMON_PLACE_NOT_FOUND(NOT_FOUND, "PLC-001", "해당 Common Place 를 찾지 못했습니다"),
+	PLACE_NOT_FOUND(NOT_FOUND, "PLC-001", "해당 Place 를 찾지 못했습니다"),
 	USER_PLACE_NOT_FOUND(NOT_FOUND, "PLC-002", "해당 User Place 를 찾지 못했습니다"),
 	FRIEND_NOT_FOUND(NOT_FOUND, "PLC-003", "등록된 친구가 없습니다"),
 	NOT_VALID(BAD_REQUEST, "PLC-004", "요청인자가 유효하지 않습니다"),

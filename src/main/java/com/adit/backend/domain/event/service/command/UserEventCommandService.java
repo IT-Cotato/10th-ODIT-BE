@@ -9,12 +9,12 @@ import com.adit.backend.domain.event.converter.UserEventConverter;
 import com.adit.backend.domain.event.dto.request.EventRequestDto;
 import com.adit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.adit.backend.domain.event.dto.response.EventResponseDto;
-import com.adit.backend.domain.event.entity.CommonEvent;
+import com.adit.backend.domain.event.entity.Event;
 import com.adit.backend.domain.event.entity.UserEvent;
 import com.adit.backend.domain.event.exception.EventException;
 import com.adit.backend.domain.event.repository.UserEventRepository;
-import com.adit.backend.domain.image.entity.Image;
-import com.adit.backend.domain.image.service.command.ImageCommandService;
+import com.adit.backend.domain.image.entity.UserEventImage;
+import com.adit.backend.domain.image.service.command.UserEventImageCommandService;
 import com.adit.backend.domain.user.entity.User;
 import com.adit.backend.domain.user.service.query.UserQueryService;
 
@@ -31,25 +31,24 @@ public class UserEventCommandService {
 	private final UserEventRepository userEventRepository;
 	private final UserEventConverter userEventConverter;
 	private final UserQueryService userQueryService;
-	private final CommonEventCommandService commonEventCommandService;
-	private final ImageCommandService imageCommandService;
+	private final EventCommandService eventCommandService;
+	private final UserEventImageCommandService userEventImageCommandService;
 
 	/**
 	 * 새로운 이벤트 생성
 	 */
 	public EventResponseDto createUserEvent(EventRequestDto request, Long userId) {
 		User user = userQueryService.findUserById(userId);
-		CommonEvent commonEvent = commonEventCommandService.saveOrFindCommonEvent(request);
+		Event event = eventCommandService.saveOrFindEvent(request);
 		UserEvent userEvent = userEventConverter.toEntity(request);
 
-		//연관 관계 설정
-		saveUserEventRelation(commonEvent, userEvent, user);
+		saveUserEventRelation(event, userEvent, user);
 
 		return userEventConverter.toResponse(userEvent);
 	}
 
-	private void saveUserEventRelation(CommonEvent commonEvent, UserEvent userEvent, User user) {
-		commonEvent.addUserEvent(userEvent);
+	private void saveUserEventRelation(Event event, UserEvent userEvent, User user) {
+		event.addUserEvent(userEvent);
 		user.addUserEvent(userEvent);
 		userEventRepository.save(userEvent);
 	}
@@ -86,8 +85,8 @@ public class UserEventCommandService {
 
 		try {
 			// 1. 이미지 삭제 (모든 이미지 삭제 성공 시 이벤트 삭제 진행)
-			for (Image image : userEvent.getImages()) {
-				imageCommandService.deleteImage(image.getId());
+			for (UserEventImage image : userEvent.getImages()) {
+				userEventImageCommandService.deleteImage(image.getId());
 			}
 
 			// 2. 이벤트 삭제

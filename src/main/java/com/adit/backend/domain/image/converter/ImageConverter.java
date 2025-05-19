@@ -2,33 +2,26 @@ package com.adit.backend.domain.image.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.adit.backend.domain.image.dto.response.ImageResponseDto;
-import com.adit.backend.domain.image.entity.Image;
-import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
+import com.adit.backend.domain.event.dto.response.UserEventImageResponseDto;
+import com.adit.backend.domain.image.entity.UserEventImage;
+import com.adit.backend.domain.image.entity.UserPlaceImage;
+import com.adit.backend.domain.place.dto.response.UserPlaceImageResponseDto;
 
 @Component
 public class ImageConverter {
-	public Image toEntity(PlaceRequestDto request) {
-		return Image.builder()
-			.url(request.url())
+	public UserPlaceImageResponseDto toResponse(UserPlaceImage userPlaceImage) {
+		return UserPlaceImageResponseDto.builder()
+			.userPlaceImageId(userPlaceImage.getId())
+			.userPlaceId(userPlaceImage.getUserPlace().getId())
+			.url(userPlaceImage.getUrl())
 			.build();
 	}
 
-	public ImageResponseDto toResponse(Image image) {
-		return ImageResponseDto.builder()
-			.id(image.getId())
-			.commonPlace(image.getCommonPlace())
-			.userPlace(image.getUserPlace())
-			.userEvent(image.getUserEvent())
-			.commonEvent(image.getCommonEvent())
-			.url(image.getUrl())
-			.build();
-	}
-
-	public ImageResponseDto toResponseForUserPlace(ImageResponseDto imageResponseDto){
-		return ImageResponseDto.builder()
-			.id(imageResponseDto.id())
-			.userPlace(imageResponseDto.userPlace())
+	public UserEventImageResponseDto toResponse(UserEventImage userEventImage) {
+		return UserEventImageResponseDto.builder()
+			.id(userEventImage.getId())
+			.userEventId(userEventImage.getUserEvent().getId())
+			.url(userEventImage.getUrl())
 			.build();
 	}
 }

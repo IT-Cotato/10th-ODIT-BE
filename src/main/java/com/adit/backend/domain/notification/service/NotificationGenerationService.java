@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.adit.backend.domain.notification.converter.NotificationEventConverter;
 import com.adit.backend.domain.notification.event.NotificationEvent;
 import com.adit.backend.domain.notification.service.command.NotificationCommandService;
-import com.adit.backend.domain.place.entity.CommonPlace;
+import com.adit.backend.domain.place.entity.Place;
 import com.adit.backend.domain.place.entity.UserPlace;
 import com.adit.backend.domain.place.service.query.UserPlaceQueryService;
 import com.adit.backend.domain.user.entity.Friendship;
@@ -37,8 +37,8 @@ public class NotificationGenerationService {
 	}
 
 	@Async
-	public void createNotificationOfASavedPlace(User user, CommonPlace commonPlace, UserPlace userPlace) {
-		userPlaceQueryService.findRelatedUserPlace(user, commonPlace)
+	public void createNotificationOfASavedPlace(User user, Place place, UserPlace userPlace) {
+		userPlaceQueryService.findRelatedUserPlace(user, place)
 			.stream()
 			.map(friendUserPlace -> notificationEventConverter.toSavedEvent(userPlace, friendUserPlace.getUser()))
 			.forEach(notificationCommandService::sendNotification);
