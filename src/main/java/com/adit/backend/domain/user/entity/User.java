@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.adit.backend.domain.event.entity.UserEvent;
+import com.adit.backend.domain.notification.entity.Notification;
 import com.adit.backend.domain.place.entity.UserPlace;
 import com.adit.backend.domain.user.enums.Role;
 import com.adit.backend.domain.user.enums.SocialType;
@@ -29,7 +30,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-	name = "user",
+	name = "users",
 	indexes = @Index(name = "idx_user_email", columnList = "email")
 )
 public class User extends BaseEntity {
@@ -70,6 +71,9 @@ public class User extends BaseEntity {
 	@OneToMany(mappedBy = "toUser", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Friendship> receivedFriendRequests = new ArrayList<>();
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Notification> notifications = new ArrayList<>();
+
 	@Builder
 	public User(String name, String email, String nickname, String profile, SocialType socialType, Role role) {
 		this.name = name;
@@ -96,6 +100,11 @@ public class User extends BaseEntity {
 		friendship.setFromUser(this);
 	}
 
+	public void addNotification(Notification notification) {
+		this.notifications.add(notification);
+		notification.assignUser(this);
+	}
+
 	public void changeNickName(String nickName) {
 		this.nickname = nickName;
 	}
@@ -107,6 +116,5 @@ public class User extends BaseEntity {
 	public void updateRole() {
 		this.role = Role.USER;
 	}
-
 
 }

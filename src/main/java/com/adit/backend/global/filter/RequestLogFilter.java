@@ -25,15 +25,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * HTTP 요청/응답을 로그에 남기는 Filter.
  * 적용 프로파일: {@code blue, green}
  */
 
+@Slf4j
 @Component
-@Log4j2
 @Profile("blue, green")
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class RequestLogFilter extends GenericFilterBean {

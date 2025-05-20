@@ -52,8 +52,8 @@ public class UserQueryService {
 		}
 	}
 
-	public List<UserResponse.InfoDto> findUsersByCommonPlaceId(Long commonPlaceId) {
-		return userPlaceRepository.findByCommonPlaceId(commonPlaceId).stream()
+	public List<UserResponse.InfoDto> findUsersByPlaceId(Long placeId) {
+		return userPlaceRepository.findByPlaceId(placeId).stream()
 			.map(id -> userRepository.findById(id).orElseThrow(() -> new UserException(USER_NOT_FOUND)))
 			.map(userConverter::InfoDto)
 			.toList();

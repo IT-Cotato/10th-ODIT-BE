@@ -6,12 +6,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.adit.backend.domain.image.entity.Image;
+import com.adit.backend.domain.image.entity.PlaceImage;
+import com.adit.backend.domain.image.entity.UserPlaceImage;
 import com.adit.backend.domain.place.dto.request.PlaceRequestDto;
 import com.adit.backend.domain.place.dto.response.PlaceResponseDto;
-import com.adit.backend.domain.place.entity.CommonPlace;
+import com.adit.backend.domain.place.entity.Place;
 import com.adit.backend.domain.place.entity.UserPlace;
-import com.adit.backend.domain.user.entity.User;
 
 @Component
 public class UserPlaceConverter {
@@ -23,7 +23,7 @@ public class UserPlaceConverter {
 			.build();
 	}
 
-	public UserPlace toEntity(CommonPlace commonPlace){
+	public UserPlace toEntity(Place place) {
 		return UserPlace.builder()
 			.visited(false)
 			.build();
@@ -34,23 +34,23 @@ public class UserPlaceConverter {
 	 */
 	public PlaceResponseDto toResponse(UserPlace userPlace) {
 		return PlaceResponseDto.builder()
-			.commonPlaceId(userPlace.getCommonPlace().getId())
+			.placeId(userPlace.getPlace().getId())
 			.userPlaceId(userPlace.getId())
 			.memo(userPlace.getMemo())
 			.visited(userPlace.getVisited())
-			.placeName(userPlace.getCommonPlace().getPlaceName())
-			// CommonPlace 에서 latitude, longitude, url 등 필요한 필드가 존재한다고 가정
-			.latitude(userPlace.getCommonPlace().getLatitude())
-			.longitude(userPlace.getCommonPlace().getLongitude())
-			.subCategory(userPlace.getCommonPlace().getSubCategory())
-			.roadAddressName(userPlace.getCommonPlace().getRoadAddressName())
-			.addressName(userPlace.getCommonPlace().getAddressName())
-			.url(userPlace.getCommonPlace().getUrl())
-			// CommonPlace에 연관된 모든 이미지의 url 목록 생성
+			.placeName(userPlace.getPlace().getPlaceName())
+			// Place 에서 latitude, longitude, url 등 필요한 필드가 존재한다고 가정
+			.latitude(userPlace.getPlace().getLatitude())
+			.longitude(userPlace.getPlace().getLongitude())
+			.subCategory(userPlace.getPlace().getSubCategory())
+			.roadAddressName(userPlace.getPlace().getRoadAddressName())
+			.addressName(userPlace.getPlace().getAddressName())
+			.url(userPlace.getPlace().getUrl())
+			// Place에 연관된 모든 이미지의 url 목록 생성
 			.imageUrlList(Optional.ofNullable(userPlace.getImages())
 				.orElse(Collections.emptyList())
 				.stream()
-				.map(Image::getUrl)
+				.map(UserPlaceImage::getUrl)
 				.collect(Collectors.toList()))
 			.build();
 	}
@@ -60,19 +60,19 @@ public class UserPlaceConverter {
 	 */
 	public PlaceResponseDto toFriendResponse(UserPlace userPlace) {
 		return PlaceResponseDto.builder()
-			.commonPlaceId(userPlace.getCommonPlace().getId())
+			.placeId(userPlace.getPlace().getId())
 			.userPlaceId(userPlace.getId())
 			.memo(userPlace.getMemo())
 			.visited(userPlace.getVisited())
-			.placeName(userPlace.getCommonPlace().getPlaceName())
-			.latitude(userPlace.getCommonPlace().getLatitude())
-			.longitude(userPlace.getCommonPlace().getLongitude())
-			.subCategory(userPlace.getCommonPlace().getSubCategory())
-			.roadAddressName(userPlace.getCommonPlace().getRoadAddressName())
-			.addressName(userPlace.getCommonPlace().getAddressName())
-			.url(userPlace.getCommonPlace().getUrl())
-			.imageUrlList(userPlace.getCommonPlace().getImages().stream()
-				.map(Image::getUrl)
+			.placeName(userPlace.getPlace().getPlaceName())
+			.latitude(userPlace.getPlace().getLatitude())
+			.longitude(userPlace.getPlace().getLongitude())
+			.subCategory(userPlace.getPlace().getSubCategory())
+			.roadAddressName(userPlace.getPlace().getRoadAddressName())
+			.addressName(userPlace.getPlace().getAddressName())
+			.url(userPlace.getPlace().getUrl())
+			.imageUrlList(userPlace.getPlace().getImages().stream()
+				.map(PlaceImage::getUrl)
 				.collect(Collectors.toList()))
 			.friendUserId(userPlace.getUser().getId())
 			.profile(userPlace.getUser().getProfile())

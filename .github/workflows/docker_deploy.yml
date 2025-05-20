@@ -106,21 +106,26 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu
-      
-            # 1) blue, green 컨테이너 중 실제로 존재하는 ID만 조회
-            CONTAINERS=$(sudo docker ps -aq --filter "name=^blue$" --filter "name=^green$")
-      
-            # 2) 컨테이너가 있을 때만 강제 삭제
+            
+            # 1) 대상 컨테이너 식별 (graceful 종료를 위한 준비)
+            CONTAINERS=$(sudo docker ps -aq --filter "name=^${{ env.TARGET_UPSTREAM }}$")
+            
+            # 2) 컨테이너가 있을 때만 graceful 종료 
             if [ -n "$CONTAINERS" ]; then
-              echo "🗑️ 삭제 중인 컨테이너: $CONTAINERS"
-              sudo docker rm -f $CONTAINERS
+              echo "🛑 ${{ env.TARGET_UPSTREAM }} 컨테이너 정지 중: $CONTAINERS"
+              # 강제 종료 대신 30초 timeout으로 정상 종료 (SIGTERM 신호)
+              sudo docker stop --time=30 $CONTAINERS
+              
+              # 정지된 컨테이너만 제거
+              sudo docker rm $CONTAINERS
+              
+              # 잠시 대기하여 시스템 자원이 안정화되도록 함
+              sleep 5
             else
-              echo "ℹ️ 삭제할 blue/green 컨테이너가 존재하지 않습니다."
+              echo "ℹ️ 정지할 ${{ env.TARGET_UPSTREAM }} 컨테이너가 존재하지 않습니다."
             fi
-      
-            # 3) 사용하지 않는 이미지 정리
-            sudo docker image prune -f
-
+            
+            # 이미지 정리는 배포 완료 후 별도 단계에서 수행
 
       - name: 새 대상 컨테이너 배포
         uses: appleboy/ssh-action@v0.1.10
@@ -131,7 +136,21 @@ jobs:
           script: |
             cd /home/ubuntu
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
+            
+            # docker-compose 파일에 리소스 제한이 없다면, 이를 설정하는 명령어 실행
+            # CPU 및 메모리 제한 설정 (기존 docker-compose 파일이 덮어씌워지지 않도록 백업)
+            if ! grep -q "cpu_" docker-compose-${{ env.TARGET_UPSTREAM }}.yml; then
+              cp docker-compose-${{ env.TARGET_UPSTREAM }}.yml docker-compose-${{ env.TARGET_UPSTREAM }}.yml.bak
+              
+              # 컨테이너 리소스 제한 설정 추가
+              sed -i '/restart: always/a\    deploy:\n      resources:\n        limits:\n          cpus: "1.0"\n          memory: 1G\n        reservations:\n          memory: 512M' docker-compose-${{ env.TARGET_UPSTREAM }}.yml
+            fi
+            
+            # 컨테이너 시작 (detached 모드)
             sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
+            
+            # 컨테이너 시작 후 5초 대기하여 안정화
+            sleep 5
 
       - name: 새 컨테이너 헬스 체크
         run: |
@@ -180,7 +199,28 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu
-            sudo docker-compose -f docker-compose-${{ env.CURRENT_UPSTREAM }}.yml down || true
+            
+            # 이전 환경의 컨테이너 확인
+            if [ -f "docker-compose-${{ env.CURRENT_UPSTREAM }}.yml" ]; then
+              # Graceful 종료 (30초 timeout)
+              sudo docker-compose -f docker-compose-${{ env.CURRENT_UPSTREAM }}.yml stop --timeout 30
+              # 정지된 컨테이너 제거
+              sudo docker-compose -f docker-compose-${{ env.CURRENT_UPSTREAM }}.yml rm -f
+            fi
+            
+      - name: 시스템 정리 (이미지 및 볼륨)
+        if: ${{ success() }}
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo docker image prune -f
+            
+            sudo docker volume prune -f
+            
+            # sudo docker system prune -af --volumes
 
       - name: Blue/Green 배포 완료 알림
         run: |
