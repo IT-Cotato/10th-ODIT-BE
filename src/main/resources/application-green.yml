@@ -31,4 +31,6 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 30s
 redirect:
-  url: ${FRONT_BASE_URL}/login/kakao
+  kakaoUrl: ${SERVER_BASE_URL}/login/oauth2/code/kakao
+  googleUrl: ${SERVER_BASE_URL}/login/oauth2/code/google
+  naverUrl: ${SERVER_BASE_URL}/login/oauth2/code/naver

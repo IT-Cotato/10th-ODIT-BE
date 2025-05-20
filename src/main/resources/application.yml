@@ -19,7 +19,7 @@ spring:
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
             client-secret: ${KAKAO_CLIENT_SECRET}
-            redirect-uri: ${KAKAO_REDIRECT_URI}
+            redirect-uri: ${redirect.kakaoUrl}
             client-authentication-method: client_secret_post # kakao는 인증 토큰 발급 요청 메서드가 post이다. (최근 버전에는 작성 방법이 이렇게 바뀌었다.)
             authorization-grant-type: authorization_code
             scope: # kakao 개인 정보 동의 항목 설정의 ID 값
@@ -31,12 +31,12 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: openid, email, profile
-            redirect-uri: ${GOOGLE_REDIRECT_URI}
+            redirect-uri: ${redirect.googleUrl}
             authorization-grant-type: authorization_code
           naver:
             client-id: ${NAVER_CLIENT_ID}
             client-secret: ${NAVER_CLIENT_SECRET}
-            redirect-uri: ${NAVER_REDIRECT_URI}
+            redirect-uri: ${redirect.naverUrl}
             authorization-grant-type: authorization_code
             scope:
               - name

@@ -28,7 +28,6 @@ jobs:
           echo "SERVER_DB_PASSWORD=${{ secrets.SERVER_DB_PASSWORD }}" >> .env
           echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
           echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-          echo "KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" >> .env
           echo "SPRING_AI_OPENAI_API_KEY=${{ secrets.SPRING_AI_OPENAI_API_KEY }}" >> .env
           echo "JWT_KEY=${{ secrets.JWT_KEY }}" >> .env
           echo "JWT_ACCESS_TOKEN_EXPIRATION=${{ secrets.JWT_ACCESS_TOKEN_EXPIRATION }}" >> .env
@@ -45,10 +44,9 @@ jobs:
           echo "SPRING_AI_MAX_TOKENS=${{ secrets.SPRING_AI_MAX_TOKENS }}" >> .env
           echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
           echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-          echo "GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}" >> .env
           echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" >> .env
           echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> .env
-          echo "NAVER_REDIRECT_URI=${{ secrets.NAVER_REDIRECT_URI }}" >> .env
+        
 
       - name: gradlew 실행권한 설정
         run: chmod +x gradlew
