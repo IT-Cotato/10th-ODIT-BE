@@ -30,4 +30,6 @@ springdoc:
     path: /
 
 redirect:
-  url: ${LOCAL_BASE_URL}/api/auth/login
+  kakaoUrl: ${LOCAL_BASE_URL}/login/oauth2/code/kakao
+  googleUrl: ${LOCAL_BASE_URL}/login/oauth2/code/google
+  naverUrl: ${LOCAL_BASE_URL}/login/oauth2/code/naver
