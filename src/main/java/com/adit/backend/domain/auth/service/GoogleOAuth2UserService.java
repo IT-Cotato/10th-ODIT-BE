@@ -15,10 +15,11 @@ import com.adit.backend.global.security.jwt.entity.Token;
 import com.adit.backend.global.security.jwt.repository.RefreshTokenRepository;
 import com.adit.backend.global.security.jwt.util.JwtTokenProvider;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class GoogleOAuth2UserService extends AbstractOAuth2UserService {
 
@@ -31,8 +32,7 @@ public class GoogleOAuth2UserService extends AbstractOAuth2UserService {
 	@Override
 	public void onAuthenticationSuccess(
 		HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws
-		IOException,
-		ServletException {
+		IOException {
 
 		//oauth 프로필 추출
 		OAuth2User oAuth2User = (OAuth2User)authentication.getPrincipal();
@@ -59,8 +59,9 @@ public class GoogleOAuth2UserService extends AbstractOAuth2UserService {
 		refreshTokenRepository.save(refreshToken);
 		addRefreshTokenToCookie(newRefreshToken, response);
 
-		response.sendRedirect(FRONT_REDIRECT_URI);
-
+		String redirectUrl = determineRedirectUrl(request);
+		log.debug("[Google OAuth2] 리다이렉션 URL: {}", redirectUrl);
+		response.sendRedirect(redirectUrl);
 	}
-
 }
+

@@ -33,6 +33,9 @@ spring:
     vectorstore:
       chroma:
         client:
+          host: http://localhost
+
+base-url: ${SERVER_BASE_URL}
 
 redirect:
   kakaoUrl: ${SERVER_BASE_URL}/login/oauth2/code/kakao
