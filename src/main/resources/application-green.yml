@@ -29,6 +29,14 @@ spring:
         default_batch_fetch_size: 1000
   lifecycle:
     timeout-per-shutdown-phase: 30s
+  ai:
+    vectorstore:
+      chroma:
+        client:
+          host: http://localhost
+
+base-url: ${SERVER_BASE_URL}
+
 redirect:
   kakaoUrl: ${SERVER_BASE_URL}/login/oauth2/code/kakao
   googleUrl: ${SERVER_BASE_URL}/login/oauth2/code/google
