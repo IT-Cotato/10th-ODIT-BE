@@ -34,6 +34,10 @@ spring:
       chroma:
         client:
           host: http://localhost
+  data:
+    redis:
+      host: host.docker.internal
+      port: 6379
 
 base-url: ${SERVER_BASE_URL}
 
