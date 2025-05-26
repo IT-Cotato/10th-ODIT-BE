@@ -19,7 +19,9 @@ import com.adit.backend.global.security.jwt.util.JwtTokenProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class KakaoOAuth2UserService extends AbstractOAuth2UserService {
 
@@ -64,8 +66,8 @@ public class KakaoOAuth2UserService extends AbstractOAuth2UserService {
 		refreshTokenRepository.save(refreshToken);
 		addRefreshTokenToCookie(newRefreshToken, response);
 
-		response.sendRedirect(FRONT_REDIRECT_URI);
-
+		String redirectUrl = determineRedirectUrl(request);
+		log.debug("[Kakao OAuth2] 리다이렉션 URL: {}", redirectUrl);
+		response.sendRedirect(redirectUrl);
 	}
-
 }
