@@ -46,7 +46,6 @@ jobs:
           echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
           echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" >> .env
           echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> .env
-        
 
       - name: gradlew 실행권한 설정
         run: chmod +x gradlew
@@ -76,15 +75,17 @@ jobs:
       - name: Docker 이미지 푸시
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
 
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Blue/Green 활성 환경 감지 (포트 8080/8081)
         run: |
+          echo "::group::환경 감지 시작"
           BLUE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:8080/actuator/health" || echo "000")
           GREEN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:8081/actuator/health" || echo "000")
+          
+          echo "🔍 포트 상태 확인: Blue(8080)=$BLUE_STATUS, Green(8081)=$GREEN_STATUS"
           
           if [[ "$BLUE_STATUS" =~ ^(200|401)$ ]]; then
             CURRENT_UPSTREAM=blue; CURRENT_PORT=8080; TARGET_UPSTREAM=green; TARGET_PORT=8081
@@ -93,92 +94,190 @@ jobs:
           fi
           
           echo "CURRENT_UPSTREAM=$CURRENT_UPSTREAM" >> $GITHUB_ENV
-          echo "CURRENT_PORT=$CURRENT_PORT"     >> $GITHUB_ENV
+          echo "CURRENT_PORT=$CURRENT_PORT" >> $GITHUB_ENV
           echo "TARGET_UPSTREAM=$TARGET_UPSTREAM" >> $GITHUB_ENV
-          echo "TARGET_PORT=$TARGET_PORT"       >> $GITHUB_ENV
-          echo "::debug::현재 활성화된 환경: $CURRENT_UPSTREAM (포트 $CURRENT_PORT), 배포 대상: $TARGET_UPSTREAM (포트 $TARGET_PORT)"
+          echo "TARGET_PORT=$TARGET_PORT" >> $GITHUB_ENV
+          
+          echo "🎯 현재 활성: $CURRENT_UPSTREAM (포트 $CURRENT_PORT)"
+          echo "🚀 배포 대상: $TARGET_UPSTREAM (포트 $TARGET_PORT)"
+          echo "::endgroup::"
 
-      - name: 이전 대상 컨테이너 정리
+      - name: 대상 환경 컨테이너 완전 정리
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 10m
           script: |
+            set -e
             cd /home/ubuntu
             
-            # 1) 대상 컨테이너 식별 (graceful 종료를 위한 준비)
-            CONTAINERS=$(sudo docker ps -aq --filter "name=^${{ env.TARGET_UPSTREAM }}$")
+            echo "::group::환경 정리"
+            echo "🧹 ${{ env.TARGET_UPSTREAM }} 환경 정리 시작"
             
-            # 2) 컨테이너가 있을 때만 graceful 종료 
-            if [ -n "$CONTAINERS" ]; then
-              echo "🛑 ${{ env.TARGET_UPSTREAM }} 컨테이너 정지 중: $CONTAINERS"
-              # 강제 종료 대신 30초 timeout으로 정상 종료 (SIGTERM 신호)
-              sudo docker stop --time=30 $CONTAINERS
-              
-              # 정지된 컨테이너만 제거
-              sudo docker rm $CONTAINERS
-              
-              # 잠시 대기하여 시스템 자원이 안정화되도록 함
-              sleep 5
-            else
-              echo "ℹ️ 정지할 ${{ env.TARGET_UPSTREAM }} 컨테이너가 존재하지 않습니다."
+            # 컨테이너 충돌 방지를 위한 강제 정리
+            echo "🔍 기존 컨테이너 확인 중..."
+            EXISTING_CONTAINERS=$(sudo docker ps -aq --filter "name=${{ env.TARGET_UPSTREAM }}")
+            if [ -n "$EXISTING_CONTAINERS" ]; then
+              echo "🛑 기존 컨테이너 강제 종료: $EXISTING_CONTAINERS"
+              sudo docker stop $EXISTING_CONTAINERS || true
+              sudo docker rm -f $EXISTING_CONTAINERS || true
             fi
             
-            # 이미지 정리는 배포 완료 후 별도 단계에서 수행
+            # docker-compose로도 정리
+            sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml down --remove-orphans || true
+            
+            # 네트워크 정리
+            sudo docker network prune -f
+            
+            # 시스템 안정화 대기
+            sleep 10
+            echo "✅ ${{ env.TARGET_UPSTREAM }} 환경 정리 완료"
+            echo "::endgroup::"
 
-      - name: 새 대상 컨테이너 배포
+      - name: 새 대상 컨테이너 배포 (리소스 제한 포함)
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 15m
           script: |
+            set -e
             cd /home/ubuntu
+            
+            echo "::group::새 환경 배포"
+            echo "🚀 ${{ env.TARGET_UPSTREAM }} 환경 배포 시작"
+            
+            # 최신 이미지 풀
+            echo "📥 최신 Docker 이미지 다운로드"
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/live_server:latest
             
-            # docker-compose 파일에 리소스 제한이 없다면, 이를 설정하는 명령어 실행
-            # CPU 및 메모리 제한 설정 (기존 docker-compose 파일이 덮어씌워지지 않도록 백업)
-            if ! grep -q "cpu_" docker-compose-${{ env.TARGET_UPSTREAM }}.yml; then
+            # 리소스 제한 추가 (수정된 Python 스크립트)
+            if ! grep -q "deploy:" docker-compose-${{ env.TARGET_UPSTREAM }}.yml; then
+              echo "⚙️ 리소스 제한 설정 추가"
               cp docker-compose-${{ env.TARGET_UPSTREAM }}.yml docker-compose-${{ env.TARGET_UPSTREAM }}.yml.bak
-              
-              # 컨테이너 리소스 제한 설정 추가
-              sed -i '/restart: always/a\    deploy:\n      resources:\n        limits:\n          cpus: "1.0"\n          memory: 1G\n        reservations:\n          memory: 512M' docker-compose-${{ env.TARGET_UPSTREAM }}.yml
+            
+              python3 << 'EOPY'
+            import yaml
+            import sys
+            import os
+            
+            compose_file = 'docker-compose-${{ env.TARGET_UPSTREAM }}.yml'
+            
+            try:
+                with open(compose_file, 'r') as f:
+                    data = yaml.safe_load(f)
+            
+                if 'services' not in data:
+                    data['services'] = {}
+            
+                for service_name in data.get('services', {}):
+                    if 'deploy' not in data['services'][service_name]:
+                        data['services'][service_name]['deploy'] = {
+                            'resources': {
+                                'limits': {'cpus': '1.0', 'memory': '1G'},
+                                'reservations': {'memory': '512M'}
+                            }
+                        }
+                    print(f"✅ {service_name} 서비스에 리소스 제한 추가")
+            
+                with open(compose_file, 'w') as f:
+                    yaml.dump(data, f, default_flow_style=False, allow_unicode=True, indent=2)
+            
+                print("📝 YAML 수정 완료")
+            
+            except Exception as e:
+                print(f"⚠️ YAML 수정 실패: {e}")
+                print("🔄 기존 설정으로 배포 계속 진행")
+                if os.path.exists(f'{compose_file}.bak'):
+                    os.rename(f'{compose_file}.bak', compose_file)
+            EOPY
+            else
+              echo "ℹ️ 리소스 제한이 이미 설정되어 있습니다"
             fi
             
-            # 컨테이너 시작 (detached 모드)
+            # 새 컨테이너 시작
+            echo "🆙 ${{ env.TARGET_UPSTREAM }} 컨테이너 시작"
             sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
             
-            # 컨테이너 시작 후 5초 대기하여 안정화
-            sleep 5
+            # 컨테이너 상태 확인
+            sleep 15
+            echo "📊 컨테이너 상태 확인:"
+            sudo docker ps --filter "name=${{ env.TARGET_UPSTREAM }}" --format "table {{.Names}}\t{{.Status}}"
+            
+            echo "✅ ${{ env.TARGET_UPSTREAM }} 환경 배포 완료"
+            echo "::endgroup::"
 
-      - name: 새 컨테이너 헬스 체크
+      - name: 새 컨테이너 상세 헬스 체크
         run: |
-          for i in {1..6}; do
+          echo "::group::헬스체크 진행"
+          echo "🏥 ${{ env.TARGET_UPSTREAM }} 환경 헬스체크 시작 (포트 ${{ env.TARGET_PORT }})"
+          
+          START_TIME=$(date +%s)
+          
+          for i in {1..15}; do
+            CURRENT_TIME=$(date '+%H:%M:%S')
+            echo "🔍 헬스체크 시도 ${i}/15 ($CURRENT_TIME)"
+          
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/actuator/health" || echo "000")
+          
             if [[ "$HTTP_CODE" == "200" ]]; then
-              echo "✅ [${i}회차] 헬스체크 성공 (HTTP 200) - 서비스가 정상적으로 동작 중입니다."
+              ELAPSED=$(($(date +%s) - START_TIME))
+              echo "✅ 헬스체크 성공 (HTTP 200) - 서비스 정상 동작 확인 (소요시간: ${ELAPSED}초)"
+              echo "::endgroup::"
               exit 0
             elif [[ "$HTTP_CODE" == "401" ]]; then
-              echo "⚠️ [${i}회차] 헬스체크 인증 필요 (HTTP 401) - 인증이 필요하지만 서버는 응답 중입니다."
+              ELAPSED=$(($(date +%s) - START_TIME))
+              echo "⚠️ 헬스체크 인증 필요 (HTTP 401) - 서버는 정상 응답 중 (소요시간: ${ELAPSED}초)"
+              echo "::endgroup::"
               exit 0
             else
-              echo "❌ [${i}회차] 헬스체크 실패 (HTTP 코드: $HTTP_CODE) - 30초 후 재시도합니다."
+              echo "❌ 헬스체크 실패 (HTTP $HTTP_CODE) - 20초 후 재시도"
+              sleep 20
             fi
-            sleep 30
           done
-          echo "🛑 헬스체크 6회 시도 후 실패 - 서비스가 정상적으로 기동되지 않았습니다."
+          
+          echo "🚨 헬스체크 15회 실패 - 배포 중단합니다"
+          echo "::endgroup::"
           exit 1
 
-      - name: Nginx 업스트림 전환
+      - name: Nginx 업스트림 안전 전환
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
+            echo "::group::Nginx 전환"
+            echo "🔄 Nginx 업스트림을 ${{ env.TARGET_UPSTREAM }}로 전환 시작"
+            
+            # 현재 설정 백업
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            sudo docker exec nginxserver cp /etc/nginx/conf.d/service-env.inc /etc/nginx/conf.d/service-env.inc.bak.$TIMESTAMP 2>/dev/null || true
+            
+            # 새 설정 적용
             sudo docker exec nginxserver bash -c \
-              'echo "set \$service_url '"${{ env.TARGET_UPSTREAM }}"';" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
+              'echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc'
+            
+            # 설정 검증 후 적용
+            if sudo docker exec nginxserver nginx -t; then
+              sudo docker exec nginxserver nginx -s reload
+              echo "✅ Nginx 업스트림 전환 완료: ${{ env.TARGET_UPSTREAM }}"
+            
+              # 전환 확인
+              sleep 5
+              HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}" || echo "000")
+              echo "🌐 메인 서비스 응답 확인: HTTP $HTTP_STATUS"
+            else
+              echo "❌ Nginx 설정 오류 - 이전 설정으로 복구"
+              sudo docker exec nginxserver cp /etc/nginx/conf.d/service-env.inc.bak.$TIMESTAMP /etc/nginx/conf.d/service-env.inc 2>/dev/null || true
+              sudo docker exec nginxserver nginx -s reload
+              exit 1
+            fi
+            echo "::endgroup::"
 
       - name: 상태 파일 동기화
         uses: appleboy/ssh-action@v0.1.10
@@ -187,42 +286,48 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo "📝 상태 파일 업데이트: ${{ env.TARGET_UPSTREAM }}"
             echo "${{ env.TARGET_UPSTREAM }}" > /home/ubuntu/.current_upstream
             chmod 644 /home/ubuntu/.current_upstream
+            echo "✅ 상태 파일 업데이트 완료"
 
-      - name: 이전 컨테이너 정리
-        if: ${{ success() }}
+      - name: 이전 환경 정리
+        if: success()
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu
+            echo "::group::이전 환경 정리"
+            echo "🧹 이전 환경 ${{ env.CURRENT_UPSTREAM }} 정리 시작"
             
-            # 이전 환경의 컨테이너 확인
-            if [ -f "docker-compose-${{ env.CURRENT_UPSTREAM }}.yml" ]; then
-              # Graceful 종료 (30초 timeout)
-              sudo docker-compose -f docker-compose-${{ env.CURRENT_UPSTREAM }}.yml stop --timeout 30
-              # 정지된 컨테이너 제거
-              sudo docker-compose -f docker-compose-${{ env.CURRENT_UPSTREAM }}.yml rm -f
+            # 안정화 대기
+            sleep 30
+            
+            # 이전 환경 정리
+            CURRENT_CONTAINERS=$(sudo docker ps -q --filter "name=${{ env.CURRENT_UPSTREAM }}")
+            if [ -n "$CURRENT_CONTAINERS" ]; then
+              echo "🛑 ${{ env.CURRENT_UPSTREAM }} 컨테이너 graceful 종료"
+              sudo docker stop --time=30 $CURRENT_CONTAINERS
+              sudo docker rm $CURRENT_CONTAINERS
             fi
             
-      - name: 시스템 정리 (이미지 및 볼륨)
-        if: ${{ success() }}
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            sudo docker image prune -f
-            
-            sudo docker volume prune -f
-            
-            # sudo docker system prune -af --volumes
+            sudo docker-compose -f docker-compose-${{ env.CURRENT_UPSTREAM }}.yml down || true
+            echo "✅ 이전 환경 정리 완료"
+            echo "::endgroup::"
 
-      - name: Blue/Green 배포 완료 알림
+      - name: Blue/Green 배포 완료 및 결과 확인
         run: |
-          echo "✅ Blue/Green 배포가 완료되었습니다! (신규: ${{ env.TARGET_UPSTREAM }}, 이전: ${{ env.CURRENT_UPSTREAM }})"
-          echo "포트 변경: ${{ env.CURRENT_PORT }} → ${{ env.TARGET_PORT }}"
+          echo "::group::배포 결과"
+          echo "🎉 Blue/Green 배포가 성공적으로 완료되었습니다!"
+          echo ""
+          echo "📊 배포 결과 요약:"
+          echo "  ├─ 이전 환경: ${{ env.CURRENT_UPSTREAM }} (포트 ${{ env.CURRENT_PORT }})"
+          echo "  ├─ 신규 환경: ${{ env.TARGET_UPSTREAM }} (포트 ${{ env.TARGET_PORT }})"
+          echo "  ├─ 전환 방향: ${{ env.CURRENT_PORT }} → ${{ env.TARGET_PORT }}"
+          echo "  └─ Nginx 업스트림: ${{ env.TARGET_UPSTREAM }}"
+          echo ""
+          echo "🔗 서비스 확인: http://${{ secrets.EC2_HOST }}"
+          echo "⏰ 배포 완료 시간: $(date '+%Y-%m-%d %H:%M:%S')"
+          echo "::endgroup::"
