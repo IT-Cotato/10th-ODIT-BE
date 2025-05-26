@@ -122,11 +122,11 @@ jobs:
             if [ -n "$EXISTING_CONTAINERS" ]; then
               echo "🛑 기존 컨테이너 강제 종료: $EXISTING_CONTAINERS"
               sudo docker stop $EXISTING_CONTAINERS || true
-              sudo docker rm -f $EXISTING_CONTAINERS || true
+              sudo docker rm  $EXISTING_CONTAINERS || true
             fi
             
             # docker-compose로도 정리
-            sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml down --remove-orphans || true
+            sudo docker-compose -f docker-compose-${{ env.TARGET_UPSTREAM }}.yml down || true
             
             # 네트워크 정리
             sudo docker network prune -f
@@ -136,7 +136,7 @@ jobs:
             echo "✅ ${{ env.TARGET_UPSTREAM }} 환경 정리 완료"
             echo "::endgroup::"
 
-      - name: 새 대상 컨테이너 배포 (리소스 제한 포함)
+      - name: 새 대상 컨테이너 배포
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -217,9 +217,9 @@ jobs:
           
           START_TIME=$(date +%s)
           
-          for i in {1..15}; do
+          for i in {1..10}; do
             CURRENT_TIME=$(date '+%H:%M:%S')
-            echo "🔍 헬스체크 시도 ${i}/15 ($CURRENT_TIME)"
+            echo "🔍 헬스체크 시도 ${i}/10 ($CURRENT_TIME)"
           
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/actuator/health" || echo "000")
           
@@ -243,7 +243,7 @@ jobs:
           echo "::endgroup::"
           exit 1
 
-      - name: Nginx 업스트림 안전 전환
+      - name: Nginx 업스트림 전환
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
