@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import com.adit.backend.domain.auth.exception.AuthException;
+import com.adit.backend.domain.auth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.adit.backend.domain.auth.service.GoogleOAuth2UserService;
 import com.adit.backend.domain.auth.service.KakaoOAuth2UserService;
 import com.adit.backend.domain.auth.service.NaverOAuth2UserService;
@@ -24,17 +25,20 @@ import jakarta.servlet.http.HttpServletResponse;
 public class DelegatingOAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
 	private final Map<String, AuthenticationSuccessHandler> handlerMap;
+	private final HttpCookieOAuth2AuthorizationRequestRepository authRequestRepository;
 
 	public DelegatingOAuth2LoginSuccessHandler(
 		GoogleOAuth2UserService googleHandler,
 		NaverOAuth2UserService naverHandler,
-		KakaoOAuth2UserService kakaoHandler
+		KakaoOAuth2UserService kakaoHandler,
+		HttpCookieOAuth2AuthorizationRequestRepository authRequestRepository
 	) {
 		this.handlerMap = Map.of(
 			"google", googleHandler,
 			"naver", naverHandler,
 			"kakao", kakaoHandler
 		);
+		this.authRequestRepository = authRequestRepository;
 	}
 
 	@Override
@@ -43,6 +47,10 @@ public class DelegatingOAuth2LoginSuccessHandler implements AuthenticationSucces
 		if (!(authentication instanceof OAuth2AuthenticationToken oAuth2Token)) {
 			throw new AuthException(INVALID_AUTHENTICATION_TYPE);
 		}
+
+
+		authRequestRepository.removeAuthorizationRequestCookies(request, response);
+
 		String registrationId = oAuth2Token.getAuthorizedClientRegistrationId();
 		AuthenticationSuccessHandler delegate = Optional.ofNullable(handlerMap)
 			.map(v -> v.get(registrationId))
