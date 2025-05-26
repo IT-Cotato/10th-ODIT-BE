@@ -78,7 +78,7 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository() {
+	public AuthorizationRequestRepository<OAuth2AuthorizationRequest> cookieOAuth2AuthorizationRequestRepository() {
 		return new HttpCookieOAuth2AuthorizationRequestRepository();
 	}
 
@@ -119,7 +119,7 @@ public class SecurityConfig {
 			// OAuth2 로그인 설정
 			.oauth2Login(oauth2 -> oauth2
 				.authorizationEndpoint(authorization -> authorization
-					.authorizationRequestRepository(authorizationRequestRepository()))
+					.authorizationRequestRepository(cookieOAuth2AuthorizationRequestRepository()))
 				.userInfoEndpoint(userInfo -> userInfo
 					.userService(customUserService) // ✅ 사용자 정보 로딩 시
 				)
