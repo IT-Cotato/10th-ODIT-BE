@@ -10,7 +10,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsUtils;
@@ -23,6 +25,7 @@ import com.adit.backend.global.security.jwt.filter.TokenExceptionFilter;
 import com.adit.backend.global.security.jwt.handler.CustomAccessDeniedHandler;
 import com.adit.backend.global.security.jwt.handler.CustomAuthenticationEntryPoint;
 import com.adit.backend.global.security.oauth.handler.OAuth2FailureHandler;
+import com.adit.backend.global.security.oauth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +78,11 @@ public class SecurityConfig {
 	}
 
 	@Bean
+	public AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository() {
+		return new HttpCookieOAuth2AuthorizationRequestRepository();
+	}
+
+	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		AuthenticationManagerBuilder sharedObject = http.getSharedObject(AuthenticationManagerBuilder.class);
 		AuthenticationManager authenticationManager = sharedObject.build();
@@ -110,6 +118,8 @@ public class SecurityConfig {
 
 			// OAuth2 로그인 설정
 			.oauth2Login(oauth2 -> oauth2
+				.authorizationEndpoint(authorization -> authorization
+					.authorizationRequestRepository(authorizationRequestRepository()))
 				.userInfoEndpoint(userInfo -> userInfo
 					.userService(customUserService) // ✅ 사용자 정보 로딩 시
 				)
