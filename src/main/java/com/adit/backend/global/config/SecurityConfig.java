@@ -19,13 +19,13 @@ import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.filter.CorsFilter;
 
 import com.adit.backend.domain.auth.handler.DelegatingOAuth2LoginSuccessHandler;
+import com.adit.backend.domain.auth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.adit.backend.domain.auth.service.CustomUserService;
 import com.adit.backend.global.security.jwt.filter.JwtAuthorizationFilter;
 import com.adit.backend.global.security.jwt.filter.TokenExceptionFilter;
 import com.adit.backend.global.security.jwt.handler.CustomAccessDeniedHandler;
 import com.adit.backend.global.security.jwt.handler.CustomAuthenticationEntryPoint;
 import com.adit.backend.global.security.oauth.handler.OAuth2FailureHandler;
-import com.adit.backend.global.security.oauth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
