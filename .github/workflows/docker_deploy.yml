@@ -20,40 +20,43 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 환경변수(.env) 파일 생성
-        run: |
-          touch .env
-          echo "SERVER_DB_URL=${{ secrets.SERVER_DB_URL }}" >> .env
-          echo "SERVER_DB_USERNAME=${{ secrets.SERVER_DB_USERNAME }}" >> .env
-          echo "SERVER_DB_PASSWORD=${{ secrets.SERVER_DB_PASSWORD }}" >> .env
-          echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
-          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-          echo "SPRING_AI_OPENAI_API_KEY=${{ secrets.SPRING_AI_OPENAI_API_KEY }}" >> .env
-          echo "JWT_KEY=${{ secrets.JWT_KEY }}" >> .env
-          echo "JWT_ACCESS_TOKEN_EXPIRATION=${{ secrets.JWT_ACCESS_TOKEN_EXPIRATION }}" >> .env
-          echo "JWT_REFRESH_TOKEN_EXPIRATION=${{ secrets.JWT_REFRESH_TOKEN_EXPIRATION }}" >> .env
-          echo "SERVER_BASE_URL=${{ secrets.SERVER_BASE_URL }}" >> .env
-          echo "SCRAPER_API_TOKEN=${{ secrets.SCRAPER_API_TOKEN }}" >> .env
-          echo "SCRAPER_BASE_URL=${{ secrets.SCRAPER_BASE_URL }}" >> .env
-          echo "SCRAPER_OUTPUT_URL=${{ secrets.SCRAPER_OUTPUT_URL }}" >> .env
-          echo "S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}" >> .env
-          echo "S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}" >> .env
-          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
-          echo "FRONT_LOCAL_URL=${{ secrets.FRONT_LOCAL_URL }}" >> .env
-          echo "FRONT_BASE_URL=${{ secrets.FRONT_BASE_URL }}" >> .env
-          echo "SPRING_AI_MAX_TOKENS=${{ secrets.SPRING_AI_MAX_TOKENS }}" >> .env
-          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-          echo "NAVER_CLIENT_ID=${{ secrets.NAVER_CLIENT_ID }}" >> .env
-          echo "NAVER_CLIENT_SECRET=${{ secrets.NAVER_CLIENT_SECRET }}" >> .env
-
-      - name: gradlew 실행권한 설정
-        run: chmod +x gradlew
-
-      - name: Gradle 빌드
-        uses: gradle/gradle-build-action@v3
+      - name: Gradle 설정
+        uses: gradle/actions/setup-gradle@v4
         with:
-          arguments: clean build -x test
+          gradle-home-cache-cleanup: true
+
+      - name: gradlew 실행 권한 부여
+        run: chmod +x ./gradlew
+
+      - name: Gradle Clean
+        run: ./gradlew clean
+
+      - name: 🏗️ Gradle 빌드
+        run: ./gradlew build -x test
+        env:
+          SERVER_DB_URL: ${{ secrets.SERVER_DB_URL }}
+          SERVER_DB_USERNAME: ${{ secrets.SERVER_DB_USERNAME }}
+          SERVER_DB_PASSWORD: ${{ secrets.SERVER_DB_PASSWORD }}
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          SPRING_AI_OPENAI_API_KEY: ${{ secrets.SPRING_AI_OPENAI_API_KEY }}
+          JWT_KEY: ${{ secrets.JWT_KEY }}
+          JWT_ACCESS_TOKEN_EXPIRATION: ${{ secrets.JWT_ACCESS_TOKEN_EXPIRATION }}
+          JWT_REFRESH_TOKEN_EXPIRATION: ${{ secrets.JWT_REFRESH_TOKEN_EXPIRATION }}
+          SERVER_BASE_URL: ${{ secrets.SERVER_BASE_URL }}
+          SCRAPER_API_TOKEN: ${{ secrets.SCRAPER_API_TOKEN }}
+          SCRAPER_BASE_URL: ${{ secrets.SCRAPER_BASE_URL }}
+          SCRAPER_OUTPUT_URL: ${{ secrets.SCRAPER_OUTPUT_URL }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          FRONT_LOCAL_URL: ${{ secrets.FRONT_LOCAL_URL }}
+          FRONT_BASE_URL: ${{ secrets.FRONT_BASE_URL }}
+          SPRING_AI_MAX_TOKENS: ${{ secrets.SPRING_AI_MAX_TOKENS }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
 
       - name: 빌드 아티팩트 업로드
         uses: actions/upload-artifact@v4
