@@ -1,7 +1,7 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.1'
-    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.springframework.boot' version '3.5.0'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.adit'
@@ -27,9 +27,6 @@ repositories {
         name = 'Central Portal Snapshots'
         url = 'https://central.sonatype.com/repository/maven-snapshots/'
     }
-}
-ext {
-    set('springAiVersion', "1.0.0-M6")
 }
 
 dependencies {
@@ -81,13 +78,6 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
-
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
-    }
-}
-
 tasks.named('test') {
     useJUnitPlatform()
 }
@@ -98,7 +88,7 @@ sourceSets {
     main.java.srcDirs += [querydslDir]
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
 }
 
@@ -107,7 +97,7 @@ bootJar {
     archiveVersion = 'server'
 }
 
-task buildDocker(type: Jar) {
+tasks.register('buildDocker', Jar) {
     dependsOn bootJar
     archiveBaseName.set('odit')
     archiveVersion.set('server')
