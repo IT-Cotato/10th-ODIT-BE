@@ -1,7 +1,6 @@
 package com.adit.backend.global.config;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
@@ -13,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.support.RetryTemplate;
 
+import com.adit.backend.domain.ai.util.LoggingAdvisor;
 import com.adit.backend.global.config.property.OpenAiProperties;
 
 import io.micrometer.observation.ObservationRegistry;
@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class AiConfig {
 
 	private final ToolCallingManager toolCallingManager;
+	private final LoggingAdvisor loggingAdvisor;
 	private final OpenAiProperties openAiProperties;
 	private final RetryTemplate retryTemplate;
 
@@ -53,7 +54,7 @@ public class AiConfig {
 
 		return ChatClient
 			.builder(chatModel)
-			.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory()).build())
+			.defaultAdvisors(loggingAdvisor)
 			.build();
 	}
 }
