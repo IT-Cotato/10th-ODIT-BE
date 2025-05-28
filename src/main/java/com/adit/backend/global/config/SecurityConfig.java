@@ -10,22 +10,20 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.filter.CorsFilter;
 
 import com.adit.backend.domain.auth.handler.DelegatingOAuth2LoginSuccessHandler;
+import com.adit.backend.domain.auth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.adit.backend.domain.auth.service.CustomUserService;
 import com.adit.backend.global.security.jwt.filter.JwtAuthorizationFilter;
 import com.adit.backend.global.security.jwt.filter.TokenExceptionFilter;
 import com.adit.backend.global.security.jwt.handler.CustomAccessDeniedHandler;
 import com.adit.backend.global.security.jwt.handler.CustomAuthenticationEntryPoint;
 import com.adit.backend.global.security.oauth.handler.OAuth2FailureHandler;
-import com.adit.backend.global.security.oauth.repository.HttpCookieOAuth2AuthorizationRequestRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +64,7 @@ public class SecurityConfig {
 	private final OAuth2FailureHandler oAuth2FailureHandler;
 	private final JwtAuthorizationFilter jwtAuthorizationFilter;
 	private final CustomUserService customUserService;
+	private final HttpCookieOAuth2AuthorizationRequestRepository cookieOAuth2AuthorizationRequestRepository;
 
 	/**
 	 * AuthenticationManager 빈 설정
@@ -75,11 +74,6 @@ public class SecurityConfig {
 	public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
 		return httpSecurity.getSharedObject(AuthenticationManagerBuilder.class)
 			.build();
-	}
-
-	@Bean
-	public AuthorizationRequestRepository<OAuth2AuthorizationRequest> cookieOAuth2AuthorizationRequestRepository() {
-		return new HttpCookieOAuth2AuthorizationRequestRepository();
 	}
 
 	@Bean
@@ -119,7 +113,7 @@ public class SecurityConfig {
 			// OAuth2 로그인 설정
 			.oauth2Login(oauth2 -> oauth2
 				.authorizationEndpoint(authorization -> authorization
-					.authorizationRequestRepository(cookieOAuth2AuthorizationRequestRepository()))
+					.authorizationRequestRepository(cookieOAuth2AuthorizationRequestRepository))
 				.userInfoEndpoint(userInfo -> userInfo
 					.userService(customUserService) // ✅ 사용자 정보 로딩 시
 				)

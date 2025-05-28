@@ -2,7 +2,6 @@ package com.adit.backend.global.security.oauth.repository;
 
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
-import org.springframework.stereotype.Component;
 
 import com.adit.backend.global.util.CookieUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
@@ -10,7 +9,7 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@Component
+
 public class HttpCookieOAuth2AuthorizationRequestRepository implements
 	AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
 
