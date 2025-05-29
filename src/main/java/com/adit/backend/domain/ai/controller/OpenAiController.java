@@ -14,7 +14,6 @@ import com.adit.backend.domain.ai.service.OpenAiService;
 import com.adit.backend.global.common.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -37,7 +36,6 @@ public class OpenAiController {
 	)
 	@PostMapping("/summary")
 	public ResponseEntity<ApiResponse<ContentListResponse>> summaryPage(
-		@Parameter(description = "분석할 웹 페이지 URL 정보", required = true)
 		@Valid @RequestBody final ContentExtractionRequest request) {
 		return ResponseEntity.ok(ApiResponse.success(openAiService.summaryContent(request.url())));
 	}
@@ -48,7 +46,6 @@ public class OpenAiController {
 	)
 	@PostMapping("/crawl")
 	public ResponseEntity<ApiResponse<CrawlCompletionResponse>> crawlPage(
-		@Parameter(description = "크롤링할 웹 페이지 URL 정보", required = true)
 		@Valid @RequestBody final ContentExtractionRequest request) {
 		return ResponseEntity.ok(ApiResponse.success(contentService.extractContents(request.url()).join()));
 	}
