@@ -36,7 +36,7 @@ public class LoggingAdvisor implements CallAdvisor {
 	public ChatClientResponse adviseCall(ChatClientRequest request, CallAdvisorChain chain) {
 		log.debug("============== Request =============");
 
-		log.debug(LOG_FORMAT, AI_TAG, "Model: " + request.prompt().getContents());
+		log.debug(LOG_FORMAT, AI_TAG, "Prompt: " + request.prompt().getContents());
 
 		ChatClientResponse advisedResponse = chain.nextCall(request);
 
