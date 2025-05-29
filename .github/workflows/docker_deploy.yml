@@ -214,37 +214,21 @@ jobs:
             echo "::endgroup::"
 
       - name: 새 컨테이너 상세 헬스 체크
-        run: |
-          echo "::group::헬스체크 진행"
-          echo "🏥 ${{ env.TARGET_UPSTREAM }} 환경 헬스체크 시작 (포트 ${{ env.TARGET_PORT }})"
-          
-          START_TIME=$(date +%s)
-          
-          for i in {1..10}; do
-            CURRENT_TIME=$(date '+%H:%M:%S')
-            echo "🔍 헬스체크 시도 ${i}/10 ($CURRENT_TIME)"
-          
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:${{ env.TARGET_PORT }}/actuator/health" || echo "000")
-          
-            if [[ "$HTTP_CODE" == "200" ]]; then
-              ELAPSED=$(($(date +%s) - START_TIME))
-              echo "✅ 헬스체크 성공 (HTTP 200) - 서비스 정상 동작 확인 (소요시간: ${ELAPSED}초)"
-              echo "::endgroup::"
-              exit 0
-            elif [[ "$HTTP_CODE" == "401" ]]; then
-              ELAPSED=$(($(date +%s) - START_TIME))
-              echo "⚠️ 헬스체크 인증 필요 (HTTP 401) - 서버는 정상 응답 중 (소요시간: ${ELAPSED}초)"
-              echo "::endgroup::"
-              exit 0
-            else
-              echo "❌ 헬스체크 실패 (HTTP $HTTP_CODE) - 20초 후 재시도"
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            for i in {1..10}; do
+              if sudo docker exec ${{ env.TARGET_UPSTREAM }} curl -f http://localhost:${{ env.TARGET_PORT }}/actuator/health > /dev/null 2>&1; then
+                echo "✅ 헬스체크 성공"
+                exit 0
+              fi
               sleep 20
-            fi
-          done
-          
-          echo "🚨 헬스체크 15회 실패 - 배포 중단합니다"
-          echo "::endgroup::"
-          exit 1
+            done
+            echo "🚨 헬스체크 실패"
+            exit 1
 
       - name: Nginx 업스트림 전환
         uses: appleboy/ssh-action@v0.1.10
