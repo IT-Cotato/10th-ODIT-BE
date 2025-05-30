@@ -1,21 +1,26 @@
 package com.adit.backend.domain.ai.util;
 
-import org.springframework.ai.chat.client.advisor.api.AdvisedRequest;
-import org.springframework.ai.chat.client.advisor.api.AdvisedResponse;
-import org.springframework.ai.chat.client.advisor.api.CallAroundAdvisor;
-import org.springframework.ai.chat.client.advisor.api.CallAroundAdvisorChain;
-import org.springframework.ai.chat.client.advisor.api.StreamAroundAdvisor;
-import org.springframework.ai.chat.client.advisor.api.StreamAroundAdvisorChain;
-import org.springframework.ai.chat.model.MessageAggregator;
+import java.util.Optional;
+
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
+import org.springframework.ai.chat.metadata.ChatResponseMetadata;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
 
 /**
  * OpenAI 사용량 추적 및 디버깅을 위한 Advisor
  */
 @Slf4j
-public class LoggingAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
+@Component
+public class LoggingAdvisor implements CallAdvisor {
+
+	private static final String AI_TAG = "[AI]";
+	private static final String LOG_FORMAT = "{} {}";
 
 	@Override
 	public String getName() {
@@ -28,26 +33,24 @@ public class LoggingAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
 	}
 
 	@Override
-	public AdvisedResponse aroundCall(AdvisedRequest advisedRequest, CallAroundAdvisorChain chain) {
-		log.debug("REQUEST");
-		log.debug(String.valueOf(advisedRequest));
-		AdvisedResponse advisedResponse = chain.nextAroundCall(advisedRequest);
-		log.debug("RESPONSE");
-		log.debug(String.valueOf(advisedResponse));
-		log.info("[Input Token Usage] : {}", advisedResponse.response().getMetadata().getUsage().getPromptTokens());
-		log.info("[Output Token Usage] : {}", advisedResponse.response().getMetadata().getUsage().getCompletionTokens());
-		log.info("[Total Token Usage] : {}", advisedResponse.response().getMetadata().getUsage().getTotalTokens());
+	public ChatClientResponse adviseCall(ChatClientRequest request, CallAdvisorChain chain) {
+		log.debug("============== Request =============");
+
+		log.debug(LOG_FORMAT, AI_TAG, "Prompt: " + request.prompt().getContents());
+
+		ChatClientResponse advisedResponse = chain.nextCall(request);
+
+		log.info("============ Response ============");
+		Optional.ofNullable(advisedResponse.chatResponse())
+			.map(ChatResponse::getMetadata)
+			.map(ChatResponseMetadata::getUsage)
+			.ifPresent(usage -> {
+				log.info(LOG_FORMAT, AI_TAG, String.format("Input Tokens: %d", usage.getPromptTokens()));
+				log.info(LOG_FORMAT, AI_TAG, String.format("Output Tokens: %d", usage.getCompletionTokens()));
+				log.info(LOG_FORMAT, AI_TAG, String.format("Total Tokens: %d", usage.getTotalTokens()));
+			});
+
+		log.info("==================================");
 		return advisedResponse;
-
 	}
-
-	@Override
-	public Flux<AdvisedResponse> aroundStream(AdvisedRequest advisedRequest, StreamAroundAdvisorChain chain) {
-		System.out.println("\nRequest: " + advisedRequest);
-		Flux<AdvisedResponse> responses = chain.nextAroundStream(advisedRequest);
-		return new MessageAggregator().aggregateAdvisedResponse(responses, aggregatedAdvisedResponse -> {
-			System.out.println("\nResponse: " + aggregatedAdvisedResponse);
-		});
-	}
-
 }
