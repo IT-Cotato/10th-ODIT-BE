@@ -54,7 +54,7 @@ public class AiConfig {
 
 		return ChatClient
 			.builder(chatModel)
-			.defaultAdvisors(loggingAdvisor)
+			.defaultAdvisors(loggingAdvisor, chatMemory())
 			.build();
 	}
 }
