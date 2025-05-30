@@ -1,4 +1,4 @@
-FROM openjdk:17
+FROM openjdk:21
 ARG JAR_FILE=build/libs/*.jar
 
 # 두 ARG는 ec2 도커 컴포즈에 세팅된 변수 값을 따라가게 됨
