@@ -6,6 +6,8 @@ plugins {
     id "org.sonarqube" version "6.2.0.5505"
 }
 
+apply from: 'jacoco.gradle'
+
 group = 'com.adit'
 version = '0.0.1-SNAPSHOT'
 
