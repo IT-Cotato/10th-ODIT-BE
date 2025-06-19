@@ -1,0 +1,216 @@
+package com.odit.backend.domain.place.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.odit.backend.domain.image.dto.request.ImageUpdateRequestDto;
+import com.odit.backend.domain.image.service.command.UserPlaceImageCommandService;
+import com.odit.backend.domain.place.dto.request.PlaceRequestDto;
+import com.odit.backend.domain.place.dto.response.FriendPlaceResponseDto;
+import com.odit.backend.domain.place.dto.response.PlaceResponseDto;
+import com.odit.backend.domain.place.dto.response.UserPlaceImageResponseDto;
+import com.odit.backend.domain.place.service.command.PlaceCommandService;
+import com.odit.backend.domain.place.service.command.UserPlaceCommandService;
+import com.odit.backend.domain.place.service.query.PlaceQueryService;
+import com.odit.backend.domain.place.service.query.UserPlaceQueryService;
+import com.odit.backend.domain.user.dto.response.UserResponse;
+import com.odit.backend.domain.user.entity.User;
+import com.odit.backend.global.common.ApiResponse;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/places")
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@Tag(name = "Place API", description = "장소 생성, 수정, 삭제, 조회할 수 있는 API 입니다")
+public class PlaceController {
+
+	private final PlaceCommandService placeCommandService;
+	private final PlaceQueryService placeQueryService;
+	private final UserPlaceCommandService userPlaceCommandService;
+	private final UserPlaceQueryService userPlaceQueryService;
+	private final UserPlaceImageCommandService userPlaceImageCommandService;
+
+	// 장소 생성 API
+	@Operation(summary = "장소 생성", description = "카카오 맵 키워드 검색 후 Place, UserPlace 에 장소를 저장합니다")
+	@PostMapping()
+	public ResponseEntity<ApiResponse<PlaceResponseDto>> createPlace(
+		@Valid @RequestBody PlaceRequestDto requestDto, @AuthenticationPrincipal(expression = "user") User user) {
+		PlaceResponseDto userPlace = userPlaceCommandService.createUserPlace(user.getId(), requestDto);
+		// 생성된 장소를 응답으로 반환
+		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(userPlace));
+	}
+
+	// 장소 수정 API
+	@Operation(summary = "장소 수정", description = "Place 의 장소를 수정합니다")
+	@PutMapping("/{placeId}")
+	public ResponseEntity<ApiResponse<PlaceResponseDto>> updatePlace(@PathVariable @Min(1) Long placeId,
+		@Valid @RequestBody PlaceRequestDto requestDto) {
+		// ID로 기존 장소를 찾아 수정
+		PlaceResponseDto response = placeCommandService.updatePlace(placeId, requestDto);
+		// 수정된 장소를 응답으로 반환
+		return ResponseEntity.ok(ApiResponse.success(response));
+	}
+
+	// 장소 삭제 API
+	@Operation(summary = "장소 삭제", description = "userPlaceId에 해당하는 장소 삭제")
+	@DeleteMapping("/{userPlaceId}")
+	public ResponseEntity<ApiResponse<String>> deletePlace(@PathVariable @Min(1) Long userPlaceId) {
+		// ID로 장소를 삭제
+		userPlaceCommandService.deletePlace(userPlaceId);
+		// 삭제 완료 메시지 응답
+		return ResponseEntity.ok(ApiResponse.success("Place deleted successfully"));
+	}
+
+	// 카테고리 기반으로 장소 찾기 API
+	@Operation(summary = "카테고리로 장소 조회", description = "userId에 해당하는 사용자가 가진 장소 중 특정 카테고리에 해당하는 장소 조회")
+	@GetMapping("/category")
+	public ResponseEntity<ApiResponse<List<PlaceResponseDto>>> getPlaceByCategory(@RequestParam List<String> subCategory
+		, @AuthenticationPrincipal(expression = "user") User user) {
+
+		List<PlaceResponseDto> placeByCategory = userPlaceQueryService.getPlaceByCategory(subCategory, user.getId());
+
+		return ResponseEntity.ok(ApiResponse.success(placeByCategory));
+	}
+
+	//인기 기반으로 장소 찾기 API
+	@Operation(summary = "인기순으로 장소 조회", description = "전체 장소 중 bookmarkCount 가 높은 순서대로 1~5위 장소 조회")
+	@GetMapping("/popular")
+	public ResponseEntity<ApiResponse<List<PlaceResponseDto>>> getPlaceByPopular() {
+		List<PlaceResponseDto> placeByPopular = placeQueryService.getPlaceByPopular();
+		return ResponseEntity.ok(ApiResponse.success(placeByPopular));
+	}
+
+	//저장된 장소 찾기 API
+	@Operation(summary = "저장된 장소 조회", description = "userId에 해당하는 사용자가 저장한 장소 조회")
+	@GetMapping()
+	public ResponseEntity<ApiResponse<List<PlaceResponseDto>>> getSavedPlace(
+		@AuthenticationPrincipal(expression = "user") User user) {
+		List<PlaceResponseDto> savedPlace = userPlaceQueryService.getSavedPlace(user.getId());
+		return ResponseEntity.ok(ApiResponse.success(savedPlace));
+	}
+
+	//특정 장소 상세 정보 찾기 API
+	@Operation(summary = "특정 장소 상세 정보 조회", description = "해당 placeName(상호명)을 가진 장소 조회")
+	@GetMapping("/detail")
+	public ResponseEntity<ApiResponse<PlaceResponseDto>> getDetailedPlace(@RequestParam String placeName) {
+
+		PlaceResponseDto detailedPlace = placeQueryService.getDetailedPlace(placeName);
+		return ResponseEntity.ok(ApiResponse.success(detailedPlace));
+	}
+
+	//현재 위치 기반 장소 찾기 API
+	@Operation(summary = "사용자 위치로 장소 조회", description = "userId에 해당하는 사용자가 가진 장소 중 사용자의 위치와 가까운 순으로 장소 조회")
+	@GetMapping("/location")
+	public ResponseEntity<ApiResponse<List<PlaceResponseDto>>> getPlaceByLocation(
+		@RequestParam @DecimalMin("33.0") @DecimalMax("43.0") double latitude
+		, @RequestParam @DecimalMin("124.0") @DecimalMax("132.0") double longitude,
+		@AuthenticationPrincipal(expression = "user") User user) {
+		List<PlaceResponseDto> placeByLocation = userPlaceQueryService.getPlaceByLocation(latitude, longitude,
+			user.getId());
+		return ResponseEntity.ok(ApiResponse.success(placeByLocation));
+	}
+
+	//주소 기반 장소 찾기 API
+	@Operation(summary = "주소로 장소 조회", description = "userId에 해당하는 사용자가 가진 장소 중 address 를 포함하고 있는 장소 조회")
+	@GetMapping("/address")
+	public ResponseEntity<ApiResponse<List<PlaceResponseDto>>> getPlaceByAddress(@RequestParam List<String> address
+		, @AuthenticationPrincipal(expression = "user") User user) {
+
+		List<PlaceResponseDto> placeByAddress = userPlaceQueryService.getPlaceByAddress(address, user.getId());
+		return ResponseEntity.ok(ApiResponse.success(placeByAddress));
+	}
+
+	//장소 방문 여부 표시 API
+	@Operation(summary = "장소 방문 표시", description = "userPlaceId에 해당하는 장소 방문 표시")
+	@PutMapping("/{userPlaceId}/visit")
+	public ResponseEntity<ApiResponse<String>> checkVisitedPlace(@PathVariable Long userPlaceId) {
+		userPlaceCommandService.checkVisitedPlace(userPlaceId);
+		return ResponseEntity.ok(ApiResponse.success("visit sign successfully"));
+	}
+
+	//친구 기반 장소 찾기 API
+	@Operation(summary = "친구 장소 조회", description = "userId에 해당하는 사용자의 친구들이 저장한 장소를, 저장한 친구 수가 많은 순서대로 조회")
+	@GetMapping("/friend")
+	public ResponseEntity<ApiResponse<List<FriendPlaceResponseDto>>> getPlaceByFriend(
+		@AuthenticationPrincipal(expression = "user") User user) {
+		Map<PlaceResponseDto, List<UserResponse.InfoDto>> placeByFriend = userPlaceQueryService.getPlaceByFriend(
+			user.getId());
+		List<FriendPlaceResponseDto> responseList = placeByFriend.entrySet().stream()
+			.map(entry -> new FriendPlaceResponseDto(entry.getKey(), entry.getValue()))
+			.toList();
+		return ResponseEntity.ok(ApiResponse.success(responseList));
+	}
+
+	//장소 메모 수정 API
+	@Operation(summary = "장소 메모 수정", description = "userPlaceId에 해당하는 장소의 메모를 수정")
+	@PutMapping("/{userPlaceId}/memo")
+	public ResponseEntity<ApiResponse<PlaceResponseDto>> updateUserPlaceMemo(@PathVariable Long userPlaceId,
+		@RequestParam String memo) {
+
+		PlaceResponseDto updateUserPlace = userPlaceCommandService.updateUserPlace(userPlaceId, memo);
+		return ResponseEntity.ok(ApiResponse.success(updateUserPlace));
+	}
+
+	//북마크 장소 저장 API
+	@Operation(summary = "북마크 장소 저장", description = "placeId에 해당하는 장소를 userPlace 에 저장")
+	@PostMapping("/{placeId}/bookMark")
+	public ResponseEntity<ApiResponse<PlaceResponseDto>> savedPlace(@PathVariable Long placeId,
+		@AuthenticationPrincipal(expression = "user") User user) {
+		PlaceResponseDto placeResponseDto = userPlaceCommandService.savedPlace(placeId, user.getId());
+		return ResponseEntity.ok(ApiResponse.success(placeResponseDto));
+	}
+
+	//장소 이미지 수정 API
+	@Operation(summary = "장소 이미지 업데이트", description = "장소의 기존 이미지를 새로운 이미지로 교체합니다.")
+	@PutMapping("/{userPlaceId}/placeImages")
+	public ResponseEntity<ApiResponse<List<UserPlaceImageResponseDto>>> updatePlaceImages(
+		@PathVariable long userPlaceId,
+		@Valid @RequestBody List<ImageUpdateRequestDto> imageUpdateRequests) {
+		List<UserPlaceImageResponseDto> updatedImages = userPlaceImageCommandService.updatePlaceImages(
+			imageUpdateRequests);
+		return ResponseEntity.ok(ApiResponse.success(updatedImages));
+	}
+
+	//장소 이미지 추가 API
+	@Operation(summary = "장소 이미지 추가", description = "userPlaceId에 해당하는 장소의 이미지 추가")
+	@PostMapping("/{userPlaceId}/placeImages")
+	public ResponseEntity<ApiResponse<List<UserPlaceImageResponseDto>>> addPlaceImages(
+		@PathVariable Long userPlaceId,
+		@RequestPart List<MultipartFile> images) {
+		List<UserPlaceImageResponseDto> uploadedImages = userPlaceImageCommandService.addUserPlaceImages(userPlaceId,
+			images);
+		return ResponseEntity.ok(ApiResponse.success(uploadedImages));
+	}
+
+	//장소 이미지 삭제 API
+	@Operation(summary = "장소 이미지 삭제", description = "장소 특정 이미지를 삭제합니다.")
+	@DeleteMapping("/{userPlaceId}/placeImages/{imageId}")
+	public ResponseEntity<ApiResponse<Void>> deletePlaceImage(
+		@PathVariable Long userPlaceId, @PathVariable Long imageId) {
+		userPlaceImageCommandService.deletePlaceImage(userPlaceId, imageId);
+		return ResponseEntity.noContent().build();
+	}
+}
