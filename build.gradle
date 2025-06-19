@@ -8,7 +8,7 @@ plugins {
 
 apply from: 'jacoco.gradle'
 
-group = 'com.adit'
+group = 'com.odit'
 version = '0.0.1-SNAPSHOT'
 
 java {
