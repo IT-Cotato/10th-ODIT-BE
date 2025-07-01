@@ -8,10 +8,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-/**
- * 각 도메인별 코드 형태를 [도메인-001] 방식으로 변경하고,
- * HTTP Status를 공식 문서를 참고하여 재검증한 에러 코드 모음
- */
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public enum GlobalErrorCode implements ErrorCode {
@@ -111,7 +107,8 @@ public enum GlobalErrorCode implements ErrorCode {
 	AI_PROCESSING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI-001", "AI 처리에 실패했습니다."),
 	AI_RESPONSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI-002", "AI 응답 변환에 실패했습니다."),
 	EXCEEDING_TOKEN_USAGE(HttpStatus.INTERNAL_SERVER_ERROR, "AI-004", "토큰 사용량을 초과했습니다."),
-
+	AI_PROMPT_GENERATE_FAILED(BAD_REQUEST, "AI-005", "프롬프트 생성에 실패했습니다."),
+	AI_CONVERSION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI-006", "AI 응답 변환에 실패했습니다."),
 	/********************************** Event Domain **********************************/
 	EVENT_NOT_FOUND(NOT_FOUND, "EVN-001", "이벤트를 찾을 수 없습니다."),
 	EVENT_ALREADY_EXISTS(BAD_REQUEST, "EVN-002", "이미 존재하는 이벤트입니다."),
@@ -133,7 +130,13 @@ public enum GlobalErrorCode implements ErrorCode {
 	S3_INVALID_FILE(HttpStatus.BAD_REQUEST, "S3-002", "잘못된 형식의 파일입니다."),
 	S3_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-003", "S3 파일 삭제에 실패했습니다."),
 	S3_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-004", "이미지 업데이트에 실패했습니다."),
-	S3_IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-005", "이벤트 삭제 중 이미지 삭제 실패.");
+	S3_IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-005", "이벤트 삭제 중 이미지 삭제 실패."),
+
+	/**
+	 * Async 설정 에러
+	 */
+	TASK_NOT_FOUND(NOT_FOUND, "AS-001", "작업을 찾지 못했습니다."),
+	TASK_ALREADY_COMPLETE(BAD_REQUEST, "AS-002", "이미 완료된 작업입니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;

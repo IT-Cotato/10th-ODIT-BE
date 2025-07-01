@@ -17,8 +17,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.odit.backend.global.util.ImageUtil;
-import com.odit.backend.infra.s3.exception.S3Exception;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3URI;
@@ -26,6 +24,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.odit.backend.infra.s3.exception.S3Exception;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -136,7 +135,7 @@ public class AwsS3Service {
 				log.info("[S3] 기존 이미지 삭제 완료: key = {}", oldKey);
 
 				// 새 이미지 업로드
-				String dirName = ImageUtil.extractPathWithoutFileName(oldKey);
+				String dirName = extractPathWithoutFileName(oldKey);
 				String newKey = createFileName(newImage.getOriginalFilename(), dirName,
 					newImage.getContentType());
 
@@ -169,7 +168,7 @@ public class AwsS3Service {
 					amazonS3.deleteObject(new DeleteObjectRequest(bucket, oldKey));
 
 					// 기존 이미지의 폴더 유지
-					String dirName = ImageUtil.extractPathWithoutFileName(oldKey);
+					String dirName = extractPathWithoutFileName(oldKey);
 					String newKey = createFileName(newImages.get(i).getOriginalFilename(), dirName,
 						newImages.get(i).getContentType());
 
