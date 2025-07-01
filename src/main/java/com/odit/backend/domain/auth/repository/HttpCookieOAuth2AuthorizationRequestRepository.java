@@ -4,8 +4,8 @@ import org.springframework.security.oauth2.client.web.AuthorizationRequestReposi
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
 
-import com.odit.backend.domain.auth.util.CookieUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
+import com.odit.backend.domain.auth.util.CookieUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

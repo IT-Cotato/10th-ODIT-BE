@@ -14,8 +14,4 @@ public enum TaskStatus {
 	CANCELLED("취소됨");
 
 	private final String message;
-
-	public boolean isTerminal() {
-		return this == COMPLETED || this == FAILED || this == CANCELLED;
-	}
 }

@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.odit.backend.domain.auth.dto.response.LoginResponse;
 import com.odit.backend.domain.user.principal.PrincipalDetails;
 import com.odit.backend.global.common.ApiResponse;
@@ -17,7 +18,6 @@ import com.odit.backend.global.security.jwt.entity.RefreshToken;
 import com.odit.backend.global.security.jwt.entity.Token;
 import com.odit.backend.global.security.jwt.repository.RefreshTokenRepository;
 import com.odit.backend.global.security.jwt.util.JwtTokenProvider;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

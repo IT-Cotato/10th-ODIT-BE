@@ -3,8 +3,8 @@ package com.odit.backend.global.security.oauth.repository;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 
-import com.odit.backend.global.util.CookieUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
+import com.odit.backend.global.util.CookieUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

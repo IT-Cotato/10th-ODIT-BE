@@ -6,8 +6,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.odit.backend.domain.place.entity.Place;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.odit.backend.domain.place.entity.Place;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
