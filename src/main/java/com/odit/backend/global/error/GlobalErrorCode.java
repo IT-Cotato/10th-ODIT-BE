@@ -136,7 +136,8 @@ public enum GlobalErrorCode implements ErrorCode {
 	 * Async 설정 에러
 	 */
 	TASK_NOT_FOUND(NOT_FOUND, "AS-001", "작업을 찾지 못했습니다."),
-	TASK_ALREADY_COMPLETE(BAD_REQUEST, "AS-002", "이미 완료된 작업입니다.");
+	TASK_ALREADY_COMPLETE(BAD_REQUEST, "AS-002", "이미 완료된 작업입니다."),
+	TASK_UPDATE_FAILED(BAD_REQUEST,"AS-003" , "작업 업데이트를 실패했습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;

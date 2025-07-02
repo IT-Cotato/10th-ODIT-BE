@@ -25,6 +25,7 @@ import com.odit.backend.domain.user.exception.UserException;
 import com.odit.backend.global.common.ApiResponse;
 import com.odit.backend.global.error.exception.BusinessException;
 import com.odit.backend.global.security.jwt.exception.TokenException;
+import com.odit.backend.infra.async.exception.AsyncException;
 import com.odit.backend.infra.crawler.exception.CrawlingException;
 import com.odit.backend.infra.s3.exception.S3Exception;
 
@@ -247,7 +248,8 @@ public class GlobalExceptionHandler {
 	 * @return ResponseEntity<ApiResponse<ErrorResponse>>
 	 */
 	@ExceptionHandler(IllegalArgumentException.class)
-	protected ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalArgumentException(IOException ex, HttpServletRequest request) {
+	protected ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalArgumentException(IOException ex,
+		HttpServletRequest request) {
 
 		log.error("[Error] IllegalArgumentException: {}", ex.getMessage());
 		log.error("[Error] 발생 이유: {} ", (Object)ex.getStackTrace());
@@ -523,4 +525,27 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(ApiResponse.failure(response), HttpStatus.OK);
 	}
 
+	/**
+	 * [Exception] 비동기 처리 관련 오류 (AsyncException)
+	 *
+	 * @param ex      AsyncException
+	 * @param request HttpServletRequest
+	 * @return ResponseEntity<ApiResponse<ErrorResponse>>
+	 */
+	@ExceptionHandler(AsyncException.class)
+	protected ResponseEntity<ApiResponse<ErrorResponse>> handleAsyncException(
+		AsyncException ex, HttpServletRequest request) {
+
+		log.error("[Error] 비동기 처리 관련 에러 발생: {}", ex.getErrorCode().getMessage());
+		log.error("[Error] 발생 이유: {} :", ex.getStackTrace());
+		log.error("[Error] 예외 발생 지점: {} | {}", request.getMethod(), request.getRequestURI());
+
+		ErrorResponse response = ErrorResponse.of(
+			ex.getErrorCode(),
+			ex.getMessage(),
+			request.getRequestURI()
+		);
+
+		return new ResponseEntity<>(ApiResponse.failure(response), HttpStatus.OK);
+	}
 }

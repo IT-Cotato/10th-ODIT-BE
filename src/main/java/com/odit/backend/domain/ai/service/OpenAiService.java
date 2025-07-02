@@ -50,7 +50,7 @@ public class OpenAiService {
 		log.info("[AI] 비동기 요약 작업 시작 - TaskId: {}, URL: {}", taskId, url);
 
 		summaryTaskService.updateTask(taskId, CRAWLING, null);
-		contentService.extractContents(url)  // 👈
+		contentService.extractContents(url)
 			.thenCompose(extractedContent -> {
 				log.debug("[AI] 웹페이지 크롤링 완료 - TaskId: {}", taskId);
 				summaryTaskService.updateTask(taskId, ANALYZING, null);
@@ -61,8 +61,9 @@ public class OpenAiService {
 				summaryTaskService.updateTask(taskId, COMPLETED, result);
 			})
 			.exceptionally(throwable -> {
+				log.error("[AI] 요약 작업 실패 - TaskId: {}, Error: {}", taskId, throwable.getMessage(), throwable);
 				summaryTaskService.updateTask(taskId, FAILED, null);
-				throw new AiException(AI_PROCESSING_FAILED);
+				return null;
 			});
 	}
 

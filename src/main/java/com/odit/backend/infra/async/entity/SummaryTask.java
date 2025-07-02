@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.RedisHash;
 
 import com.odit.backend.infra.async.enums.TaskStatus;
 
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +19,7 @@ import lombok.NoArgsConstructor;
 @RedisHash(value = "summaryTask", timeToLive = 3600)
 public class SummaryTask {
 
+	@Id
 	private String id;
 
 	private String url;

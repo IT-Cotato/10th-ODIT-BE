@@ -75,6 +75,7 @@ public class SummaryTaskService {
 			case COMPLETED -> task.completeTask(response);
 			case CANCELLED -> task.cancelTask();
 			case FAILED -> task.failTask();
+			default -> throw new AsyncException(GlobalErrorCode.TASK_UPDATE_FAILED);
 		}
 		summaryTaskRepository.save(task);
 	}

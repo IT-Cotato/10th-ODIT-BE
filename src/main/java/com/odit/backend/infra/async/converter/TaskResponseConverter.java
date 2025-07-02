@@ -26,7 +26,7 @@ public class TaskResponseConverter {
 			.taskId(task.getId())
 			.status(task.getStatus().name())
 			.message(task.getStatus().getMessage())
-			.createdAt(LocalDateTime.now().toString())
+			.createdAt(task.getStartedAt() != null ? task.getStartedAt().toString() : null)
 			.build();
 	}
 
@@ -42,9 +42,9 @@ public class TaskResponseConverter {
 			.taskId(task.getId())
 			.status(task.getStatus().name())
 			.statusMessage(task.getStatus().getMessage())
-			.progress(calculateProgress(task))
+			.progress(task.getProgress())
 			.result(task.getResult())
-			.createdAt(LocalDateTime.now().toString())
+			.createdAt(task.getStartedAt() != null ? task.getStartedAt().toString() : null)
 			.completedAt(task.getCompletedAt() != null ? task.getCompletedAt().toString() : null)
 			.build();
 	}
