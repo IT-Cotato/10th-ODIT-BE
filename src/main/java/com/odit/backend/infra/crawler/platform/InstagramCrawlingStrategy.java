@@ -16,11 +16,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.odit.backend.domain.ai.dto.response.CrawlCompletionResponse;
 import com.odit.backend.infra.crawler.common.AbstractWebCrawlingStrategy;
 import com.odit.backend.infra.crawler.exception.CrawlingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

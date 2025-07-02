@@ -17,10 +17,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.odit.backend.domain.auth.dto.OAuth2UserInfo;
 import com.odit.backend.domain.auth.dto.response.KakaoResponse;
 import com.odit.backend.domain.auth.exception.AuthException;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
