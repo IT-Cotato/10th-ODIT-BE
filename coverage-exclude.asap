@@ -1,0 +1,6 @@
+exclude com/adit/*/common/*
+exclude com/adit/*/common/*/*
+exclude com/adit/*/config/*
+exclude com/adit/*/config/*/*
+exclude com/adit/*/*Application*
+exclude com/adit/*/dto/*

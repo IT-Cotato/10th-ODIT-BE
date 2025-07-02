@@ -10,7 +10,9 @@ spring:
       local: local
       blue: blue
       green: green
-
+  threads:
+    virtual:
+      enabled: true
 
   security:
     oauth2:
@@ -66,8 +68,7 @@ spring:
       api-key: ${SPRING_AI_OPENAI_API_KEY}
       chat:
         options:
-          model: gpt-4o-mini
-          temperature: 0.7
+          model: gpt-4.1-mini
           max-tokens: ${SPRING_AI_MAX_TOKENS}
 
   servlet:
