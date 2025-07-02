@@ -3,7 +3,6 @@ package com.adit.backend.domain.auth.service;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -24,8 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j
 public abstract class AbstractOAuth2UserService extends SimpleUrlAuthenticationSuccessHandler {
-	private static final String FRONT_PORT = "5173";
-	protected static final String FRONT_REDIRECT_URI = "http://localhost:5173";
+	protected static final String FRONT_REDIRECT_URI = "http://localhost:3000/";
+	private static final String FRONT_PORT = "3000";
 	protected final JwtTokenProvider jwtTokenProvider;
 	protected final RefreshTokenRepository refreshTokenRepository;
 	protected final UserCommandService userCommandService;
@@ -60,14 +59,10 @@ public abstract class AbstractOAuth2UserService extends SimpleUrlAuthenticationS
 	}
 
 	protected String determineRedirectUrl(HttpServletRequest request) {
-		String sourceUrl = Optional
-			.ofNullable(request.getHeader("Referer"))
-			.orElse(request.getHeader("Origin"));
-
-		log.debug("[OAuth2] Source URL: {}", sourceUrl);
-
-		return (sourceUrl != null && sourceUrl.contains(FRONT_PORT))
-			? FRONT_REDIRECT_URI
-			: baseUrl;
+		if (request.getHeader("Referer") != null && request.getHeader("Referer").contains(FRONT_PORT)) {
+			return FRONT_REDIRECT_URI;
+		} else {
+			return baseUrl;
+		}
 	}
 }
