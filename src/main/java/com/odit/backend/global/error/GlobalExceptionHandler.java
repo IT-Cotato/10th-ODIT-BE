@@ -248,7 +248,7 @@ public class GlobalExceptionHandler {
 	 * @return ResponseEntity<ApiResponse<ErrorResponse>>
 	 */
 	@ExceptionHandler(IllegalArgumentException.class)
-	protected ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalArgumentException(IOException ex,
+	protected ResponseEntity<ApiResponse<ErrorResponse>> handleIllegalArgumentException(IllegalArgumentException ex,
 		HttpServletRequest request) {
 
 		log.error("[Error] IllegalArgumentException: {}", ex.getMessage());
