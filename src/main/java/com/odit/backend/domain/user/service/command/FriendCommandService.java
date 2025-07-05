@@ -79,11 +79,17 @@ public class FriendCommandService {
 	}
 
 	// 친구 삭제
-	public void removeFriend(Long userId, Long friendId) {
+	public void removeFriend(Long userId, String NickName) {
 		List<Long> friends = friendshipRepository.findFriends(userId);
-		if (!friends.contains(friendId)) {
-			throw new FriendShipException(FRIEND_NOT_FOUND);
+		for(Long id : friends){
+			User friend = userRepository.findById(id).orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+			if (friend.getNickname().equals(NickName)){
+				friendshipRepository.deleteFriend(userId, friend.getId());
+				break;
+			}
 		}
-		friendshipRepository.deleteFriend(userId, friendId);
+
+
 	}
 }
