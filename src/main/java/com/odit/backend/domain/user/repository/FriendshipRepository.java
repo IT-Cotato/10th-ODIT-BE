@@ -31,5 +31,14 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 		+ " OR fs.fromUser.id = :friendId AND fs.toUser.id = :userId")
 	void deleteFriend(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
+	@Query("SELECT f.toUser.id FROM Friendship f " +
+		"WHERE f.fromUser.id = :userId AND f.status = true " +
+		"AND f.toUser.nickname = :nickname " +
+		"AND f.toUser.id IN ( " +
+		"   SELECT f2.fromUser.id FROM Friendship f2 " +
+		"   WHERE f2.toUser.id = :userId AND f2.status = true " +
+		")")
+	Optional<Long> findFriendIdByUserIdAndNickname(@Param("userId") Long userId, @Param("NickName")String NickName);
+
 	Optional<Friendship> findByFromUser_IdAndToUser_Id(Long fromUserId, Long toUserId);
 }
