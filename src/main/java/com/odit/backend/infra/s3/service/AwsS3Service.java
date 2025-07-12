@@ -10,6 +10,7 @@ import java.net.URLConnection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -213,6 +214,14 @@ public class AwsS3Service {
 		String contentType = file.getContentType();
 		if (contentType == null || !contentType.startsWith("image/")) {
 			throw new AwsException(GlobalErrorCode.S3_UPLOAD_FAILED);
+		}
+
+		String filename = file.getOriginalFilename();
+		if (filename != null) {
+			String extension = StringUtils.getFilenameExtension(filename.toLowerCase());
+			if (!Set.of("jpg", "jpeg", "png", "gif", "webp").contains(extension)) {
+				throw new AwsException(GlobalErrorCode.S3_UPLOAD_FAILED);
+			}
 		}
 	}
 
