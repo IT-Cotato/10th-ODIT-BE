@@ -31,10 +31,11 @@ public class PlaceCommandService {
 		Long placeId = extractTrailingDigits(request.url());
 		return placeRepository.findById(placeId).orElseGet(() -> {
 			Place place = placeConverter.toEntity(request, placeId);
+			placeRepository.save(place);
 			if (!request.imageUrlList().isEmpty()) {
 				placeImageCommandService.addNewPlaceImage(request, place);
 			}
-			return placeRepository.save(place);
+			return place;
 		});
 	}
 

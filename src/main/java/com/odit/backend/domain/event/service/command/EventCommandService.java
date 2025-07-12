@@ -25,10 +25,11 @@ public class EventCommandService {
 	public Event saveOrFindEvent(EventRequestDto request) {
 		return eventRepository.findByName(request.name()).orElseGet(() -> {
 			Event event = eventConverter.toEntity(request);
+			eventRepository.save(event);
 			if (!request.imageUrlList().isEmpty()) {
 				eventImageCommandService.addImageToEvent(request, event);
 			}
-			return eventRepository.save(event);
+			return event;
 		});
 	}
 }
