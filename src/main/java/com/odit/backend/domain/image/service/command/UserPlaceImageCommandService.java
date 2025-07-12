@@ -41,7 +41,8 @@ public class UserPlaceImageCommandService {
 	private final ImageConverter imageConverter;
 
 	public void addNewUserPlaceImage(PlaceRequestDto request, User user, UserPlace userPlace) {
-		List<UserPlaceImage> imageList = s3Service.uploadFile(request.imageUrlList(), USER.getPath() + user.getId())
+		List<UserPlaceImage> imageList = s3Service.uploadImageFromUrls(request.imageUrlList(),
+				USER.getPath() + user.getId())
 			.join()
 			.stream()
 			.map(url -> UserPlaceImage.builder().url(url).build())
@@ -51,7 +52,7 @@ public class UserPlaceImageCommandService {
 	}
 
 	public void addBookMarkPlaceImage(Place place, User user, UserPlace userPlace) {
-		List<UserPlaceImage> imageList = s3Service.uploadFile(
+		List<UserPlaceImage> imageList = s3Service.uploadImageFromUrls(
 				place.getImages()
 					.stream()
 
@@ -69,7 +70,7 @@ public class UserPlaceImageCommandService {
 			.orElseThrow(() -> new PlaceException(USER_PLACE_NOT_FOUND));
 
 		List<UserPlaceImage> uploadedImages =
-			s3Service.uploadFiles(images, USER.getPath() + userPlaceId)
+			s3Service.uploadImageFromFile(images, USER.getPath() + userPlaceId)
 				.join()
 				.stream()
 				.map(url -> UserPlaceImage.builder().url(url).build())
@@ -95,7 +96,7 @@ public class UserPlaceImageCommandService {
 
 	private UserPlaceImageResponseDto updateUserPlaceImage(Long imageId, MultipartFile multipartFile) {
 		UserPlaceImage image = userPlaceImageQueryService.getImageById(imageId);
-		String newImageUrl = s3Service.updateImage(image.getUrl(), multipartFile).join();
+		String newImageUrl = s3Service.updateImage(image.getUrl(), multipartFile);
 		image.updateUrl(newImageUrl);
 		return imageConverter.toResponse(image);
 	}

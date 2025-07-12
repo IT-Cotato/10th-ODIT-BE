@@ -27,7 +27,7 @@ public class PlaceImageCommandService {
 	private final PlaceImageRepository placeImageRepository;
 
 	public void addNewPlaceImage(PlaceRequestDto request, Place place) {
-		List<PlaceImage> imageList = s3Service.uploadFile(request.imageUrlList(), PLACE.getPath())
+		List<PlaceImage> imageList = s3Service.uploadImageFromUrls(request.imageUrlList(), PLACE.getPath())
 			.join()
 			.stream()
 			.map(url -> PlaceImage.builder().url(url).build())
