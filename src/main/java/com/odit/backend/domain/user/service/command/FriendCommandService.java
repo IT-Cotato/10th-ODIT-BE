@@ -77,8 +77,8 @@ public class FriendCommandService {
 	}
 
 	// 친구 삭제
-	public void removeFriend(Long userId, String NickName) {
-		Long friendId = friendshipRepository.findFriendIdByUserIdAndNickname(userId, NickName)
+	public void removeFriend(Long userId, String nickName) {
+		Long friendId = friendshipRepository.findFriendIdByUserIdAndNickname(userId, nickName)
 			.orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
 		friendshipRepository.deleteFriend(userId, friendId);

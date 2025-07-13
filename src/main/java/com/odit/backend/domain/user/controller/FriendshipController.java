@@ -65,12 +65,12 @@ public class FriendshipController {
 	}
 
 	// 친구 삭제 API
-	@Operation(summary = "친구 삭제", description = "friendId에 해당하는 친구를 삭제")
+	@Operation(summary = "친구 삭제", description = "닉네임에 해당하는 친구를 삭제")
 	@DeleteMapping("/")
-	public ResponseEntity<ApiResponse<String>> removeFriend(@RequestParam String NickName,
+	public ResponseEntity<ApiResponse<String>> removeFriend(@RequestParam String nickName,
 		@AuthenticationPrincipal(expression = "user") User user) {
 		// 친구 관계를 삭제
-		friendCommandService.removeFriend(user.getId(), NickName);
+		friendCommandService.removeFriend(user.getId(), nickName);
 		return ResponseEntity.ok(ApiResponse.success("Friend removed"));
 	}
 
