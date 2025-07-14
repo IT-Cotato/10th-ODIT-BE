@@ -26,7 +26,7 @@ public class TaskResponseConverter {
 			.taskId(task.getId())
 			.status(task.getStatus())
 			.message(task.getStatus().getMessage())
-			.createdAt(LocalDateTime.now())
+			.startedAt(task.getStartedAt())
 			.build();
 	}
 

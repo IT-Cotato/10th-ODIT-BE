@@ -20,9 +20,9 @@ public record TaskStartResponse(
 	TaskStatus status,
 
 	@Schema(description = "작업 생성 시간", example = "2025-06-29T10:30:00")
-	LocalDateTime createdAt,
+	LocalDateTime startedAt,
 
 	@Schema(description = "상태 메시지", example = "작업이 성공적으로 시작되었습니다.")
-	String  message
+	String message
 ) {
 }
