@@ -13,7 +13,15 @@ spring:
   threads:
     virtual:
       enabled: true
-
+  cloud:
+    aws:
+      credentials:
+        access-key: ${S3_ACCESS_KEY}
+        secret-key: ${S3_SECRET_KEY}
+      region:
+        static: ap-northeast-2  # 버킷의 리전
+      s3:
+        bucket: ${S3_BUCKET_NAME}
   security:
     oauth2:
       client:
@@ -95,6 +103,8 @@ logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.security.oauth2: DEBUG
+    com.odit.backend.infra.s3: DEBUG
+    software.amazon.awssdk: WARN
 
 token:
   key: ${JWT_KEY}
@@ -111,19 +121,6 @@ apify:
   poll-interval: 5000
   base-url: ${SCRAPER_BASE_URL}
   output-url: ${SCRAPER_OUTPUT_URL}
-
-  # AWS S3
-cloud:
-  aws:
-    credentials:
-      access-key: ${S3_ACCESS_KEY}
-      secret-key: ${S3_SECRET_KEY}
-    region:
-      static: ap-northeast-2  # 버킷의 리전
-    s3:
-      bucket: ${S3_BUCKET_NAME}   # 버킷 이름
-    stack:
-      auto: true
 
 sse:
   timeout: 6000

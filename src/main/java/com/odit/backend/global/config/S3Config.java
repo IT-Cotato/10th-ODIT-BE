@@ -1,40 +1,48 @@
 package com.odit.backend.global.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.odit.backend.global.config.property.AwsProperties;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
-@Slf4j
 @Configuration
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@EnableConfigurationProperties(AwsProperties.class)
 public class S3Config {
-    @Value("${cloud.aws.credentials.access-key}") // application.yml 에 명시한 내용
-    private String accessKey;
 
-    @Value("${cloud.aws.credentials.secret-key}")
-    private String secretKey;
+	private final AwsProperties awsProperties;
 
-    @Value("${cloud.aws.region.static}")
-    private String region;
+	private StaticCredentialsProvider createCredentialsProvider() {
+		AwsCredentials credentials = AwsBasicCredentials.create(
+			awsProperties.credentials().accessKey(),
+			awsProperties.credentials().secretKey()
+		);
+		return StaticCredentialsProvider.create(credentials);
+	}
 
-    /**
-     *
-     * Amazon S3 클라이언트 객체를 생성하고 구성하는 빈을 정의한다.
-     * Spring Boot Cloud AWS를 이용하면 AmazonS3Client와 같은 S3 관련 Bean들이 자동 생성된다.
-     * 즉, 여기서는 AmazonS3Client를 재정의한 것이다.
-     */
-    @Bean
-    public AmazonS3Client amazonS3Client() {
-        BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
-        return (AmazonS3Client) AmazonS3ClientBuilder.standard()
-            .withRegion(region)
-            .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-            .build();
-    }
+	@Bean
+	public S3Client s3Client() {
+		return S3Client.builder()
+			.region(Region.of(awsProperties.region().static_()))
+			.credentialsProvider(createCredentialsProvider())
+			.build();
+	}
+
+	@Bean
+	public S3Presigner s3Presigner() {
+		return S3Presigner.builder()
+			.credentialsProvider(createCredentialsProvider())
+			.region(Region.of(awsProperties.region().static_()))
+			.build();
+	}
 }

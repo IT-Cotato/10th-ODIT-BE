@@ -131,7 +131,8 @@ public enum GlobalErrorCode implements ErrorCode {
 	S3_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-003", "S3 파일 삭제에 실패했습니다."),
 	S3_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-004", "이미지 업데이트에 실패했습니다."),
 	S3_IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-005", "이벤트 삭제 중 이미지 삭제 실패."),
-
+	S3_URL_NOT_VALID(HttpStatus.INTERNAL_SERVER_ERROR, "S3-006", "유효하지 않은 URL입니다."),
+	S3_FILE_SIZE_LIMIT(HttpStatus.INTERNAL_SERVER_ERROR,"S3-007" , "파일 크기가 제한을 초과했습니다."),
 	/**
 	 * Async 설정 에러
 	 */

@@ -24,7 +24,7 @@ public class EventImageCommandService {
 	private final EventImageRepository eventImageRepository;
 
 	public void addImageToEvent(EventRequestDto request, Event event) {
-		List<EventImage> imageList = s3Service.uploadFile(request.imageUrlList(), EVENT.getPath())
+		List<EventImage> imageList = s3Service.uploadImageFromUrls(request.imageUrlList(), EVENT.getPath())
 			.join()
 			.stream()
 			.map(url -> EventImage.builder().url(url).build())

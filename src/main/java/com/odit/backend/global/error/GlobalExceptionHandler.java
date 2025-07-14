@@ -27,7 +27,7 @@ import com.odit.backend.global.error.exception.BusinessException;
 import com.odit.backend.global.security.jwt.exception.TokenException;
 import com.odit.backend.infra.async.exception.AsyncException;
 import com.odit.backend.infra.crawler.exception.CrawlingException;
-import com.odit.backend.infra.s3.exception.S3Exception;
+import com.odit.backend.infra.s3.exception.AwsException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -508,9 +508,9 @@ public class GlobalExceptionHandler {
 	 * @param request HttpServletRequest
 	 * @return ResponseEntity<ApiResponse<ErrorResponse>>
 	 */
-	@ExceptionHandler(S3Exception.class)
+	@ExceptionHandler(AwsException.class)
 	protected ResponseEntity<ApiResponse<ErrorResponse>> handleS3Exception(
-		S3Exception ex, HttpServletRequest request) {
+		AwsException ex, HttpServletRequest request) {
 
 		log.error("[Error] S3 관련 에러 발생: {}", ex.getErrorCode().getMessage());
 		log.error("[Error] 발생 이유: {} :", ex.getStackTrace());

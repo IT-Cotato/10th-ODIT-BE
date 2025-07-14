@@ -54,7 +54,7 @@ public class UserEventImageCommandService {
 	}
 
 	public List<UserEventImage> uploadImages(List<MultipartFile> files, String dirName) {
-		List<UserEventImage> imageList = s3Service.uploadFiles(files, dirName).join()
+		List<UserEventImage> imageList = s3Service.uploadImageFromFile(files, dirName).join()
 			.stream()
 			.map(url -> UserEventImage.builder().url(url).build())
 			.toList();
@@ -77,7 +77,7 @@ public class UserEventImageCommandService {
 
 	private UserEventImageResponseDto updateUserEventImage(Long imageId, MultipartFile multipartFile) {
 		UserEventImage image = userEventImageQueryService.getImageById(imageId);
-		String newImageUrl = s3Service.updateImage(image.getUrl(), multipartFile).join();
+		String newImageUrl = s3Service.updateImage(image.getUrl(), multipartFile);
 		image.updateUrl(newImageUrl);
 		return imageConverter.toResponse(image);
 	}
