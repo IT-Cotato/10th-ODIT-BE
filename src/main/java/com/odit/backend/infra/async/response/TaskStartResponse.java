@@ -1,5 +1,9 @@
 package com.odit.backend.infra.async.response;
 
+import java.time.LocalDateTime;
+
+import com.odit.backend.infra.async.enums.TaskStatus;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -13,12 +17,12 @@ public record TaskStartResponse(
 	String taskId,
 
 	@Schema(description = "작업 상태", example = "PENDING")
-	String status,
+	TaskStatus status,
 
 	@Schema(description = "작업 생성 시간", example = "2025-06-29T10:30:00")
-	String createdAt,
+	LocalDateTime createdAt,
 
 	@Schema(description = "상태 메시지", example = "작업이 성공적으로 시작되었습니다.")
-	String message
+	String  message
 ) {
 }

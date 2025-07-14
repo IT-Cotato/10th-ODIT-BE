@@ -24,9 +24,9 @@ public class TaskResponseConverter {
 
 		return TaskStartResponse.builder()
 			.taskId(task.getId())
-			.status(task.getStatus().name())
+			.status(task.getStatus())
 			.message(task.getStatus().getMessage())
-			.createdAt(task.getStartedAt() != null ? task.getStartedAt().toString() : null)
+			.createdAt(LocalDateTime.now())
 			.build();
 	}
 
@@ -40,22 +40,12 @@ public class TaskResponseConverter {
 
 		return TaskStatusResponse.builder()
 			.taskId(task.getId())
-			.status(task.getStatus().name())
+			.status(task.getStatus())
 			.statusMessage(task.getStatus().getMessage())
 			.progress(task.getProgress())
 			.result(task.getResult())
-			.createdAt(task.getStartedAt() != null ? task.getStartedAt().toString() : null)
-			.completedAt(task.getCompletedAt() != null ? task.getCompletedAt().toString() : null)
+			.createdAt(task.getStartedAt())
+			.completedAt(task.getCompletedAt())
 			.build();
 	}
-
-	private int calculateProgress(SummaryTask task) {
-		return switch (task.getStatus()) {
-			case PENDING, FAILED, CANCELLED -> 0;
-			case CRAWLING -> 10;
-			case ANALYZING -> 50;
-			case COMPLETED -> 100;
-		};
-	}
-
 }

@@ -1,6 +1,9 @@
 package com.odit.backend.infra.async.response;
 
+import java.time.LocalDateTime;
+
 import com.odit.backend.domain.ai.dto.response.ContentListResponse;
+import com.odit.backend.infra.async.enums.TaskStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -26,7 +29,7 @@ public record TaskStatusResponse(
 		requiredMode = Schema.RequiredMode.REQUIRED,
 		allowableValues = {"PENDING", "IN_PROGRESS", "COMPLETED", "FAILED"}
 	)
-	String status,
+	TaskStatus status,
 
 	@Schema(
 		description = "현재 작업 단계에 대한 상태 메시지",
@@ -62,13 +65,12 @@ public record TaskStatusResponse(
 		example = "2025-06-29T10:30:00",
 		requiredMode = Schema.RequiredMode.REQUIRED
 	)
-	String createdAt,
-
+	LocalDateTime createdAt,
 	@Schema(
 		description = "작업 완료 시간, 완료시에만 반환)",
 		example = "2025-06-29T10:40:00",
 		requiredMode = Schema.RequiredMode.NOT_REQUIRED
 	)
-	String completedAt
+	LocalDateTime completedAt
 ) {
 }
