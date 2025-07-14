@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.redis.core.RedisHash;
 
+import com.odit.backend.domain.ai.dto.response.ContentListResponse;
 import com.odit.backend.infra.async.enums.TaskStatus;
 
 import jakarta.persistence.Id;
@@ -30,7 +31,7 @@ public class SummaryTask {
 	@Builder.Default
 	private Integer progress = 0;
 
-	private Object result;
+	private ContentListResponse result;
 	private LocalDateTime startedAt;
 	private LocalDateTime completedAt;
 	private String currentStep;
@@ -48,7 +49,7 @@ public class SummaryTask {
 		this.progress = 50;
 	}
 
-	public void completeTask(Object taskResult) {
+	public void completeTask(ContentListResponse taskResult) {
 		this.status = TaskStatus.COMPLETED;
 		this.result = taskResult;
 		this.progress = 100;
