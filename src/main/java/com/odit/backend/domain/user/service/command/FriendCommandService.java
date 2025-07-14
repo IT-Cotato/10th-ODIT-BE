@@ -2,8 +2,6 @@ package com.odit.backend.domain.user.service.command;
 
 import static com.odit.backend.global.error.GlobalErrorCode.*;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,11 +77,12 @@ public class FriendCommandService {
 	}
 
 	// 친구 삭제
-	public void removeFriend(Long userId, Long friendId) {
-		List<Long> friends = friendshipRepository.findFriends(userId);
-		if (!friends.contains(friendId)) {
-			throw new FriendShipException(FRIEND_NOT_FOUND);
-		}
+	public void removeFriend(Long userId, String nickName) {
+		Long friendId = friendshipRepository.findFriendIdByUserIdAndNickname(userId, nickName)
+			.orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
 		friendshipRepository.deleteFriend(userId, friendId);
+
+
 	}
 }
