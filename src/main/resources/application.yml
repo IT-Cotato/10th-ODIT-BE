@@ -128,3 +128,11 @@ sse:
 springdoc:
   swagger-ui:
     path: /
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    show-common-extensions: true
+  api-docs:
+    path: /v3/api-docs
+  show-actuator: true
+  use-fqn: false

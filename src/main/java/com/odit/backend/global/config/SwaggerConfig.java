@@ -2,6 +2,7 @@ package com.odit.backend.global.config;
 
 import java.util.Arrays;
 
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -51,5 +52,13 @@ public class SwaggerConfig {
 				.description("ODIT api 명세서입니다.")
 				.version("1.0.0"))
 			.servers(Arrays.asList(localServer, httpsServer)); // 서버 URL 추가
+	}
+
+	@Bean
+	public GroupedOpenApi publicApi() {
+		return GroupedOpenApi.builder()
+			.group("public")
+			.pathsToMatch("/api/**")
+			.build();
 	}
 }
