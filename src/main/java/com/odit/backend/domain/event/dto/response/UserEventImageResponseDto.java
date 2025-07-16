@@ -1,15 +1,25 @@
 package com.odit.backend.domain.event.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
 public record UserEventImageResponseDto(
-	@NotNull(message = "이벤트 이미지 ID는 필수입니다.")
+	@Schema(
+		description = "Event ID",
+		example = "2"
+	)
 	Long id,
-	@NotNull(message = "사용자 이벤트 ID는 필수입니다.")
+	@Schema(
+		description = "User Event ID",
+		example = "2"
+	)
 	Long userEventId,
-	@NotBlank(message = "URL은 비어 있을 수 없습니다.")
+	@Schema(
+		description = "업데이트 된 이미지 URL",
+		example = "[\"https://example.com/image2.jpg\"]"
+	)
 	String url) {
 }

@@ -3,19 +3,56 @@ package com.odit.backend.domain.event.dto.request;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
+@Schema(description = "이벤트 등록 요청")
 public record EventRequestDto(
 	@NotBlank(message = "이벤트명은 필수 입력값입니다.")
+	@Schema(
+		description = "이벤트명",
+		example = "Cats",
+		requiredMode = Schema.RequiredMode.REQUIRED
+	)
 	String name,
 
 	@NotBlank(message = "카테고리는 필수 입력값입니다.")
+	@Schema(
+		description = "카테고리",
+		example = "뮤지컬",
+		requiredMode = Schema.RequiredMode.REQUIRED
+	)
 	String category,
 
+	@NotBlank(message = "이벤트 시작일자는 필수 입력값입니다.")
+	@Schema(
+		description = "이벤트 시작일시",
+		example = "2024-01-01T10:00:00",
+		requiredMode = Schema.RequiredMode.REQUIRED
+	)
 	LocalDateTime startDate,
+
+	@NotBlank(message = "이벤트 종료일자는 필수 입력값입니다.")
+	@Schema(
+		description = "이벤트 마감일시",
+		example = "2024-01-01T10:00:00",
+		requiredMode = Schema.RequiredMode.REQUIRED
+	)
 	LocalDateTime endDate,
+
+	@Schema(
+		description = "사용자 메모",
+		example = "",
+		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+	)
 	String memo,
-	Boolean visited,
+
+	@Schema(
+		description = "관련 이미지 URL 목록",
+		example = "[\"https://example.com/image1.jpg\", \"https://example.com/image2.jpg\"]",
+		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+	)
 	List<String> imageUrlList
 ) {
 }
