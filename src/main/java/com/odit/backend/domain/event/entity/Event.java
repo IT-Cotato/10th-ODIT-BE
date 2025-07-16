@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Builder
 @Getter
@@ -34,16 +35,21 @@ public class Event extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(unique = true, nullable = false)
+	@NonNull
+	@Column(unique = true)
+	private Long externalId;
+
+	@NonNull
 	private String name;
 
-	@Column(nullable = false)
+	@NonNull
 	private String category;
 
-	@Column(nullable = false, name = "start_date")
+	@NonNull
 	private LocalDateTime startDate;
 
-	@Column(nullable = false, name = "end_date")
+	@NonNull
+	@Column(name = "end_date")
 	private LocalDateTime endDate;
 
 	@Builder.Default
@@ -54,8 +60,10 @@ public class Event extends BaseEntity {
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<EventImage> images = new ArrayList<>();
 
-	public static Event createEvent(String name, String category, LocalDateTime startDate, LocalDateTime endDate) {
+	public static Event createEvent(Long externalId, String name, String category, LocalDateTime startDate,
+		LocalDateTime endDate) {
 		Event event = new Event();
+		event.externalId = externalId;
 		event.name = name;
 		event.category = category;
 		event.startDate = startDate;

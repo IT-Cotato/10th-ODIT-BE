@@ -8,4 +8,6 @@ import com.odit.backend.domain.event.entity.Event;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
   Optional<Event> findByName(String name);
+
+  Optional<Event> findByExternalId(Long externalId);
 }

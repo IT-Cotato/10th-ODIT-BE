@@ -1,5 +1,7 @@
 package com.odit.backend.domain.event.service.query;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,5 +25,9 @@ public class EventQueryService {
 	public Event getEventByName(String eventName) {
 		return eventRepository.findByName(eventName)
 			.orElseThrow(() -> new EventException(GlobalErrorCode.COMMON_EVENT_NOT_FOUND));
+	}
+
+	public Optional<Event> getEventByExternalId(long externalId) {
+		return eventRepository.findByExternalId(externalId);
 	}
 }
