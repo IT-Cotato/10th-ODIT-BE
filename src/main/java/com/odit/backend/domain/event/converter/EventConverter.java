@@ -27,7 +27,7 @@ public class EventConverter {
 	public EventResponseDto toResponse(Event event) {
 		return EventResponseDto.builder()
 			.id(event.getId())
-			.name(event.getName())
+			.name(event.getTitle())
 			.category(event.getCategory())
 			.startDate(event.getStartDate())
 			.endDate(event.getEndDate())

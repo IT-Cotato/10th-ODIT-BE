@@ -40,7 +40,7 @@ public class Event extends BaseEntity {
 	private Long externalId;
 
 	@NonNull
-	private String name;
+	private String title;
 
 	@NonNull
 	private String category;
@@ -64,7 +64,7 @@ public class Event extends BaseEntity {
 		LocalDateTime endDate) {
 		Event event = new Event();
 		event.externalId = externalId;
-		event.name = name;
+		event.title = name;
 		event.category = category;
 		event.startDate = startDate;
 		event.endDate = endDate;
@@ -84,7 +84,7 @@ public class Event extends BaseEntity {
 
 	public void updateEvent(EventUpdateRequestDto updateRequest) {
 		if (updateRequest.name() != null)
-			this.name = updateRequest.name();
+			this.title = updateRequest.name();
 		if (updateRequest.category() != null)
 			this.category = updateRequest.category();
 		if (updateRequest.startDate() != null)
