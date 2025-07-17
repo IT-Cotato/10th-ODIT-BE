@@ -60,11 +60,11 @@ public class Event extends BaseEntity {
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<EventImage> images = new ArrayList<>();
 
-	public static Event createEvent(Long externalId, String name, String category, LocalDateTime startDate,
+	public static Event createEvent(Long externalId, String title, String category, LocalDateTime startDate,
 		LocalDateTime endDate) {
 		Event event = new Event();
 		event.externalId = externalId;
-		event.title = name;
+		event.title = title;
 		event.category = category;
 		event.startDate = startDate;
 		event.endDate = endDate;
@@ -83,8 +83,8 @@ public class Event extends BaseEntity {
 	}
 
 	public void updateEvent(EventUpdateRequestDto updateRequest) {
-		if (updateRequest.name() != null)
-			this.title = updateRequest.name();
+		if (updateRequest.title() != null)
+			this.title = updateRequest.title();
 		if (updateRequest.category() != null)
 			this.category = updateRequest.category();
 		if (updateRequest.startDate() != null)

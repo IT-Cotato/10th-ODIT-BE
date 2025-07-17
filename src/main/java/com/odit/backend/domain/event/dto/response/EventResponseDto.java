@@ -19,7 +19,7 @@ public record EventResponseDto(
 		description = "이벤트명",
 		example = "Cats"
 	)
-	String name,
+	String title,
 
 	@Schema(
 		description = "카테고리",

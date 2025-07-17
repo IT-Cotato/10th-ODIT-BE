@@ -22,8 +22,8 @@ public class EventQueryService {
 
 	private final EventRepository eventRepository;
 
-	public Event getEventByName(String eventName) {
-		return eventRepository.findByName(eventName)
+	public Event getEventByTitle(String eventName) {
+		return eventRepository.findByTitle(eventName)
 			.orElseThrow(() -> new EventException(GlobalErrorCode.COMMON_EVENT_NOT_FOUND));
 	}
 

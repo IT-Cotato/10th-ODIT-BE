@@ -14,7 +14,7 @@ public record EventUpdateRequestDto(
 		example = "Cats",
 		requiredMode = Schema.RequiredMode.REQUIRED
 	)
-	String name,
+	String title,
 
 	@NotBlank(message = "카테고리는 필수 입력값입니다.")
 	@Schema(

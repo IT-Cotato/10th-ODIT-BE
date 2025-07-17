@@ -17,7 +17,7 @@ public class EventConverter {
 	public Event toEntity(EventRequestDto request) {
 		return Event.createEvent(
 			request.externalId(),
-			request.name(),
+			request.title(),
 			request.category(),
 			request.startDate(),
 			request.endDate()
@@ -27,7 +27,7 @@ public class EventConverter {
 	public EventResponseDto toResponse(Event event) {
 		return EventResponseDto.builder()
 			.id(event.getId())
-			.name(event.getTitle())
+			.title(event.getTitle())
 			.category(event.getCategory())
 			.startDate(event.getStartDate())
 			.endDate(event.getEndDate())
