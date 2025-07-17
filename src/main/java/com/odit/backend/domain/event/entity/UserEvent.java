@@ -50,27 +50,18 @@ public class UserEvent extends BaseEntity {
 	@JoinColumn(name = "event_id")
 	private Event event;
 
-	@Column(name = "custom_start_date")
-	private LocalDateTime customStartDate;
-
-	@Column(name = "custom_end_date")
-	private LocalDateTime customEndDate;
-
 	private String memo;
 
 	@NonNull
-	@Negative
 	private Boolean visited;
 
 	@OneToMany(mappedBy = "userEvent", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserEventImage> images = new ArrayList<>();
 
 	// 팩토리 메서드
-	public static UserEvent createEvent(LocalDateTime startDate, LocalDateTime endDate,
+	public static UserEvent createEvent(
 		String memo, Boolean visited) {
 		UserEvent userEvent = new UserEvent();
-		userEvent.customStartDate = startDate;
-		userEvent.customEndDate = endDate;
 		userEvent.memo = memo;
 		userEvent.visited = visited;
 		return userEvent;
@@ -92,10 +83,6 @@ public class UserEvent extends BaseEntity {
 
 	// 업데이트 메서드
 	public void updateEvent(EventUpdateRequestDto request) {
-		if (request.startDate() != null)
-			this.customStartDate = request.startDate();
-		if (request.endDate() != null)
-			this.customEndDate = request.endDate();
 		if (request.memo() != null)
 			this.memo = request.memo();
 		if (request.visited() != null)

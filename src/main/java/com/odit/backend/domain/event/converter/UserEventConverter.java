@@ -9,6 +9,7 @@ import com.odit.backend.domain.event.dto.request.EventRequestDto;
 import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.entity.UserEvent;
+import com.odit.backend.domain.image.entity.EventImage;
 import com.odit.backend.domain.image.entity.UserEventImage;
 
 @Component
@@ -16,8 +17,6 @@ public class UserEventConverter {
 
 	public UserEvent toEntity(EventRequestDto request) {
 		return UserEvent.createEvent(
-			request.startDate(),
-			request.endDate(),
 			request.memo(),
 			false
 		);
@@ -26,14 +25,15 @@ public class UserEventConverter {
 	public EventResponseDto toResponse(UserEvent userEvent) {
 		return EventResponseDto.builder()
 			.id(userEvent.getId())
-			.startDate(userEvent.getCustomStartDate())
-			.endDate(userEvent.getCustomEndDate())
+			.startDate(userEvent.getEvent().getStartDate())
+			.endDate(userEvent.getEvent().getEndDate())
+			.category(userEvent.getEvent().getCategory())
 			.memo(userEvent.getMemo())
 			.visited(userEvent.getVisited())
-			.imageUrlList(Optional.ofNullable(userEvent.getImages())
+			.imageUrlList(Optional.ofNullable(userEvent.getEvent().getImages())
 				.orElse(Collections.emptyList())
 				.stream()
-				.map(UserEventImage::getUrl)
+				.map(EventImage::getUrl)
 				.toList())
 			.build();
 	}
