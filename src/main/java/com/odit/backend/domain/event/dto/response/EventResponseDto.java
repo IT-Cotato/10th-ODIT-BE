@@ -1,5 +1,6 @@
 package com.odit.backend.domain.event.dto.response;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,15 +30,15 @@ public record EventResponseDto(
 
 	@Schema(
 		description = "이벤트 시작일시",
-		example = "2024-01-01T10:00:00"
+		example = "20250718"
 	)
-	LocalDateTime startDate,
+	LocalDate startDate,
 
 	@Schema(
 		description = "이벤트 마감일시",
-		example = "2024-01-01T10:00:00"
+		example = "20250718"
 	)
-	LocalDateTime endDate,
+	LocalDate endDate,
 
 	@Schema(
 		description = "사용자 메모"

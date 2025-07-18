@@ -1,6 +1,6 @@
 package com.odit.backend.domain.event.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,11 +46,12 @@ public class Event extends BaseEntity {
 	private String category;
 
 	@NonNull
-	private LocalDateTime startDate;
+	@Column(name = "start_date")
+	private LocalDate startDate;
 
 	@NonNull
 	@Column(name = "end_date")
-	private LocalDateTime endDate;
+	private LocalDate endDate;
 
 	@Builder.Default
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -60,8 +61,8 @@ public class Event extends BaseEntity {
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<EventImage> images = new ArrayList<>();
 
-	public static Event createEvent(Long seq, String title, String category, LocalDateTime startDate,
-		LocalDateTime endDate) {
+	public static Event createEvent(Long seq, String title, String category, LocalDate startDate,
+		LocalDate endDate) {
 		Event event = new Event();
 		event.seq = seq;
 		event.title = title;

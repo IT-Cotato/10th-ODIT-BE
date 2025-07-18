@@ -1,7 +1,10 @@
 package com.odit.backend.domain.event.dto.request;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -33,18 +36,20 @@ public record EventRequestDto(
 	@NotBlank(message = "이벤트 시작일자는 필수 입력값입니다.")
 	@Schema(
 		description = "이벤트 시작일시",
-		example = "2024-01-01T10:00:00",
+		example = "20250718",
 		requiredMode = Schema.RequiredMode.REQUIRED
 	)
-	LocalDateTime startDate,
+	@JsonFormat(pattern = "yyyyMMdd")
+	LocalDate startDate,
 
 	@NotBlank(message = "이벤트 종료일자는 필수 입력값입니다.")
 	@Schema(
 		description = "이벤트 마감일시",
-		example = "2024-01-01T10:00:00",
+		example = "20250718",
 		requiredMode = Schema.RequiredMode.REQUIRED
 	)
-	LocalDateTime endDate,
+	@JsonFormat(pattern = "yyyyMMdd")
+	LocalDate endDate,
 
 	@Schema(
 		description = "사용자 메모",

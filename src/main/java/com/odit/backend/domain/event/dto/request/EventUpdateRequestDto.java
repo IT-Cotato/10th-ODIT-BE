@@ -1,5 +1,6 @@
 package com.odit.backend.domain.event.dto.request;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,18 +28,18 @@ public record EventUpdateRequestDto(
 	@NotBlank(message = "이벤트 시작일자는 필수 입력값입니다.")
 	@Schema(
 		description = "이벤트 시작일시",
-		example = "2024-01-01 10:00:00",
+		example = "20250718",
 		requiredMode = Schema.RequiredMode.REQUIRED
 	)
-	LocalDateTime startDate,
+	LocalDate startDate,
 
 	@NotBlank(message = "이벤트 종료일자는 필수 입력값입니다.")
 	@Schema(
 		description = "이벤트 마감일시",
-		example = "2024-01-01 10:00:00",
+		example = "20250718",
 		requiredMode = Schema.RequiredMode.REQUIRED
 	)
-	LocalDateTime endDate,
+	LocalDate endDate,
 
 	@Schema(
 		description = "사용자 메모",
