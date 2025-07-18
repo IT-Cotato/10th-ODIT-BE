@@ -1,5 +1,7 @@
 package com.odit.backend.domain.event.service.query;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +22,12 @@ public class EventQueryService {
 
 	private final EventRepository eventRepository;
 
-	public Event getEventByName(String eventName) {
-		return eventRepository.findByName(eventName)
+	public Event getEventByTitle(String eventName) {
+		return eventRepository.findByTitle(eventName)
 			.orElseThrow(() -> new EventException(GlobalErrorCode.COMMON_EVENT_NOT_FOUND));
+	}
+
+	public Optional<Event> getEventBySeq(long seq) {
+		return eventRepository.findBySeq(seq);
 	}
 }

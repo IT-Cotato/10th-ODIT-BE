@@ -7,6 +7,7 @@ import com.odit.backend.domain.event.converter.EventConverter;
 import com.odit.backend.domain.event.dto.request.EventRequestDto;
 import com.odit.backend.domain.event.entity.Event;
 import com.odit.backend.domain.event.repository.EventRepository;
+import com.odit.backend.domain.event.service.query.EventQueryService;
 import com.odit.backend.domain.image.service.command.EventImageCommandService;
 
 import lombok.AccessLevel;
@@ -21,15 +22,18 @@ public class EventCommandService {
 	private final EventRepository eventRepository;
 	private final EventConverter eventConverter;
 	private final EventImageCommandService eventImageCommandService;
+	private final EventQueryService eventQueryService;
 
 	public Event saveOrFindEvent(EventRequestDto request) {
-		return eventRepository.findByName(request.name()).orElseGet(() -> {
-			Event event = eventConverter.toEntity(request);
-			eventRepository.save(event);
-			if (!request.imageUrlList().isEmpty()) {
-				eventImageCommandService.addImageToEvent(request, event);
-			}
-			return event;
-		});
+		return eventQueryService.getEventBySeq(request.seq()).orElseGet(() -> createNewEvent(request));
+	}
+
+	private Event createNewEvent(EventRequestDto request) {
+		Event event = eventConverter.toEntity(request);
+		Event savedEvent = eventRepository.save(event);
+		if (!request.imageUrlList().isEmpty()) {
+			eventImageCommandService.addImageToEvent(request, savedEvent);
+		}
+		return savedEvent;
 	}
 }

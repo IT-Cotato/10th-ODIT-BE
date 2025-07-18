@@ -38,13 +38,13 @@ public class NotificationEventConverter {
 
 	/* EVENT_START_SOON */
 	public NotificationEvent toStartEvent(UserEvent userEvent, int remainingDays) {
-		String content = String.format("'%s'이 %d일 뒤 시작해요!", userEvent.getEvent().getName(), remainingDays);
+		String content = String.format("'%s'이 %d일 뒤 시작해요!", userEvent.getEvent().getTitle(), remainingDays);
 		return createNotificationEvent(userEvent.getUser().getEmail(), EVENT_START_SOON, content);
 	}
 
 	/* EVENT_DURATION_MISSING */
 	public NotificationEvent toMissingEvent(UserEvent userEvent) {
-		String content = String.format("'%s' 기간을 아직 입력하지 않았어요!", userEvent.getEvent().getName());
+		String content = String.format("'%s' 기간을 아직 입력하지 않았어요!", userEvent.getEvent().getTitle());
 		return createNotificationEvent(userEvent.getUser().getEmail(), EVENT_DURATION_MISSING, content);
 	}
 
@@ -53,7 +53,7 @@ public class NotificationEventConverter {
 		if (userEvents == null || userEvents.isEmpty()) {
 			throw new IllegalArgumentException("이벤트 리스트에 하나 이상의 요소가 존재해야 합니다.");
 		}
-		String primaryEventName = userEvents.get(0).getEvent().getName();
+		String primaryEventName = userEvents.get(0).getEvent().getTitle();
 		int remainingCount = userEvents.size() - 1;
 		String content = String.format("'%s'외 %d개의 이벤트 기간을 아직 입력하지 않았어요!", primaryEventName, remainingCount);
 		return createNotificationEvent(userEvents.get(0).getUser().getEmail(), EVENT_DURATION_MISSING, content);

@@ -1,6 +1,6 @@
 package com.odit.backend.domain.event.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Builder
 @Getter
@@ -34,17 +35,23 @@ public class Event extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(unique = true, nullable = false)
-	private String name;
+	@NonNull
+	@Column(unique = true)
+	private Long seq;
 
-	@Column(nullable = false)
+	@NonNull
+	private String title;
+
+	@NonNull
 	private String category;
 
-	@Column(nullable = false, name = "start_date")
-	private LocalDateTime startDate;
+	@NonNull
+	@Column(name = "start_date")
+	private LocalDate startDate;
 
-	@Column(nullable = false, name = "end_date")
-	private LocalDateTime endDate;
+	@NonNull
+	@Column(name = "end_date")
+	private LocalDate endDate;
 
 	@Builder.Default
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -54,9 +61,11 @@ public class Event extends BaseEntity {
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<EventImage> images = new ArrayList<>();
 
-	public static Event createEvent(String name, String category, LocalDateTime startDate, LocalDateTime endDate) {
+	public static Event createEvent(Long seq, String title, String category, LocalDate startDate,
+		LocalDate endDate) {
 		Event event = new Event();
-		event.name = name;
+		event.seq = seq;
+		event.title = title;
 		event.category = category;
 		event.startDate = startDate;
 		event.endDate = endDate;
@@ -75,8 +84,8 @@ public class Event extends BaseEntity {
 	}
 
 	public void updateEvent(EventUpdateRequestDto updateRequest) {
-		if (updateRequest.name() != null)
-			this.name = updateRequest.name();
+		if (updateRequest.title() != null)
+			this.title = updateRequest.title();
 		if (updateRequest.category() != null)
 			this.category = updateRequest.category();
 		if (updateRequest.startDate() != null)
