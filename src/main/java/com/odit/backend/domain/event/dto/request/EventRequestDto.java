@@ -10,10 +10,10 @@ import jakarta.validation.constraints.NotNull;
 @Schema(description = "이벤트 등록 요청")
 public record EventRequestDto(
 	@Schema(
-		description = "문화정보 API에서 가져온 문화정보 ID",
+		description = "문화정보 API에서 가져온 ",
 		example = "2432452"
 	)
-	Long externalId,
+	Long seq,
 	@NotBlank(message = "이벤트명은 필수 입력값입니다.")
 	@Schema(
 		description = "이벤트명",

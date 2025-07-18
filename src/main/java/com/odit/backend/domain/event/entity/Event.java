@@ -37,7 +37,7 @@ public class Event extends BaseEntity {
 
 	@NonNull
 	@Column(unique = true)
-	private Long externalId;
+	private Long seq;
 
 	@NonNull
 	private String title;
@@ -60,10 +60,10 @@ public class Event extends BaseEntity {
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<EventImage> images = new ArrayList<>();
 
-	public static Event createEvent(Long externalId, String title, String category, LocalDateTime startDate,
+	public static Event createEvent(Long seq, String title, String category, LocalDateTime startDate,
 		LocalDateTime endDate) {
 		Event event = new Event();
-		event.externalId = externalId;
+		event.seq = seq;
 		event.title = title;
 		event.category = category;
 		event.startDate = startDate;

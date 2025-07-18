@@ -25,7 +25,7 @@ public class EventCommandService {
 	private final EventQueryService eventQueryService;
 
 	public Event saveOrFindEvent(EventRequestDto request) {
-		return eventQueryService.getEventByExternalId(request.externalId()).orElseGet(() -> createNewEvent(request));
+		return eventQueryService.getEventBySeq(request.seq()).orElseGet(() -> createNewEvent(request));
 	}
 
 	private Event createNewEvent(EventRequestDto request) {

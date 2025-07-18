@@ -16,7 +16,7 @@ public class EventConverter {
 
 	public Event toEntity(EventRequestDto request) {
 		return Event.createEvent(
-			request.externalId(),
+			request.seq(),
 			request.title(),
 			request.category(),
 			request.startDate(),
