@@ -10,7 +10,6 @@ import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.entity.UserEvent;
 import com.odit.backend.domain.image.entity.EventImage;
-import com.odit.backend.domain.image.entity.UserEventImage;
 
 @Component
 public class UserEventConverter {
