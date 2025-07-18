@@ -28,7 +28,7 @@ public record EventResponseDto(
 
 	@Schema(
 		description = "이벤트 시작일시",
-		example = "20250718"
+		example = "2025-07-18"
 	)
 	LocalDate startDate,
 

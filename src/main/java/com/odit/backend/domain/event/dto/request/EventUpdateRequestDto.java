@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-
+import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "이벤트 업데이트 요청")
 public record EventUpdateRequestDto(
@@ -24,7 +24,7 @@ public record EventUpdateRequestDto(
 	)
 	String category,
 
-	@NotBlank(message = "이벤트 시작일자는 필수 입력값입니다.")
+	@NotNull(message = "이벤트 시작일자는 필수 입력값입니다.")
 	@Schema(
 		description = "이벤트 시작일시",
 		example = "20250718",
@@ -32,7 +32,7 @@ public record EventUpdateRequestDto(
 	)
 	LocalDate startDate,
 
-	@NotBlank(message = "이벤트 종료일자는 필수 입력값입니다.")
+	@NotNull(message = "이벤트 종료일자는 필수 입력값입니다.")
 	@Schema(
 		description = "이벤트 마감일시",
 		example = "20250718",

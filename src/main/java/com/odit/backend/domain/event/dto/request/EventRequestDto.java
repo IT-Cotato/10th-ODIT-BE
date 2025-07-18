@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "이벤트 등록 요청")
 public record EventRequestDto(
@@ -40,7 +41,7 @@ public record EventRequestDto(
 	@JsonFormat(pattern = "yyyyMMdd")
 	LocalDate startDate,
 
-	@NotBlank(message = "이벤트 종료일자는 필수 입력값입니다.")
+	@NotNull(message = "이벤트 종료일자는 필수 입력값입니다.")
 	@Schema(
 		description = "이벤트 마감일시",
 		example = "20250718",
