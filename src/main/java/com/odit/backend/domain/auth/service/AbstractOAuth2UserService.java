@@ -58,11 +58,7 @@ public abstract class AbstractOAuth2UserService extends SimpleUrlAuthenticationS
 		log.debug("[Token] 리프레시 토큰 쿠키 생성 - name: {}, maxAge: {}", refreshTokenCookieName, cookie.getMaxAge());
 	}
 
-	protected String determineRedirectUrl(HttpServletRequest request) {
-		if (request.getHeader("Referer") != null && request.getHeader("Referer").contains(FRONT_PORT)) {
-			return FRONT_REDIRECT_URI;
-		} else {
-			return baseUrl;
-		}
+	protected String determineRedirectUrl() {
+		return baseUrl;
 	}
 }

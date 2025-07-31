@@ -40,7 +40,7 @@ spring:
       port: 6379
 
 
-base-url: ${SERVER_BASE_URL}
+base-url: ${FRONT_LOCAL_URL}/login/oauth
 
 redirect:
   kakaoUrl: ${SERVER_BASE_URL}/login/oauth2/code/kakao
