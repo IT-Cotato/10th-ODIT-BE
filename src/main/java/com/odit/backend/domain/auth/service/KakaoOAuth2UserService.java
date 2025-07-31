@@ -66,7 +66,7 @@ public class KakaoOAuth2UserService extends AbstractOAuth2UserService {
 		refreshTokenRepository.save(refreshToken);
 		addRefreshTokenToCookie(newRefreshToken, response);
 
-		String redirectUrl = determineRedirectUrl(request);
+		String redirectUrl = determineRedirectUrl();
 		log.debug("[Kakao OAuth2] 리다이렉션 URL: {}", redirectUrl);
 		response.sendRedirect(redirectUrl);
 	}

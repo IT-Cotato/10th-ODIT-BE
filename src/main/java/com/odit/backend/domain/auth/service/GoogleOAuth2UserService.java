@@ -59,7 +59,7 @@ public class GoogleOAuth2UserService extends AbstractOAuth2UserService {
 		refreshTokenRepository.save(refreshToken);
 		addRefreshTokenToCookie(newRefreshToken, response);
 
-		String redirectUrl = determineRedirectUrl(request);
+		String redirectUrl = determineRedirectUrl();
 		log.debug("[Google OAuth2] 리다이렉션 URL: {}", redirectUrl);
 		response.sendRedirect(redirectUrl);
 	}
