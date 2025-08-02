@@ -15,9 +15,9 @@ import com.odit.backend.domain.place.entity.UserPlace;
 
 @Component
 public class PlaceConverter {
-	public Place toEntity(PlaceRequestDto requestDto, Long placeId) {
+	public Place toEntity(PlaceRequestDto requestDto, Long sequence) {
 		return Place.builder()
-			.seq(placeId)
+			.seq(sequence)
 			.placeName(requestDto.placeName())
 			.addressName(requestDto.addressName())
 			.latitude(requestDto.latitude())

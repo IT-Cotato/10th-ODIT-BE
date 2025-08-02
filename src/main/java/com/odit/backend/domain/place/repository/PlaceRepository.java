@@ -16,4 +16,7 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
 
 	@Query("SELECT p FROM Place p where p.placeName LIKE %:placeName%")
 	Optional<Place> findByBusinessName(@Param("placeName") String businessName);
+
+	@Query("SELECT p FROM Place p where p.seq = :seq")
+	Optional<Place> findBySequence(@Param("seq") Long sequence);
 }
