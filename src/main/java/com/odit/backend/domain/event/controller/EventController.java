@@ -48,7 +48,7 @@ public class EventController {
 	private final UserEventQueryService queryService;
 	private final UserEventImageCommandService userEventImageCommandService;
 
-	@Operation(summary = "모든 이벤트 조회", description = "모든 이벤트 목록을 조회합니다.")
+	@Operation(summary = "모든 이벤트 조회", description = "유저의 모든 이벤트 목록을 조회합니다.")
 	@ApiResponses(value = {
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(
 			responseCode = "200",
@@ -57,8 +57,9 @@ public class EventController {
 		)
 	})
 	@GetMapping
-	public ResponseEntity<ApiResponse<List<EventResponseDto>>> getAllEvents() {
-		List<EventResponseDto> events = queryService.getAllEvents();
+	public ResponseEntity<ApiResponse<List<EventResponseDto>>> getAllEvents(
+		@AuthenticationPrincipal(expression = "user") User user) {
+		List<EventResponseDto> events = queryService.getAllUserEvents(user.getId());
 		return ResponseEntity.ok(ApiResponse.success(events));
 	}
 

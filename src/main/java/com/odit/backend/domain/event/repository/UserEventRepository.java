@@ -1,6 +1,7 @@
 package com.odit.backend.domain.event.repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,7 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.odit.backend.domain.event.converter.UserEventConverter;
+import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.entity.UserEvent;
+import com.odit.backend.domain.user.entity.User;
 
 @Repository
 public interface UserEventRepository extends JpaRepository<UserEvent, Long> {
@@ -21,4 +25,8 @@ public interface UserEventRepository extends JpaRepository<UserEvent, Long> {
 
 	@Query("SELECT ue FROM UserEvent ue ORDER BY ue.visited DESC")
 	List<UserEvent> findPopularEvents();
+
+	@Query("SELECT ue FROM UserEvent ue JOIN FETCH ue.user JOIN FETCH ue.event WHERE ue.user.id = :userId")
+	List<UserEvent> findAllUserEvents(@Param("userId") Long userId);
+
 }

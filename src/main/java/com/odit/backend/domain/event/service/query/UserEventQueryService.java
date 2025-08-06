@@ -12,6 +12,7 @@ import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.entity.UserEvent;
 import com.odit.backend.domain.event.exception.EventException;
 import com.odit.backend.domain.event.repository.UserEventRepository;
+import com.odit.backend.domain.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +24,13 @@ public class UserEventQueryService {
 
 	public List<EventResponseDto> getAllEvents() {
 		return userEventRepository.findAll()
+			.stream()
+			.map(UserEventConverter::toResponse)
+			.toList();
+	}
+
+	public List<EventResponseDto> getAllUserEvents(Long userId) {
+		return userEventRepository.findAllUserEvents(userId)
 			.stream()
 			.map(UserEventConverter::toResponse)
 			.toList();
