@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class EventCommandService {
 	private final EventRepository eventRepository;
-	private final EventConverter eventConverter;
 	private final EventImageCommandService eventImageCommandService;
 	private final EventQueryService eventQueryService;
 
@@ -29,7 +28,7 @@ public class EventCommandService {
 	}
 
 	private Event createNewEvent(EventRequestDto request) {
-		Event event = eventConverter.toEntity(request);
+		Event event = EventConverter.toEntity(request);
 		Event savedEvent = eventRepository.save(event);
 		if (!request.imageUrlList().isEmpty()) {
 			eventImageCommandService.addImageToEvent(request, savedEvent);

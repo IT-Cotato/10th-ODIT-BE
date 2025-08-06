@@ -20,25 +20,24 @@ import lombok.RequiredArgsConstructor;
 public class UserEventQueryService {
 
 	private final UserEventRepository userEventRepository;
-	private final UserEventConverter userEventConverter;
 
 	public List<EventResponseDto> getAllEvents() {
 		return userEventRepository.findAll()
 			.stream()
-			.map(userEventConverter::toResponse)
+			.map(UserEventConverter::toResponse)
 			.toList();
 	}
 
 	public EventResponseDto getEventById(Long id) {
 		UserEvent userEvent = userEventRepository.findById(id)
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
-		return userEventConverter.toResponse(userEvent);
+		return UserEventConverter.toResponse(userEvent);
 	}
 
 	public List<EventResponseDto> getEventsByDate(LocalDate date) {
 		return userEventRepository.findByDate(date)
 			.stream()
-			.map(userEventConverter::toResponse)
+			.map(UserEventConverter::toResponse)
 			.toList();
 	}
 
@@ -50,14 +49,14 @@ public class UserEventQueryService {
 	public List<EventResponseDto> getNoDateEvents() {
 		return userEventRepository.findNoDateEvents()
 			.stream()
-			.map(userEventConverter::toResponse)
+			.map(UserEventConverter::toResponse)
 			.toList();
 	}
 
 	public List<EventResponseDto> getPopularEvents() {
 		return userEventRepository.findPopularEvents()
 			.stream()
-			.map(userEventConverter::toResponse)
+			.map(UserEventConverter::toResponse)
 			.toList();
 	}
 }

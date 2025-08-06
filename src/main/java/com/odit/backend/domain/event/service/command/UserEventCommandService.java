@@ -29,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 public class UserEventCommandService {
 
 	private final UserEventRepository userEventRepository;
-	private final UserEventConverter userEventConverter;
 	private final UserQueryService userQueryService;
 	private final EventCommandService eventCommandService;
 	private final UserEventImageCommandService userEventImageCommandService;
@@ -40,11 +39,11 @@ public class UserEventCommandService {
 	public EventResponseDto createUserEvent(EventRequestDto request, Long userId) {
 		User user = userQueryService.findUserById(userId);
 		Event event = eventCommandService.saveOrFindEvent(request);
-		UserEvent userEvent = userEventConverter.toEntity(request);
+		UserEvent userEvent = UserEventConverter.toEntity(request);
 
 		saveUserEventRelation(event, userEvent, user);
 
-		return userEventConverter.toResponse(userEvent);
+		return UserEventConverter.toResponse(userEvent);
 	}
 
 	private void saveUserEventRelation(Event event, UserEvent userEvent, User user) {
@@ -60,10 +59,10 @@ public class UserEventCommandService {
 		UserEvent userEvent = userEventRepository.findById(id)
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
 
-		userEventConverter.updateEntity(userEvent, request);
+		UserEventConverter.updateEntity(userEvent, request);
 		userEventRepository.save(userEvent);
 
-		return userEventConverter.toResponse(userEvent);
+		return UserEventConverter.toResponse(userEvent);
 	}
 
 	/**
@@ -73,7 +72,7 @@ public class UserEventCommandService {
 		UserEvent userEvent = userEventRepository.findById(id)
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
 		userEvent.updateMemo(memo);
-		return userEventConverter.toResponse(userEvent);
+		return UserEventConverter.toResponse(userEvent);
 	}
 
 	/**
