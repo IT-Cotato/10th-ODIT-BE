@@ -5,54 +5,95 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "장소 응답")
 public record PlaceResponseDto(
-	@NotNull(message = "장소 아이디는 필수 입력값입니다.")
+
+
+	@Schema(
+		description = "place Id",
+		example = "1"
+	)
 	Long placeId,
 
-	@NotNull(message = "사용자 장소 아이디는 필수 입력값입니다.")
+	@Schema(
+		description = "userPlace Id",
+		example = "1"
+	)
 	Long userPlaceId,
 
-	@NotBlank(message = "메모는 빈 값일 수 없습니다.")
+	@Schema(
+		description = "사용자 메모"
+	)
 	String memo,
 
-	@NotNull(message = "방문 여부는 필수 입력값입니다.")
+	@Schema(
+		description = "해당 장소 방문여부",
+		example = "true"
+	)
 	Boolean visited,
 
-	@NotBlank(message = "장소명은 빈 값일 수 없습니다.")
+	@Schema(
+		description = "장소 이름",
+		example = "스타벅스"
+	)
 	String placeName,
 
-	@NotNull(message = "위도는 필수 입력값입니다.")
+	@Schema(
+		description = "장소 위도",
+		example = "37.5665"
+	)
 	BigDecimal latitude,
 
-	@NotNull(message = "경도는 필수 입력값입니다.")
+	@Schema(
+		description = "장소 경도",
+		example = "127.0458"
+	)
 	BigDecimal longitude,
 
-	@NotBlank(message = "카테고리는 빈 값일 수 없습니다.")
+	@Schema(
+		description = "장소 카테고리",
+		example = "음식점"
+	)
 	String subCategory,
 
-	@NotBlank(message = "도로명 주소는 빈 값일 수 없습니다.")
+	@Schema(
+		description = "장소의 도로명 주소",
+		example = "서울 강남구 영동대로 513"
+	)
 	String roadAddressName,
 
-	@NotBlank(message = "지번 주소는 빈 값일 수 없습니다.")
+	@Schema(
+		description = "장소의 지번 주소",
+		example = "서울 강남구 삼성동 159"
+	)
 	String addressName,
 
-	@NotBlank(message = "URL은 빈 값일 수 없습니다.")
+	@Schema(
+		description = "카카오 맵 url",
+		example = "https://place.map.kakao.com/1382220123"
+	)
 	String url,
 
-	@Nullable
+	@Schema(
+		description = "장소 이미지 url 리스트"
+	)
 	List<String> imageUrlList,
 
-	@NotNull(message = "친구 사용자 아이디는 필수 입력값입니다.")
+	@Schema(
+		description = "친구 Id",
+		example = "1"
+	)
 	Long friendUserId,
 
-	@NotBlank(message = "프로필은 빈 값일 수 없습니다.")
+	@Schema(
+		description = "사용자의 profile",
+		example = "http://k.kakaocdn.net/dn/c6s5g4/btsEtkScM1S/2496XzpgkN4SW7HKFvvcT0/img_640x640.jpg"
+	)
 	String profile
 ) {
 }
