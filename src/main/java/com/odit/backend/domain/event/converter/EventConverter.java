@@ -36,6 +36,7 @@ public class EventConverter {
 				.stream()
 				.map(EventImage::getUrl)
 				.toList())
+			.seq(event.getSeq())
 			.build();
 	}
 
