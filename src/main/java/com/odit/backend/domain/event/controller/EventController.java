@@ -31,6 +31,9 @@ import com.odit.backend.domain.user.entity.User;
 import com.odit.backend.global.common.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +49,13 @@ public class EventController {
 	private final UserEventImageCommandService userEventImageCommandService;
 
 	@Operation(summary = "모든 이벤트 조회", description = "모든 이벤트 목록을 조회합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "이벤트 목록 조회 성공",
+			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
+		)
+	})
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<EventResponseDto>>> getAllEvents() {
 		List<EventResponseDto> events = queryService.getAllEvents();
@@ -54,6 +64,13 @@ public class EventController {
 
 	//특정 ID로 이벤트 조회
 	@Operation(summary = "ID로 이벤트 조회", description = "특정 ID에 해당하는 이벤트의 세부 정보를 조회합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "이벤트 조회 성공",
+			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
+		)
+	})
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<EventResponseDto>> getEventById(@PathVariable Long id) {
 		EventResponseDto event = queryService.getEventById(id);
@@ -61,6 +78,13 @@ public class EventController {
 	}
 
 	@Operation(summary = "특정 날짜의 이벤트 조회", description = "특정 날짜에 해당하는 이벤트 목록을 조회합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "날짜별 이벤트 목록 조회 성공",
+			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
+		)
+	})
 	@GetMapping("/date")
 	public ResponseEntity<ApiResponse<List<EventResponseDto>>> getEventsByDate(@RequestParam LocalDate date) {
 		List<EventResponseDto> events = queryService.getEventsByDate(date);
@@ -68,6 +92,13 @@ public class EventController {
 	}
 
 	@Operation(summary = "오늘의 이벤트 조회", description = "오늘 날짜에 해당하는 이벤트 목록을 조회합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "오늘의 이벤트 목록 조회 성공",
+			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
+		)
+	})
 	@GetMapping("/today")
 	public ResponseEntity<ApiResponse<List<EventResponseDto>>> getTodayEvents() {
 		List<EventResponseDto> events = queryService.getTodayEvents();
@@ -75,6 +106,13 @@ public class EventController {
 	}
 
 	@Operation(summary = "날짜가 지정되지 않은 이벤트 조회", description = "특정 날짜가 지정되지 않은 이벤트 목록을 조회합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "날짜 미지정 이벤트 목록 조회 성공",
+			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
+		)
+	})
 	@GetMapping("/no-date")
 	public ResponseEntity<ApiResponse<List<EventResponseDto>>> getNoDateEvents() {
 		List<EventResponseDto> events = queryService.getNoDateEvents();
@@ -82,6 +120,13 @@ public class EventController {
 	}
 
 	@Operation(summary = "인기 이벤트 조회", description = "방문 수를 기준으로 인기 있는 이벤트 목록을 조회합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "인기 이벤트 목록 조회 성공",
+			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
+		)
+	})
 	@GetMapping("/popular")
 	public ResponseEntity<ApiResponse<List<EventResponseDto>>> getPopularEvents() {
 		List<EventResponseDto> events = queryService.getPopularEvents();
@@ -89,6 +134,13 @@ public class EventController {
 	}
 
 	@Operation(summary = "새 이벤트 생성", description = "제공된 세부 정보를 기반으로 새 이벤트를 생성합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "201",
+			description = "이벤트 생성 성공",
+			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
+		)
+	})
 	@PostMapping
 	public ResponseEntity<ApiResponse<EventResponseDto>> createEvent(
 		@AuthenticationPrincipal(expression = "user") User user,
@@ -98,6 +150,13 @@ public class EventController {
 	}
 
 	@Operation(summary = "이벤트 기본 정보 수정", description = "기존 이벤트의 기본 정보를 수정합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "이벤트 정보 수정 성공",
+			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
+		)
+	})
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponse<EventResponseDto>> updateEventInfo(
 		@PathVariable Long id, @Valid @RequestBody EventUpdateRequestDto request) {
@@ -107,8 +166,15 @@ public class EventController {
 	}
 
 	@Operation(summary = "이벤트 메모 수정", description = "기존 이벤트의 메모를 수정합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "이벤트 메모 수정 성공",
+			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
+		)
+	})
 	@PatchMapping("/{id}/memo")
-	public ResponseEntity<ApiResponse<EventResponseDto>> updateEventInfo(
+	public ResponseEntity<ApiResponse<EventResponseDto>> updateEventMemo(
 		@PathVariable Long id, @RequestParam String memo) {
 
 		EventResponseDto updatedEvent = commandService.updateUserEventMemo(id, memo);
@@ -116,6 +182,12 @@ public class EventController {
 	}
 
 	@Operation(summary = "이벤트 삭제", description = "이벤트 ID를 기반으로 해당 이벤트를 삭제합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "204",
+			description = "이벤트 삭제 성공"
+		)
+	})
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long id) {
 		commandService.deleteEvent(id);
@@ -123,6 +195,13 @@ public class EventController {
 	}
 
 	@Operation(summary = "유저 이벤트 이미지 추가", description = "유저 이벤트에 새로운 이미지를 추가합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "이벤트 이미지 추가 성공",
+			content = @Content(schema = @Schema(implementation = UserEventImageResponseDto.class))
+		)
+	})
 	@PostMapping("/{id}/images")
 	public ResponseEntity<ApiResponse<List<UserEventImageResponseDto>>> addEventImages(
 		@PathVariable Long id,
@@ -133,6 +212,13 @@ public class EventController {
 	}
 
 	@Operation(summary = "유저 이벤트 이미지 업데이트", description = "유저 이벤트의 기존 이미지를 새로운 이미지로 교체합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "이벤트 이미지 업데이트 성공",
+			content = @Content(schema = @Schema(implementation = UserEventImageResponseDto.class))
+		)
+	})
 	@PutMapping("/{id}/images")
 	public ResponseEntity<ApiResponse<List<UserEventImageResponseDto>>> updateEventImages(
 		@PathVariable Long id,
@@ -143,8 +229,13 @@ public class EventController {
 		return ResponseEntity.ok(ApiResponse.success(updatedImages));
 	}
 
-	// 이벤트 이미지 삭제
 	@Operation(summary = "유저 이벤트 이미지 삭제", description = "유저 이벤트의 특정 이미지를 삭제합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "204",
+			description = "이벤트 이미지 삭제 성공"
+		)
+	})
 	@DeleteMapping("/{id}/images/{imageId}")
 	public ResponseEntity<ApiResponse<Void>> deleteEventImage(
 		@PathVariable Long id, @PathVariable Long imageId) {
