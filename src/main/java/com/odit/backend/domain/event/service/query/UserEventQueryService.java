@@ -54,13 +54,6 @@ public class UserEventQueryService {
 		return getEventsByDate(today);
 	}
 
-	public List<EventResponseDto> getNoDateEvents() {
-		return userEventRepository.findNoDateEvents()
-			.stream()
-			.map(UserEventConverter::toResponse)
-			.toList();
-	}
-
 	public List<EventResponseDto> getPopularEvents() {
 		return userEventRepository.findPopularEvents()
 			.stream()

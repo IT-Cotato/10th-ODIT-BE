@@ -106,20 +106,6 @@ public class EventController {
 		return ResponseEntity.ok(ApiResponse.success(events));
 	}
 
-	@Operation(summary = "날짜가 지정되지 않은 이벤트 조회", description = "특정 날짜가 지정되지 않은 이벤트 목록을 조회합니다.")
-	@ApiResponses(value = {
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(
-			responseCode = "200",
-			description = "날짜 미지정 이벤트 목록 조회 성공",
-			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
-		)
-	})
-	@GetMapping("/no-date")
-	public ResponseEntity<ApiResponse<List<EventResponseDto>>> getNoDateEvents() {
-		List<EventResponseDto> events = queryService.getNoDateEvents();
-		return ResponseEntity.ok(ApiResponse.success(events));
-	}
-
 	@Operation(summary = "인기 이벤트 조회", description = "방문 수를 기준으로 인기 있는 이벤트 목록을 조회합니다.")
 	@ApiResponses(value = {
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(
