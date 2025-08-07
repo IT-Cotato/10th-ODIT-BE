@@ -23,6 +23,11 @@ public class UserEventQueryService {
 
 	private final UserEventRepository userEventRepository;
 
+	public UserEvent findById(Long id) {
+		return userEventRepository.findById(id)
+			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
+	}
+
 	public List<EventResponseDto> getAllEvents() {
 		List<EventResponseDto> events = userEventRepository.findAll()
 			.stream()

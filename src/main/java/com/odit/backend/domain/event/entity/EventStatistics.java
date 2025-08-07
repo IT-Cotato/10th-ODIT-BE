@@ -31,10 +31,10 @@ public class EventStatistics extends BaseEntity {
 	private Event event;
 
 	@Column(nullable = false)
-	private Integer bookmarkCount = 0; // 기본값 추가
+	private Integer bookmarkCount = 1; // 기본값 추가
 
 	@Column(nullable = false)
-	private Integer visitCount = 0; // 기본값 추가
+	private Integer visitCount = 1; // 기본값 추가
 
 	// bookmarkCount 증가 메서드 추가
 	public void incrementBookmarkCount() {
@@ -44,5 +44,21 @@ public class EventStatistics extends BaseEntity {
 	// visitCount 증가 메서드 추가
 	public void incrementVisitCount() {
 		this.visitCount++;
+	}
+
+	public void decrementsBookmarkCount() {
+		if (bookmarkCount != 0) {
+			this.bookmarkCount--;
+		}
+	}
+
+	public void decrementVisitCount() {
+		if (visitCount != 0) {
+			this.visitCount--;
+		}
+	}
+
+	public void assignEvent(Event event) {
+		this.event = event;
 	}
 }

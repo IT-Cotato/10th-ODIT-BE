@@ -1,0 +1,27 @@
+package com.odit.backend.domain.event.service.query;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.odit.backend.domain.event.entity.EventStatistics;
+import com.odit.backend.domain.event.exception.EventException;
+import com.odit.backend.domain.event.repository.EventStatisticsRepository;
+import com.odit.backend.global.error.GlobalErrorCode;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+public class EventStatisticsQueryService {
+
+	private final EventStatisticsRepository eventStatisticsRepository;
+
+	public EventStatistics findById(Long eventId) {
+		return eventStatisticsRepository.findById(eventId)
+			.orElseThrow(() -> new EventException(GlobalErrorCode.EVENT_NOT_FOUND));
+	}
+}

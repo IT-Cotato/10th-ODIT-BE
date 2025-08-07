@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
+import com.odit.backend.domain.event.exception.EventException;
 import com.odit.backend.domain.image.entity.EventImage;
 import com.odit.backend.global.entity.BaseEntity;
+import com.odit.backend.global.error.GlobalErrorCode;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -15,6 +17,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -61,6 +64,9 @@ public class Event extends BaseEntity {
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<EventImage> images = new ArrayList<>();
 
+	@OneToOne(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+	private EventStatistics eventStatistics;
+
 	public static Event createEvent(Long seq, String title, String category, LocalDate startDate,
 		LocalDate endDate) {
 		Event event = new Event();
@@ -81,6 +87,13 @@ public class Event extends BaseEntity {
 	public void addImage(EventImage image) {
 		this.images.add(image);
 		image.assignEvent(this);
+	}
+
+	public void assignStatics(EventStatistics eventStatistics) {
+		if (eventStatistics == null) {
+			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
+		}
+		this.eventStatistics = eventStatistics;
 	}
 
 	public void updateEvent(EventUpdateRequestDto updateRequest) {
