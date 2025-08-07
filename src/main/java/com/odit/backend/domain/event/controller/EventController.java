@@ -216,7 +216,7 @@ public class EventController {
 		return ResponseEntity.ok(ApiResponse.success(updatedImages));
 	}
 
-	@Operation(summary = "유저 이벤트 이미지 삭제", description = "유저 이벤트의 특정 이미지를 삭제합니다.")
+	@Operation(summary = "유저 이벤트 단일 이미지 삭제", description = "유저 이벤트의 특정 이미지를 삭제합니다.")
 	@ApiResponses(value = {
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(
 			responseCode = "204",

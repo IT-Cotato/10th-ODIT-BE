@@ -83,17 +83,12 @@ public class UserEventCommandService {
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
 
 		try {
-			// 1. 이미지 삭제 (모든 이미지 삭제 성공 시 이벤트 삭제 진행)
 			for (UserEventImage image : userEvent.getImages()) {
 				userEventImageCommandService.deleteImage(image.getId());
 			}
-
-			// 2. 이벤트 삭제
 			userEventRepository.delete(userEvent);
-			log.info("[이벤트 삭제 완료] eventId = {}", id);
-
+			log.info("[Event] 이벤트 삭제 완료 | eventId = {}", id);
 		} catch (Exception e) {
-			log.error("[이벤트 삭제 실패] eventId = {}, 이유: {}", id, e.getMessage(), e);
 			throw new EventException(EVENT_DELETE_FAILED); // 실패 시 예외 발생 → 트랜잭션 롤백
 		}
 	}
