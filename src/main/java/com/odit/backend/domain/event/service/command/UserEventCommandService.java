@@ -42,6 +42,7 @@ public class UserEventCommandService {
 		UserEvent userEvent = UserEventConverter.toEntity(request);
 
 		saveUserEventRelation(event, userEvent, user);
+		log.info("[Event] 이벤트 생성 완료 | userId = {}, eventId = {}", userId, userEvent.getId());
 
 		return UserEventConverter.toResponse(userEvent);
 	}
@@ -61,6 +62,7 @@ public class UserEventCommandService {
 
 		UserEventConverter.updateEntity(userEvent, request);
 		userEventRepository.save(userEvent);
+		log.info("[Event] 이벤트 정보 수정 완료 | eventId = {}", id);
 
 		return UserEventConverter.toResponse(userEvent);
 	}
@@ -72,6 +74,7 @@ public class UserEventCommandService {
 		UserEvent userEvent = userEventRepository.findById(id)
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
 		userEvent.updateMemo(memo);
+		log.info("[Event] 이벤트 메모 수정 완료 | eventId = {}", id);
 		return UserEventConverter.toResponse(userEvent);
 	}
 
