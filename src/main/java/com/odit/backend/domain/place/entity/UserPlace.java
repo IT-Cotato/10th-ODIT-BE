@@ -44,6 +44,7 @@ public class UserPlace extends BaseEntity {
 	private Place place;
 
 	@OneToMany(mappedBy = "userPlace", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<UserPlaceImage> images = new ArrayList<>();
 
 	private String memo;
