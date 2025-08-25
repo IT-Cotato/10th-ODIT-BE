@@ -23,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class GoogleOAuth2UserService extends AbstractOAuth2UserService {
 
+	private final String FRONT_LOCAL_URL = "http://localhost:3000";
+
 	protected GoogleOAuth2UserService(JwtTokenProvider jwtTokenProvider,
 		RefreshTokenRepository refreshTokenRepository,
 		UserCommandService userCommandService) {
@@ -59,7 +61,8 @@ public class GoogleOAuth2UserService extends AbstractOAuth2UserService {
 		refreshTokenRepository.save(refreshToken);
 		addRefreshTokenToCookie(newRefreshToken, response);
 
-		String redirectUrl = determineRedirectUrl();
+		//String redirectUrl = determineRedirectUrl();
+		String redirectUrl = FRONT_LOCAL_URL + "/login/oauth?accessToken=" + "Bearer " + newAccessToken;
 		log.debug("[Google OAuth2] 리다이렉션 URL: {}", redirectUrl);
 		response.sendRedirect(redirectUrl);
 	}
