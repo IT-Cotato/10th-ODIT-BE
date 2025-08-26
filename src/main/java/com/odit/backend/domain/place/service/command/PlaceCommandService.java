@@ -28,9 +28,9 @@ public class PlaceCommandService {
 
 	// 카카오맵 url -> 기존 공통 장소 반환 or 새로운 공통 장소 생성
 	public Place saveOrFindPlace(PlaceRequestDto request) {
-		Long placeId = extractTrailingDigits(request.url());
-		return placeRepository.findById(placeId).orElseGet(() -> {
-			Place place = placeConverter.toEntity(request, placeId);
+		Long sequence = extractTrailingDigits(request.url());
+		return placeRepository.findBySequence(sequence).orElseGet(() -> {
+			Place place = placeConverter.toEntity(request, sequence);
 			placeRepository.save(place);
 			if (!request.imageUrlList().isEmpty()) {
 				placeImageCommandService.addNewPlaceImage(request, place);

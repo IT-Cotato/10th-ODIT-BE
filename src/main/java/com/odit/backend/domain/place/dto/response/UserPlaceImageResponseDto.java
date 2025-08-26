@@ -1,15 +1,23 @@
 package com.odit.backend.domain.place.dto.response;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
 public record UserPlaceImageResponseDto(
-	@NotNull(message = "사용자 장소 이미지 ID는 필수입니다.")
+	@Schema(
+		description = "userPlaceImage Id",
+		example = "1"
+	)
 	Long userPlaceImageId,
-	@NotNull(message = "사용자 장소 ID는 필수입니다.")
+	@Schema(
+		description = "userPlace Id",
+		example = "1"
+	)
 	Long userPlaceId,
-	@NotBlank(message = "URL은 비어 있을 수 없습니다.")
+	@Schema(
+		description = "업데이트 된 이미지 URL",
+		example = "[\"https://example.com/image2.jpg\"]"
+	)
 	String url) {
 }

@@ -53,5 +53,12 @@ public record EventResponseDto(
 		description = "관련 이미지 URL 목록",
 		example = "[\"https://example.com/image1.jpg\", \"https://example.com/image2.jpg\"]"
 	)
-	List<String> imageUrlList) {
+	List<String> imageUrlList,
+	@Schema(
+		description = "문화정보 API에서 가져온 ",
+		example = "2432452"
+	)
+	Long seq
+	)
+{
 }
