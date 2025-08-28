@@ -11,64 +11,47 @@ import lombok.Builder;
 public record EventResponseDto(
 	@Schema(
 		description = "Event ID",
-		example = "2",
-		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+		example = "2"
 	)
 	Long id,
-
-	@Schema(
-		description = "문화정보 API에서 가져온 고유 시퀀스 번호",
-		example = "2432452",
-		requiredMode = Schema.RequiredMode.NOT_REQUIRED
-	)
-	Long seq,
-
 	@Schema(
 		description = "이벤트명",
-		example = "Cats",
-		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+		example = "Cats"
 	)
 	String title,
 
 	@Schema(
 		description = "카테고리",
-		example = "뮤지컬",
-		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+		example = "뮤지컬"
 	)
 	String category,
 
 	@Schema(
 		description = "이벤트 시작일시",
-		example = "2025-07-18",
-		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+		example = "2025-07-18"
 	)
 	LocalDate startDate,
 
 	@Schema(
 		description = "이벤트 마감일시",
-		example = "2025-07-25",
-		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+		example = "20250718"
 	)
 	LocalDate endDate,
 
 	@Schema(
-		description = "사용자 메모",
-		example = "꼭 봐야 할 뮤지컬, 친구와 함께 관람 예정",
-		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+		description = "사용자 메모"
 	)
 	String memo,
 
 	@Schema(
 		description = "방문 여부",
-		example = "false",
-		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+		example = "false"
 	)
 	Boolean visited,
 
 	@Schema(
 		description = "관련 이미지 URL 목록",
-		example = "[\"https://example.com/image1.jpg\", \"https://example.com/image2.jpg\"]",
-		requiredMode = Schema.RequiredMode.NOT_REQUIRED
+		example = "[\"https://example.com/image1.jpg\", \"https://example.com/image2.jpg\"]"
 	)
 	List<String> imageUrlList,
 	@Schema(

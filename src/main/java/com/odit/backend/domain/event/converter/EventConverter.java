@@ -11,9 +11,7 @@ import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.entity.Event;
 import com.odit.backend.domain.image.entity.EventImage;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
+@Component
 public class EventConverter {
 
 	public Event toEntity(EventRequestDto request) {

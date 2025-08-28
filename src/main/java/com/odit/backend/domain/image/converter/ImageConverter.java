@@ -24,8 +24,4 @@ public class ImageConverter {
 			.url(userEventImage.getUrl())
 			.build();
 	}
-
-	public static UserEventImage toDefaultEntity(String url) {
-		return UserEventImage.builder().url(url).build();
-	}
 }

@@ -44,6 +44,7 @@ public class UserEventImageCommandService {
 
 		List<UserEventImage> uploadedImages = uploadImages(images, Directory.EVENT.getPath());
 
+		// 이미지 연관관계 설정
 		uploadedImages.forEach(userEvent::addImage);
 		userEventRepository.save(userEvent);
 
@@ -55,7 +56,7 @@ public class UserEventImageCommandService {
 	public List<UserEventImage> uploadImages(List<MultipartFile> files, String dirName) {
 		List<UserEventImage> imageList = s3Service.uploadImageFromFile(files, dirName).join()
 			.stream()
-			.map(ImageConverter::toDefaultEntity)
+			.map(url -> UserEventImage.builder().url(url).build())
 			.toList();
 		userEventImageRepository.saveAll(imageList);
 		return imageList;
@@ -81,6 +82,9 @@ public class UserEventImageCommandService {
 		return imageConverter.toResponse(image);
 	}
 
+	/**
+	 * 이벤트 이미지 삭제 (DB에서도 삭제)
+	 */
 	public void deleteEventImage(Long eventId, Long imageId) {
 		UserEvent userEvent = userEventRepository.findById(eventId)
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
@@ -100,9 +104,10 @@ public class UserEventImageCommandService {
 
 			// 3. DB에서 이미지 삭제
 			userEventImageRepository.delete(image);
-			log.info("[Event] 이미지 삭제 완료 eventId = {}, imageId = {}", eventId, imageId);
+			log.info("[이벤트 이미지 삭제 완료] eventId = {}, imageId = {}", eventId, imageId);
 
 		} catch (Exception e) {
+			log.error("[이벤트 이미지 삭제 실패] eventId = {}, imageId = {}, 이유: {}", eventId, imageId, e.getMessage(), e);
 			throw new EventException(IMAGE_DELETE_FAILED);
 		}
 	}

@@ -59,7 +59,7 @@ public record EventRequestDto(
 
 	@Schema(
 		description = "관련 이미지 URL 목록",
-		example = "[\"https://avatars.githubusercontent.com/in/946600?s=64&v=4\"]",
+		example = "[\"https://example.com/image1.jpg\", \"https://example.com/image2.jpg\"]",
 		requiredMode = Schema.RequiredMode.NOT_REQUIRED
 	)
 	List<String> imageUrlList

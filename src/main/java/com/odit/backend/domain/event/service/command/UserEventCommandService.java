@@ -13,6 +13,7 @@ import com.odit.backend.domain.event.entity.Event;
 import com.odit.backend.domain.event.entity.UserEvent;
 import com.odit.backend.domain.event.exception.EventException;
 import com.odit.backend.domain.event.repository.UserEventRepository;
+import com.odit.backend.domain.image.entity.UserEventImage;
 import com.odit.backend.domain.image.service.command.UserEventImageCommandService;
 import com.odit.backend.domain.user.entity.User;
 import com.odit.backend.domain.user.service.query.UserQueryService;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserEventCommandService {
 
 	private final UserEventRepository userEventRepository;
+	private final UserEventConverter userEventConverter;
 	private final UserQueryService userQueryService;
 	private final EventCommandService eventCommandService;
 	private final UserEventImageCommandService userEventImageCommandService;
@@ -38,12 +40,11 @@ public class UserEventCommandService {
 	public EventResponseDto createUserEvent(EventRequestDto request, Long userId) {
 		User user = userQueryService.findUserById(userId);
 		Event event = eventCommandService.saveOrFindEvent(request);
-		UserEvent userEvent = UserEventConverter.toEntity(request);
+		UserEvent userEvent = userEventConverter.toEntity(request);
 
 		saveUserEventRelation(event, userEvent, user);
-		log.info("[Event] 이벤트 생성 완료 | userId = {}, eventId = {}", userId, userEvent.getId());
 
-		return UserEventConverter.toResponse(userEvent);
+		return userEventConverter.toResponse(userEvent);
 	}
 
 	private void saveUserEventRelation(Event event, UserEvent userEvent, User user) {
@@ -59,11 +60,10 @@ public class UserEventCommandService {
 		UserEvent userEvent = userEventRepository.findById(id)
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
 
-		UserEventConverter.updateEntity(userEvent, request);
+		userEventConverter.updateEntity(userEvent, request);
 		userEventRepository.save(userEvent);
-		log.info("[Event] 이벤트 정보 수정 완료 | eventId = {}", id);
 
-		return UserEventConverter.toResponse(userEvent);
+		return userEventConverter.toResponse(userEvent);
 	}
 
 	/**
@@ -73,16 +73,30 @@ public class UserEventCommandService {
 		UserEvent userEvent = userEventRepository.findById(id)
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
 		userEvent.updateMemo(memo);
-		log.info("[Event] 이벤트 메모 수정 완료 | eventId = {}", id);
-		return UserEventConverter.toResponse(userEvent);
+		return userEventConverter.toResponse(userEvent);
 	}
 
 	/**
 	 * 이벤트 삭제 (연관된 이미지도 삭제, 트랜잭션 보장)
 	 */
-	public void delete(UserEvent userEvent) {
-		userEventRepository.delete(userEvent);
-		log.info("[Event] 이벤트 삭제 완료 | eventId = {}", userEvent.getId());
+	public void deleteEvent(Long id) {
+		UserEvent userEvent = userEventRepository.findById(id)
+			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
+
+		try {
+			// 1. 이미지 삭제 (모든 이미지 삭제 성공 시 이벤트 삭제 진행)
+			for (UserEventImage image : userEvent.getImages()) {
+				userEventImageCommandService.deleteImage(image.getId());
+			}
+
+			// 2. 이벤트 삭제
+			userEventRepository.delete(userEvent);
+			log.info("[이벤트 삭제 완료] eventId = {}", id);
+
+		} catch (Exception e) {
+			log.error("[이벤트 삭제 실패] eventId = {}, 이유: {}", id, e.getMessage(), e);
+			throw new EventException(EVENT_DELETE_FAILED); // 실패 시 예외 발생 → 트랜잭션 롤백
+		}
 	}
 
 }

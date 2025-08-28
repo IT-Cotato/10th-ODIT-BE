@@ -27,7 +27,7 @@ public class EventQueryService {
 			.orElseThrow(() -> new EventException(GlobalErrorCode.COMMON_EVENT_NOT_FOUND));
 	}
 
-	public Optional<Event> findEventBySeq(long seq) {
+	public Optional<Event> getEventBySeq(long seq) {
 		return eventRepository.findBySeq(seq);
 	}
 }

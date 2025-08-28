@@ -117,7 +117,6 @@ public enum GlobalErrorCode implements ErrorCode {
 	EVENT_DELETION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EVN-005", "이벤트 삭제에 실패했습니다."),
 	EVENT_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EVN-006", "이벤트 삭제를 실패했습니다."),
 	COMMON_EVENT_NOT_FOUND(NOT_FOUND, "EVN-006", "해당 Common Event 를 찾을 수 없습니다."),
-	MISSING_EVENT_STATISTICS(NOT_FOUND, "EVN-007", "이벤트 통계를 찾을 수 없습니다."),
 
 	/********************************** Notification Domain **********************************/
 	NOTIFICATION_NOT_FOUND(NOT_FOUND, "NOT-001", "알림을 찾을 수 없습니다."),
@@ -133,13 +132,13 @@ public enum GlobalErrorCode implements ErrorCode {
 	S3_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-004", "이미지 업데이트에 실패했습니다."),
 	S3_IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3-005", "이벤트 삭제 중 이미지 삭제 실패."),
 	S3_URL_NOT_VALID(HttpStatus.INTERNAL_SERVER_ERROR, "S3-006", "유효하지 않은 URL입니다."),
-	S3_FILE_SIZE_LIMIT(HttpStatus.INTERNAL_SERVER_ERROR, "S3-007", "파일 크기가 제한을 초과했습니다."),
+	S3_FILE_SIZE_LIMIT(HttpStatus.INTERNAL_SERVER_ERROR,"S3-007" , "파일 크기가 제한을 초과했습니다."),
 	/**
 	 * Async 설정 에러
 	 */
 	TASK_NOT_FOUND(NOT_FOUND, "AS-001", "작업을 찾지 못했습니다."),
 	TASK_ALREADY_COMPLETE(BAD_REQUEST, "AS-002", "이미 완료된 작업입니다."),
-	TASK_UPDATE_FAILED(BAD_REQUEST, "AS-003", "작업 업데이트를 실패했습니다.");
+	TASK_UPDATE_FAILED(BAD_REQUEST,"AS-003" , "작업 업데이트를 실패했습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;
