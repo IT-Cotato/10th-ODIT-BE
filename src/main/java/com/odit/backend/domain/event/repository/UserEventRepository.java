@@ -16,9 +16,10 @@ public interface UserEventRepository extends JpaRepository<UserEvent, Long> {
 	@Query("SELECT ue FROM UserEvent ue WHERE DATE(ue.event.startDate) = :date")
 	List<UserEvent> findByDate(@Param("date") LocalDate date);
 
-	@Query("SELECT ue FROM UserEvent ue WHERE ue.event.startDate IS NULL AND ue.event.endDate IS NULL")
-	List<UserEvent> findNoDateEvents();
-
 	@Query("SELECT ue FROM UserEvent ue ORDER BY ue.visited DESC")
 	List<UserEvent> findPopularEvents();
+
+	@Query("SELECT ue FROM UserEvent ue JOIN FETCH ue.user JOIN FETCH ue.event WHERE ue.user.id = :userId")
+	List<UserEvent> findAllUserEvents(@Param("userId") Long userId);
+
 }

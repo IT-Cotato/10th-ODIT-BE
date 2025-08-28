@@ -14,50 +14,68 @@ import com.odit.backend.domain.event.exception.EventException;
 import com.odit.backend.domain.event.repository.UserEventRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserEventQueryService {
 
 	private final UserEventRepository userEventRepository;
-	private final UserEventConverter userEventConverter;
+
+	public UserEvent findById(Long id) {
+		return userEventRepository.findById(id)
+			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
+	}
 
 	public List<EventResponseDto> getAllEvents() {
-		return userEventRepository.findAll()
+		List<EventResponseDto> events = userEventRepository.findAll()
 			.stream()
-			.map(userEventConverter::toResponse)
+			.map(UserEventConverter::toResponse)
 			.toList();
+		log.info("[Event] 전체 이벤트 조회 완료 | eventCount = {}", events.size());
+		return events;
+	}
+
+	public List<EventResponseDto> getAllUserEvents(Long userId) {
+		List<EventResponseDto> userEvents = userEventRepository.findAllUserEvents(userId)
+			.stream()
+			.map(UserEventConverter::toResponse)
+			.toList();
+		log.info("[Event] 사용자 이벤트 조회 완료 | userId = {}, eventCount = {}", userId, userEvents.size());
+		return userEvents;
 	}
 
 	public EventResponseDto getEventById(Long id) {
 		UserEvent userEvent = userEventRepository.findById(id)
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
-		return userEventConverter.toResponse(userEvent);
+		EventResponseDto response = UserEventConverter.toResponse(userEvent);
+		log.info("[Event] 이벤트 상세 조회 완료 | eventId = {}", id);
+		return response;
 	}
 
 	public List<EventResponseDto> getEventsByDate(LocalDate date) {
-		return userEventRepository.findByDate(date)
+		List<EventResponseDto> events = userEventRepository.findByDate(date)
 			.stream()
-			.map(userEventConverter::toResponse)
+			.map(UserEventConverter::toResponse)
 			.toList();
+		log.info("[Event] 날짜별 이벤트 조회 완료 | date = {}, eventCount = {}", date, events.size());
+		return events;
 	}
 
 	public List<EventResponseDto> getTodayEvents() {
 		LocalDate today = LocalDate.now();
-		return getEventsByDate(today);
-	}
-
-	public List<EventResponseDto> getNoDateEvents() {
-		return userEventRepository.findNoDateEvents()
-			.stream()
-			.map(userEventConverter::toResponse)
-			.toList();
+		List<EventResponseDto> todayEvents = getEventsByDate(today);
+		log.info("[Event] 오늘 이벤트 조회 완료 | date = {}, eventCount = {}", today, todayEvents.size());
+		return todayEvents;
 	}
 
 	public List<EventResponseDto> getPopularEvents() {
-		return userEventRepository.findPopularEvents()
+		List<EventResponseDto> popularEvents = userEventRepository.findPopularEvents()
 			.stream()
-			.map(userEventConverter::toResponse)
+			.map(UserEventConverter::toResponse)
 			.toList();
+		log.info("[Event] 인기 이벤트 조회 완료 | eventCount = {}", popularEvents.size());
+		return popularEvents;
 	}
 }
