@@ -5,10 +5,13 @@ import static com.odit.backend.global.error.GlobalErrorCode.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.odit.backend.domain.event.converter.UserEventConverter;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
+import com.odit.backend.domain.event.dto.response.MonthlyEventPageResponseDto;
 import com.odit.backend.domain.event.entity.UserEvent;
 import com.odit.backend.domain.event.exception.EventException;
 import com.odit.backend.domain.event.repository.UserEventRepository;
@@ -77,5 +80,13 @@ public class UserEventQueryService {
 			.toList();
 		log.info("[Event] 인기 이벤트 조회 완료 | eventCount = {}", popularEvents.size());
 		return popularEvents;
+	}
+
+	public MonthlyEventPageResponseDto getUserEventsByMonth(Long userId, Integer year, Integer month, Pageable pageable) {
+		Page<UserEvent> userEventPage = userEventRepository.findUserEventsByMonth(userId, year, month, pageable);
+		Page<EventResponseDto> eventResponsePage = userEventPage.map(UserEventConverter::toResponse);
+		log.info("[Event] 월별 이벤트 조회 완료 | userId = {}, year = {}, month = {}, pageNumber = {}, totalElements = {}", 
+			userId, year, month, pageable.getPageNumber(), eventResponsePage.getTotalElements());
+		return MonthlyEventPageResponseDto.from(eventResponsePage, year, month);
 	}
 }

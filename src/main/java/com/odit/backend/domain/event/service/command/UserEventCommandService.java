@@ -55,7 +55,7 @@ public class UserEventCommandService {
 	/**
 	 * 이벤트 기본 정보 수정 (이미지 제외)
 	 */
-	public EventResponseDto updateEventInfo(Long id, EventUpdateRequestDto request) {
+	public EventResponseDto updateEventInfo(User user, Long id, EventUpdateRequestDto request) {
 		UserEvent userEvent = userEventRepository.findById(id)
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
 

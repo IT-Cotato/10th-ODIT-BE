@@ -70,12 +70,6 @@ public record EventResponseDto(
 		example = "[\"https://example.com/image1.jpg\", \"https://example.com/image2.jpg\"]",
 		requiredMode = Schema.RequiredMode.NOT_REQUIRED
 	)
-	List<String> imageUrlList,
-	@Schema(
-		description = "문화정보 API에서 가져온 ",
-		example = "2432452"
-	)
-	Long seq
-	)
-{
+	List<String> imageUrlList
+) {
 }

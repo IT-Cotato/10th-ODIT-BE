@@ -48,7 +48,7 @@ public class UserEventCommandController {
 	@PostMapping
 	public ResponseEntity<ApiResponse<EventResponseDto>> createEvent(
 		@AuthenticationPrincipal(expression = "user") User user,
-		@RequestBody EventRequestDto request) {
+		@Valid @RequestBody EventRequestDto request) {
 		EventResponseDto event = commandService.createUserEvent(request, user.getId());
 		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(event));
 	}
@@ -63,9 +63,12 @@ public class UserEventCommandController {
 	})
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponse<EventResponseDto>> updateEventInfo(
-		@PathVariable Long id, @Valid @RequestBody EventUpdateRequestDto request) {
+		@PathVariable Long id,
+		@Valid @RequestBody EventUpdateRequestDto request,
+		@AuthenticationPrincipal(expression = "user") User user
+	) {
 
-		EventResponseDto updatedEvent = commandService.updateEventInfo(id, request);
+		EventResponseDto updatedEvent = commandService.updateEventInfo(user, id, request);
 		return ResponseEntity.ok(ApiResponse.success(updatedEvent));
 	}
 

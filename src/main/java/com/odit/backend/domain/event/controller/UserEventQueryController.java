@@ -3,16 +3,23 @@ package com.odit.backend.domain.event.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
+import com.odit.backend.domain.event.dto.request.MonthlyEventRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
+import com.odit.backend.domain.event.dto.response.MonthlyEventPageResponseDto;
 import com.odit.backend.domain.event.service.command.UserEventCommandService;
+import com.odit.backend.domain.event.service.facade.EventQueryFacade;
 import com.odit.backend.domain.event.service.query.UserEventQueryService;
 import com.odit.backend.domain.user.entity.User;
 import com.odit.backend.global.common.ApiResponse;
@@ -31,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class UserEventQueryController {
 
 	private final UserEventQueryService queryService;
+	private final EventQueryFacade eventQueryFacade;
 
 	@Operation(summary = "모든 이벤트 조회", description = "유저의 모든 이벤트 목록을 조회합니다.")
 	@ApiResponses(value = {
@@ -102,5 +110,22 @@ public class UserEventQueryController {
 	public ResponseEntity<ApiResponse<List<EventResponseDto>>> getPopularEvents() {
 		List<EventResponseDto> events = queryService.getPopularEvents();
 		return ResponseEntity.ok(ApiResponse.success(events));
+	}
+
+	@Operation(summary = "월별 이벤트 페이지 조회", description = "특정 연월의 사용자 이벤트 목록을 페이지 형태로 조회합니다.")
+	@ApiResponses(value = {
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(
+			responseCode = "200",
+			description = "월별 이벤트 페이지 조회 성공",
+			content = @Content(schema = @Schema(implementation = MonthlyEventPageResponseDto.class))
+		)
+	})
+	@GetMapping("/monthly")
+	public ResponseEntity<ApiResponse<MonthlyEventPageResponseDto>> getMonthlyEvents(
+		@AuthenticationPrincipal(expression = "user") User user,
+		@Valid @RequestBody MonthlyEventRequestDto request,
+		Pageable pageable) {
+		MonthlyEventPageResponseDto response = eventQueryFacade.getUserEventsByMonth(user.getId(), request, pageable);
+		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 }
