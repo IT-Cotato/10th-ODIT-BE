@@ -1,13 +1,13 @@
 package com.odit.backend.domain.image.converter;
 
-import org.springframework.stereotype.Component;
-
 import com.odit.backend.domain.event.dto.response.UserEventImageResponseDto;
 import com.odit.backend.domain.image.entity.UserEventImage;
 import com.odit.backend.domain.image.entity.UserPlaceImage;
 import com.odit.backend.domain.place.dto.response.UserPlaceImageResponseDto;
 
-@Component
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class ImageConverter {
 	public UserPlaceImageResponseDto toResponse(UserPlaceImage userPlaceImage) {
 		return UserPlaceImageResponseDto.builder()

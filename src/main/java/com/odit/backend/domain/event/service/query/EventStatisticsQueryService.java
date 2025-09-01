@@ -22,6 +22,6 @@ public class EventStatisticsQueryService {
 
 	public EventStatistics findById(Long eventId) {
 		return eventStatisticsRepository.findById(eventId)
-			.orElseThrow(() -> new EventException(GlobalErrorCode.EVENT_NOT_FOUND));
+			.orElseThrow(() -> new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS));
 	}
 }

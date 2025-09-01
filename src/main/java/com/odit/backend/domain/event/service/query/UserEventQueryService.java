@@ -31,6 +31,11 @@ public class UserEventQueryService {
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
 	}
 
+	public UserEvent findByIdAndUserId(Long id, Long userId) {
+		return userEventRepository.findByIdAndUserId(id, userId)
+			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
+	}
+
 	public List<EventResponseDto> getAllEvents() {
 		List<EventResponseDto> events = userEventRepository.findAll()
 			.stream()

@@ -52,6 +52,7 @@ public class UserEvent extends BaseEntity {
 	@NonNull
 	private Boolean visited;
 
+	@Builder.Default
 	@OneToMany(mappedBy = "userEvent", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserEventImage> images = new ArrayList<>();
 
@@ -88,5 +89,9 @@ public class UserEvent extends BaseEntity {
 
 	public void updateMemo(String memo) {
 		this.memo = memo;
+	}
+
+	public void toggleVisited() {
+		this.visited = !this.visited;
 	}
 }

@@ -1,6 +1,8 @@
 package com.odit.backend.domain.event.entity;
 
+import com.odit.backend.domain.event.exception.EventException;
 import com.odit.backend.global.entity.BaseEntity;
+import com.odit.backend.global.error.GlobalErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,9 +33,14 @@ public class EventStatistics extends BaseEntity {
 	@JoinColumn(name = "event_id", nullable = false)
 	private Event event;
 
+	@Version
+	private Long version;
+
+	@Builder.Default
 	@Column(nullable = false)
 	private Integer bookmarkCount = 1; // 기본값 추가
 
+	@Builder.Default
 	@Column(nullable = false)
 	private Integer visitCount = 1; // 기본값 추가
 
@@ -46,7 +54,7 @@ public class EventStatistics extends BaseEntity {
 		this.visitCount++;
 	}
 
-	public void decrementsBookmarkCount() {
+	public void decrementBookmarkCount() {
 		if (bookmarkCount != 0) {
 			this.bookmarkCount--;
 		}
@@ -59,6 +67,9 @@ public class EventStatistics extends BaseEntity {
 	}
 
 	public void assignEvent(Event event) {
+		if (event == null) {
+			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
+		}
 		this.event = event;
 	}
 }

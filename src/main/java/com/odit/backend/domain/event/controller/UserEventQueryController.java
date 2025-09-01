@@ -18,7 +18,6 @@ import jakarta.validation.Valid;
 import com.odit.backend.domain.event.dto.request.MonthlyEventRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.dto.response.MonthlyEventPageResponseDto;
-import com.odit.backend.domain.event.service.command.UserEventCommandService;
 import com.odit.backend.domain.event.service.facade.EventQueryFacade;
 import com.odit.backend.domain.event.service.query.UserEventQueryService;
 import com.odit.backend.domain.user.entity.User;

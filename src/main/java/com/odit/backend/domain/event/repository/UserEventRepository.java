@@ -2,6 +2,7 @@ package com.odit.backend.domain.event.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,5 +28,8 @@ public interface UserEventRepository extends JpaRepository<UserEvent, Long> {
 	@Query("SELECT ue FROM UserEvent ue JOIN FETCH ue.user JOIN FETCH ue.event " +
 		"WHERE ue.user.id = :userId AND YEAR(ue.event.startDate) = :year AND MONTH(ue.event.startDate) = :month")
 	Page<UserEvent> findUserEventsByMonth(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month, Pageable pageable);
+
+	@Query("SELECT ue FROM UserEvent ue WHERE ue.id = :eventId AND ue.user.id = :userId")
+	Optional<UserEvent> findByIdAndUserId(@Param("eventId") Long eventId, @Param("userId") Long userId);
 
 }

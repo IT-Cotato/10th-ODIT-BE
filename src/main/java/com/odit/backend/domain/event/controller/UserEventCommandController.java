@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.odit.backend.domain.event.dto.request.EventRequestDto;
 import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
+import com.odit.backend.domain.event.dto.request.EventMemoUpdateRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.service.command.UserEventCommandService;
 import com.odit.backend.domain.event.service.facade.EventCommandFacade;
@@ -64,9 +64,8 @@ public class UserEventCommandController {
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponse<EventResponseDto>> updateEventInfo(
 		@PathVariable Long id,
-		@Valid @RequestBody EventUpdateRequestDto request,
-		@AuthenticationPrincipal(expression = "user") User user
-	) {
+		@AuthenticationPrincipal(expression = "user") User user,
+		@Valid @RequestBody EventUpdateRequestDto request) {
 
 		EventResponseDto updatedEvent = commandService.updateEventInfo(user, id, request);
 		return ResponseEntity.ok(ApiResponse.success(updatedEvent));
@@ -82,9 +81,11 @@ public class UserEventCommandController {
 	})
 	@PatchMapping("/{id}/memo")
 	public ResponseEntity<ApiResponse<EventResponseDto>> updateEventMemo(
-		@PathVariable Long id, @RequestParam String memo) {
+		@PathVariable Long id,
+		@AuthenticationPrincipal(expression = "user") User user,
+		@Valid @RequestBody EventMemoUpdateRequestDto request) {
 
-		EventResponseDto updatedEvent = commandService.updateUserEventMemo(id, memo);
+		EventResponseDto updatedEvent = commandService.updateUserEventMemo(id, request.memo(), user.getId());
 		return ResponseEntity.ok(ApiResponse.success(updatedEvent));
 	}
 
@@ -96,8 +97,10 @@ public class UserEventCommandController {
 		)
 	})
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long id) {
-		eventCommandFacade.deleteUserEvent(id);
+	public ResponseEntity<ApiResponse<Void>> deleteEvent(
+		@PathVariable Long id,
+		@AuthenticationPrincipal(expression = "user") User user) {
+		eventCommandFacade.deleteUserEvent(id, user.getId());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -111,8 +114,9 @@ public class UserEventCommandController {
 	})
 	@PatchMapping("/{id}/visit-status")
 	public ResponseEntity<ApiResponse<EventResponseDto>> toggleEventVisitStatus(
-		@PathVariable Long id) {
-		EventResponseDto updatedEvent = eventCommandFacade.toggleEventVisitStatus(id);
+		@PathVariable Long id,
+		@AuthenticationPrincipal(expression = "user") User user) {
+		EventResponseDto updatedEvent = eventCommandFacade.toggleEventVisitStatus(id, user.getId());
 		return ResponseEntity.ok(ApiResponse.success(updatedEvent));
 	}
 }

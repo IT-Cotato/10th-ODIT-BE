@@ -89,7 +89,7 @@ public class Event extends BaseEntity {
 		image.assignEvent(this);
 	}
 
-	public void assignStatics(EventStatistics eventStatistics) {
+	public void assignStatistics(EventStatistics eventStatistics) {
 		if (eventStatistics == null) {
 			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
 		}

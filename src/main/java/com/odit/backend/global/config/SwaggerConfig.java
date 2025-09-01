@@ -1,8 +1,10 @@
 package com.odit.backend.global.config;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +17,9 @@ import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
 public class SwaggerConfig {
+
+	@Value("${base-url}")
+	String serverBaseUrl;
 
 	@Bean
 	public OpenAPI openAPI() {
@@ -35,7 +40,7 @@ public class SwaggerConfig {
 			.addList("refreshTokenAuth");
 
 		Server httpsServer = new Server();
-		httpsServer.setUrl("https://odit.store");
+		httpsServer.setUrl(serverBaseUrl);
 		httpsServer.setDescription("운영 서버");
 
 		Server localServer = new Server();
@@ -46,7 +51,7 @@ public class SwaggerConfig {
 			.components(new Components()
 				.addSecuritySchemes("accessTokenAuth", accessTokenAuth)
 				.addSecuritySchemes("refreshTokenAuth", refreshTokenAuth))
-			.security(Arrays.asList(securityRequirement))
+			.security(Collections.singletonList(securityRequirement))
 			.info(new Info()
 				.title("오딧(ODIT) api 명세서")
 				.description("ODIT api 명세서입니다.")
