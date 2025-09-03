@@ -2,18 +2,19 @@ package com.odit.backend.domain.event.service.facade;
 
 import static com.odit.backend.global.error.GlobalErrorCode.EVENT_DELETE_FAILED;
 
+import com.odit.backend.global.error.GlobalErrorCode;
+
+import org.springframework.dao.DataAccessException;
+
 import org.springframework.stereotype.Service;
 
-import com.odit.backend.domain.event.converter.EventStatisticsConverter;
 import com.odit.backend.domain.event.converter.UserEventConverter;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.entity.Event;
 import com.odit.backend.domain.event.entity.EventStatistics;
 import com.odit.backend.domain.event.entity.UserEvent;
 import com.odit.backend.domain.event.exception.EventException;
-import com.odit.backend.domain.event.service.command.EventStatisticsCommandService;
 import com.odit.backend.domain.event.service.command.UserEventCommandService;
-import com.odit.backend.domain.event.service.query.EventStatisticsQueryService;
 import com.odit.backend.domain.event.service.query.UserEventQueryService;
 import com.odit.backend.domain.image.entity.UserEventImage;
 import com.odit.backend.domain.image.service.command.UserEventImageCommandService;
@@ -29,34 +30,28 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class EventCommandFacade {
 
-	private final EventStatisticsCommandService eventStatisticsCommandService;
-	private final EventStatisticsQueryService eventStatisticsQueryService;
 	private final UserEventQueryService userEventQueryService;
 	private final UserEventImageCommandService userEventImageCommandService;
 	private final UserEventCommandService userEventCommandService;
 
-	public void createEventStatistics(Event event) {
-		EventStatistics eventStatistics = EventStatisticsConverter.toEntity();
-		eventStatistics.assignEvent(event);
-		EventStatistics statistics = eventStatisticsCommandService.save(eventStatistics);
-		event.assignStatics(statistics);
-	}
 
-	public void increaseBookMark(Event event) {
-		EventStatistics statistics = eventStatisticsQueryService.findById(event.getId());
-		statistics.incrementBookmarkCount();
-	}
-
-	public void deleteUserEvent(Long id) {
-		UserEvent userEvent = userEventQueryService.findById(id);
+	public void deleteUserEvent(Long id, Long userId) {
+		UserEvent userEvent = userEventQueryService.findByIdAndUserId(id, userId);
 		Event event = userEvent.getEvent();
-		EventStatistics statistics = eventStatisticsQueryService.findById(event.getId());
+		EventStatistics statistics = event.getEventStatistics();
+		if (statistics == null) {
+			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
+		}
 		try {
 			deleteUserEventImages(userEvent);
 			userEventCommandService.delete(userEvent);
-			statistics.decrementsBookmarkCount();
+			statistics.decrementBookmarkCount();
+		} catch (DataAccessException | EventException e) {
+			log.error("삭제 작업 실패: {}", e.getMessage());
+			throw new EventException(EVENT_DELETE_FAILED);
 		} catch (Exception e) {
-			throw new EventException(EVENT_DELETE_FAILED); // 실패 시 예외 발생 → 트랜잭션 롤백
+			log.error("예상치 못한 오류 발생: {}", e.getMessage(), e);
+			throw new EventException(EVENT_DELETE_FAILED);
 		}
 	}
 
@@ -66,15 +61,20 @@ public class EventCommandFacade {
 		}
 	}
 
-	public EventResponseDto toggleEventVisitStatus(Long id) {
-		UserEvent userEvent = userEventQueryService.findById(id);
+	public EventResponseDto toggleEventVisitStatus(Long id, Long userId) {
+		UserEvent userEvent = userEventQueryService.findByIdAndUserId(id, userId);
 		Event event = userEvent.getEvent();
-		EventStatistics statistics = eventStatisticsQueryService.findById(event.getId());
+		EventStatistics statistics = event.getEventStatistics();
+		if (statistics == null) {
+			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
+		}
 
-		if (userEvent.getVisited()) {
+		if (Boolean.TRUE.equals(userEvent.getVisited())) {
 			statistics.decrementVisitCount();
+			userEvent.toggleVisited();
 		} else {
-			statistics.incrementBookmarkCount();
+			statistics.incrementVisitCount();
+			userEvent.toggleVisited();
 		}
 
 		return UserEventConverter.toResponse(userEvent);

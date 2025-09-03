@@ -3,10 +3,7 @@ package com.odit.backend.domain.event.converter;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.springframework.stereotype.Component;
-
 import com.odit.backend.domain.event.dto.request.EventRequestDto;
-import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.entity.UserEvent;
 import com.odit.backend.domain.image.entity.EventImage;
@@ -26,6 +23,8 @@ public class UserEventConverter {
 	public EventResponseDto toResponse(UserEvent userEvent) {
 		return EventResponseDto.builder()
 			.id(userEvent.getId())
+			.seq(userEvent.getEvent().getSeq())
+			.title(userEvent.getEvent().getTitle())
 			.startDate(userEvent.getEvent().getStartDate())
 			.endDate(userEvent.getEvent().getEndDate())
 			.category(userEvent.getEvent().getCategory())
@@ -37,9 +36,5 @@ public class UserEventConverter {
 				.map(EventImage::getUrl)
 				.toList())
 			.build();
-	}
-
-	public void updateEntity(UserEvent userEvent, EventUpdateRequestDto updateRequest) {
-		userEvent.updateEvent(updateRequest);  // Event 엔터티의 update 메서드 호출
 	}
 }

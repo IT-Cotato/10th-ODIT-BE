@@ -1,7 +1,9 @@
 package com.odit.backend.domain.event.dto.response;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -39,17 +41,19 @@ public record EventResponseDto(
 
 	@Schema(
 		description = "이벤트 시작일시",
-		example = "2025-07-18",
+		example = "2025-07-18T14:30:00",
 		requiredMode = Schema.RequiredMode.NOT_REQUIRED
 	)
-	LocalDate startDate,
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	LocalDateTime startDate,
 
 	@Schema(
-		description = "이벤트 마감일시",
-		example = "2025-07-25",
+		description = "이벤트 종료일시",
+		example = "2025-07-18T17:00:00",
 		requiredMode = Schema.RequiredMode.NOT_REQUIRED
 	)
-	LocalDate endDate,
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	LocalDateTime endDate,
 
 	@Schema(
 		description = "사용자 메모",
@@ -70,12 +74,6 @@ public record EventResponseDto(
 		example = "[\"https://example.com/image1.jpg\", \"https://example.com/image2.jpg\"]",
 		requiredMode = Schema.RequiredMode.NOT_REQUIRED
 	)
-	List<String> imageUrlList,
-	@Schema(
-		description = "문화정보 API에서 가져온 ",
-		example = "2432452"
-	)
-	Long seq
-	)
-{
+	List<String> imageUrlList
+) {
 }

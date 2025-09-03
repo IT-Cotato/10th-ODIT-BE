@@ -1,10 +1,9 @@
 package com.odit.backend.domain.event.entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.odit.backend.domain.event.exception.EventException;
 import com.odit.backend.domain.image.entity.EventImage;
 import com.odit.backend.global.entity.BaseEntity;
@@ -16,6 +15,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -31,7 +31,9 @@ import lombok.NonNull;
 @Entity
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "event")
+@Table(name = "event", indexes = {
+		@Index(name = "idx_event_start_date", columnList = "start_date")
+	})
 public class Event extends BaseEntity {
 
 	@Id
@@ -50,11 +52,11 @@ public class Event extends BaseEntity {
 
 	@NonNull
 	@Column(name = "start_date")
-	private LocalDate startDate;
+	private LocalDateTime startDate;
 
 	@NonNull
 	@Column(name = "end_date")
-	private LocalDate endDate;
+	private LocalDateTime endDate;
 
 	@Builder.Default
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -67,17 +69,6 @@ public class Event extends BaseEntity {
 	@OneToOne(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	private EventStatistics eventStatistics;
 
-	public static Event createEvent(Long seq, String title, String category, LocalDate startDate,
-		LocalDate endDate) {
-		Event event = new Event();
-		event.seq = seq;
-		event.title = title;
-		event.category = category;
-		event.startDate = startDate;
-		event.endDate = endDate;
-		return event;
-	}
-
 	//연관관계 메서드
 	public void addUserEvent(UserEvent userEvent) {
 		this.userEvents.add(userEvent);
@@ -89,21 +80,11 @@ public class Event extends BaseEntity {
 		image.assignEvent(this);
 	}
 
-	public void assignStatics(EventStatistics eventStatistics) {
+	public void assignStatistics(EventStatistics eventStatistics) {
 		if (eventStatistics == null) {
 			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
 		}
 		this.eventStatistics = eventStatistics;
-	}
-
-	public void updateEvent(EventUpdateRequestDto updateRequest) {
-		if (updateRequest.title() != null)
-			this.title = updateRequest.title();
-		if (updateRequest.category() != null)
-			this.category = updateRequest.category();
-		if (updateRequest.startDate() != null)
-			this.startDate = updateRequest.startDate();
-		if (updateRequest.endDate() != null)
-			this.endDate = updateRequest.endDate();
+		eventStatistics.assignEvent(this);
 	}
 }

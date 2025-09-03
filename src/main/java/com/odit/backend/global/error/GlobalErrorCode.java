@@ -118,6 +118,9 @@ public enum GlobalErrorCode implements ErrorCode {
 	EVENT_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "EVN-006", "이벤트 삭제를 실패했습니다."),
 	COMMON_EVENT_NOT_FOUND(NOT_FOUND, "EVN-006", "해당 Common Event 를 찾을 수 없습니다."),
 	MISSING_EVENT_STATISTICS(NOT_FOUND, "EVN-007", "이벤트 통계를 찾을 수 없습니다."),
+	INVALID_YEAR_MONTH_PARAMETER(BAD_REQUEST, "EVN-008", "연도 또는 월 파라미터가 유효하지 않습니다."),
+	INVALID_MONTH_RANGE(BAD_REQUEST, "EVN-009", "월은 1부터 12 사이의 값이어야 합니다."),
+	INVALID_YEAR_RANGE(BAD_REQUEST, "EVN-010", "연도는 유효한 범위 내의 값이어야 합니다."),
 
 	/********************************** Notification Domain **********************************/
 	NOTIFICATION_NOT_FOUND(NOT_FOUND, "NOT-001", "알림을 찾을 수 없습니다."),

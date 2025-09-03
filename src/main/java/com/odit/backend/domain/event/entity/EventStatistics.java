@@ -1,6 +1,8 @@
 package com.odit.backend.domain.event.entity;
 
+import com.odit.backend.domain.event.exception.EventException;
 import com.odit.backend.global.entity.BaseEntity;
+import com.odit.backend.global.error.GlobalErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,14 +30,19 @@ public class EventStatistics extends BaseEntity {
 	private Long id;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "event_id", nullable = false)
+	@JoinColumn(name = "event_id", nullable = false, unique = true)
 	private Event event;
 
-	@Column(nullable = false)
-	private Integer bookmarkCount = 1; // 기본값 추가
+	@Version
+	private Long version;
 
+	@Builder.Default
 	@Column(nullable = false)
-	private Integer visitCount = 1; // 기본값 추가
+	private Integer bookmarkCount = 0; // 기본값: 0
+
+	@Builder.Default
+	@Column(nullable = false)
+	private Integer visitCount = 0; // 기본값: 0
 
 	// bookmarkCount 증가 메서드 추가
 	public void incrementBookmarkCount() {
@@ -46,19 +54,22 @@ public class EventStatistics extends BaseEntity {
 		this.visitCount++;
 	}
 
-	public void decrementsBookmarkCount() {
-		if (bookmarkCount != 0) {
-			this.bookmarkCount--;
+	public void decrementBookmarkCount() {
+		if (bookmarkCount > 0) {
+			this.bookmarkCount = Math.max(0, bookmarkCount - 1);
 		}
 	}
 
 	public void decrementVisitCount() {
-		if (visitCount != 0) {
-			this.visitCount--;
+		if (visitCount > 0) {
+			this.visitCount = Math.max(0, visitCount - 1);
 		}
 	}
 
 	public void assignEvent(Event event) {
+		if (event == null) {
+			throw new EventException(GlobalErrorCode.EVENT_NOT_FOUND);
+		}
 		this.event = event;
 	}
 }

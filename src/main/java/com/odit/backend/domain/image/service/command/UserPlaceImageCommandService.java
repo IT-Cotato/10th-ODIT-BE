@@ -38,7 +38,6 @@ public class UserPlaceImageCommandService {
 	private final AwsS3Service s3Service;
 	private final UserPlaceImageRepository userPlaceImageRepository;
 	private final UserPlaceImageQueryService userPlaceImageQueryService;
-	private final ImageConverter imageConverter;
 
 	public void addNewUserPlaceImage(PlaceRequestDto request, User user, UserPlace userPlace) {
 		List<UserPlaceImage> imageList = s3Service.uploadImageFromUrls(request.imageUrlList(),
@@ -81,7 +80,7 @@ public class UserPlaceImageCommandService {
 		userPlaceRepository.save(userPlace);
 
 		return uploadedImages.stream()
-			.map(imageConverter::toResponse)
+			.map(ImageConverter::toResponse)
 			.toList();
 	}
 
@@ -98,7 +97,7 @@ public class UserPlaceImageCommandService {
 		UserPlaceImage image = userPlaceImageQueryService.getImageById(imageId);
 		String newImageUrl = s3Service.updateImage(image.getUrl(), multipartFile);
 		image.updateUrl(newImageUrl);
-		return imageConverter.toResponse(image);
+		return ImageConverter.toResponse(image);
 	}
 
 	/**

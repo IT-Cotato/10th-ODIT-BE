@@ -9,9 +9,7 @@ import com.odit.backend.domain.event.dto.request.EventRequestDto;
 import com.odit.backend.domain.event.entity.Event;
 import com.odit.backend.domain.event.entity.EventStatistics;
 import com.odit.backend.domain.event.repository.EventRepository;
-import com.odit.backend.domain.event.service.facade.EventCommandFacade;
 import com.odit.backend.domain.event.service.query.EventQueryService;
-import com.odit.backend.domain.event.service.query.EventStatisticsQueryService;
 import com.odit.backend.domain.image.service.command.EventImageCommandService;
 
 import lombok.AccessLevel;
@@ -26,12 +24,12 @@ public class EventCommandService {
 	private final EventRepository eventRepository;
 	private final EventImageCommandService eventImageCommandService;
 	private final EventQueryService eventQueryService;
-	private final EventCommandFacade eventCommandFacade;
+	private final EventStatisticsCommandService eventStatisticsCommandService;
 
 	public Event saveOrFindEvent(EventRequestDto request) {
 		return eventQueryService.findEventBySeq(request.seq())
 			.map(event -> {
-				eventCommandFacade.increaseBookMark(event);
+				increaseBookMark(event);
 				return event;
 			})
 			.orElseGet(() -> createNewEvent(request));
@@ -43,8 +41,23 @@ public class EventCommandService {
 		if (!request.imageUrlList().isEmpty()) {
 			eventImageCommandService.addImageToEvent(request, savedEvent);
 		}
-		eventCommandFacade.createEventStatistics(savedEvent);
+		createEventStatistics(savedEvent);
 		return savedEvent;
+	}
+
+	private void increaseBookMark(Event event) {
+		EventStatistics statistics = event.getEventStatistics();
+		if (statistics == null) {
+			return;
+		}
+		statistics.incrementBookmarkCount();
+	}
+
+	private void createEventStatistics(Event event) {
+		EventStatistics eventStatistics = EventStatisticsConverter.toEntity();
+		eventStatistics.assignEvent(event);
+		EventStatistics statistics = eventStatisticsCommandService.save(eventStatistics);
+		event.assignStatistics(statistics);
 	}
 
 }

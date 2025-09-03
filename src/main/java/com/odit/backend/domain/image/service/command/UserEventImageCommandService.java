@@ -33,7 +33,6 @@ public class UserEventImageCommandService {
 	private final AwsS3Service s3Service;
 	private final UserEventRepository userEventRepository;
 	private final UserEventImageQueryService userEventImageQueryService;
-	private final ImageConverter imageConverter;
 
 	/**
 	 * 이벤트에 새로운 이미지 추가
@@ -48,7 +47,7 @@ public class UserEventImageCommandService {
 		userEventRepository.save(userEvent);
 
 		return uploadedImages.stream()
-			.map(imageConverter::toResponse)
+			.map(ImageConverter::toResponse)
 			.toList();
 	}
 
@@ -78,7 +77,7 @@ public class UserEventImageCommandService {
 		UserEventImage image = userEventImageQueryService.getImageById(imageId);
 		String newImageUrl = s3Service.updateImage(image.getUrl(), multipartFile);
 		image.updateUrl(newImageUrl);
-		return imageConverter.toResponse(image);
+		return ImageConverter.toResponse(image);
 	}
 
 	public void deleteEventImage(Long eventId, Long imageId) {

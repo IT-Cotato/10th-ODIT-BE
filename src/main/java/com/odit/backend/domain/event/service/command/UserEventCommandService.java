@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.odit.backend.domain.event.converter.UserEventConverter;
 import com.odit.backend.domain.event.dto.request.EventRequestDto;
-import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.entity.Event;
 import com.odit.backend.domain.event.entity.UserEvent;
@@ -30,7 +29,6 @@ public class UserEventCommandService {
 	private final UserEventRepository userEventRepository;
 	private final UserQueryService userQueryService;
 	private final EventCommandService eventCommandService;
-	private final UserEventImageCommandService userEventImageCommandService;
 
 	/**
 	 * 새로운 이벤트 생성
@@ -53,27 +51,13 @@ public class UserEventCommandService {
 	}
 
 	/**
-	 * 이벤트 기본 정보 수정 (이미지 제외)
-	 */
-	public EventResponseDto updateEventInfo(Long id, EventUpdateRequestDto request) {
-		UserEvent userEvent = userEventRepository.findById(id)
-			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
-
-		UserEventConverter.updateEntity(userEvent, request);
-		userEventRepository.save(userEvent);
-		log.info("[Event] 이벤트 정보 수정 완료 | eventId = {}", id);
-
-		return UserEventConverter.toResponse(userEvent);
-	}
-
-	/**
 	 * 이벤트 메모 수정
 	 */
-	public EventResponseDto updateUserEventMemo(Long id, String memo) {
-		UserEvent userEvent = userEventRepository.findById(id)
+	public EventResponseDto updateUserEventMemo(Long id, String memo, Long userId) {
+		UserEvent userEvent = userEventRepository.findByIdAndUserId(id, userId)
 			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
 		userEvent.updateMemo(memo);
-		log.info("[Event] 이벤트 메모 수정 완료 | eventId = {}", id);
+		log.info("[Event] 이벤트 메모 수정 완료 | userId = {}, eventId = {}", userId, id);
 		return UserEventConverter.toResponse(userEvent);
 	}
 
