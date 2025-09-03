@@ -3,6 +3,8 @@ package com.odit.backend.domain.event.service.query;
 import static com.odit.backend.global.error.GlobalErrorCode.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -88,7 +90,23 @@ public class UserEventQueryService {
 	}
 
 	public MonthlyEventPageResponseDto getUserEventsByMonth(Long userId, Integer year, Integer month, Pageable pageable) {
-		Page<UserEvent> userEventPage = userEventRepository.findUserEventsByMonth(userId, year, month, pageable);
+		// Defensive validation
+		if (year == null || month == null) {
+			throw new IllegalArgumentException("Year and month must not be null");
+		}
+		if (month < 1 || month > 12) {
+			throw new IllegalArgumentException("Month must be between 1 and 12");
+		}
+		if (year < 2000 || year > 3000) {
+			throw new IllegalArgumentException("Year must be between 2000 and 3000");
+		}
+
+		// Calculate YearMonth boundaries for index-friendly query
+		YearMonth yearMonth = YearMonth.of(year, month);
+		LocalDateTime start = yearMonth.atDay(1).atStartOfDay();
+		LocalDateTime end = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
+
+		Page<UserEvent> userEventPage = userEventRepository.findUserEventsByMonth(userId, start, end, pageable);
 		Page<EventResponseDto> eventResponsePage = userEventPage.map(UserEventConverter::toResponse);
 		log.info("[Event] 월별 이벤트 조회 완료 | userId = {}, year = {}, month = {}, pageNumber = {}, totalElements = {}", 
 			userId, year, month, pageable.getPageNumber(), eventResponsePage.getTotalElements());
