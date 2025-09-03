@@ -15,6 +15,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -30,7 +31,9 @@ import lombok.NonNull;
 @Entity
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "event")
+@Table(name = "event", indexes = {
+		@Index(name = "idx_event_start_date", columnList = "start_date")
+	})
 public class Event extends BaseEntity {
 
 	@Id
@@ -82,5 +85,6 @@ public class Event extends BaseEntity {
 			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
 		}
 		this.eventStatistics = eventStatistics;
+		eventStatistics.assignEvent(this);
 	}
 }

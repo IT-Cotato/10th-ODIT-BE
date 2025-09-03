@@ -26,11 +26,11 @@ public interface UserEventRepository extends JpaRepository<UserEvent, Long> {
 	@Query("SELECT ue FROM UserEvent ue JOIN FETCH ue.event e LEFT JOIN FETCH e.images ORDER BY ue.visited DESC")
 	List<UserEvent> findPopularEvents();
 
-	@Query("SELECT ue FROM UserEvent ue JOIN FETCH ue.user JOIN FETCH ue.event e LEFT JOIN FETCH e.images WHERE ue.user.id = :userId")
+	@Query("SELECT DISTINCT ue FROM UserEvent ue JOIN FETCH ue.user JOIN FETCH ue.event e LEFT JOIN FETCH e.images WHERE ue.user.id = :userId")
 	List<UserEvent> findAllUserEvents(@Param("userId") Long userId);
 
 	@Query(
-		value = "SELECT ue FROM UserEvent ue JOIN FETCH ue.user u JOIN FETCH ue.event e LEFT JOIN FETCH e.images " +
+		value = "SELECT DISTINCT ue FROM UserEvent ue JOIN FETCH ue.user u JOIN FETCH ue.event e " +
 			"WHERE u.id = :userId AND e.startDate >= :start AND e.startDate < :end " +
 			"ORDER BY e.startDate DESC",
 		countQuery = "SELECT COUNT(ue) FROM UserEvent ue JOIN ue.user u JOIN ue.event e " +
@@ -49,7 +49,7 @@ public interface UserEventRepository extends JpaRepository<UserEvent, Long> {
 	@Query("SELECT ue FROM UserEvent ue JOIN FETCH ue.event e LEFT JOIN FETCH e.images WHERE ue.id = :id")
 	Optional<UserEvent> findByIdWithEvent(@Param("id") Long id);
 
-	@Query("SELECT ue FROM UserEvent ue JOIN FETCH ue.event e LEFT JOIN FETCH e.images")
+	@Query("SELECT distinct ue FROM UserEvent ue JOIN FETCH ue.event e LEFT JOIN FETCH e.images")
 	List<UserEvent> findAllWithEvent();
 
 }

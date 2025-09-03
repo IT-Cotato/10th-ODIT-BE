@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -37,7 +38,7 @@ public record EventRequestDto(
 		description = "이벤트 시작일시",
 		example = "2025-07-18T14:30:00"
 	)
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
 	LocalDateTime startDate,
 
 	@NotNull(message = "이벤트 종료일시는 필수 입력값입니다.")
@@ -45,7 +46,7 @@ public record EventRequestDto(
 		description = "이벤트 종료일시",
 		example = "2025-07-18T17:00:00"
 	)
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
 	LocalDateTime endDate,
 
 	@Schema(
@@ -62,4 +63,5 @@ public record EventRequestDto(
 	)
 	List<String> imageUrlList
 ) {
+
 }
