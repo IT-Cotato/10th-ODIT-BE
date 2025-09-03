@@ -69,7 +69,7 @@ public class EventCommandFacade {
 			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
 		}
 
-		if (userEvent.getVisited()) {
+		if (Boolean.TRUE.equals(userEvent.getVisited())) {
 			statistics.decrementVisitCount();
 			userEvent.toggleVisited();
 		} else {
