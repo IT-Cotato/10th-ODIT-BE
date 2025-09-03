@@ -38,11 +38,11 @@ public class EventStatistics extends BaseEntity {
 
 	@Builder.Default
 	@Column(nullable = false)
-	private Integer bookmarkCount = 1; // 기본값 추가
+	private Integer bookmarkCount = 0; // 기본값: 0
 
 	@Builder.Default
 	@Column(nullable = false)
-	private Integer visitCount = 1; // 기본값 추가
+	private Integer visitCount = 0; // 기본값: 0
 
 	// bookmarkCount 증가 메서드 추가
 	public void incrementBookmarkCount() {
@@ -55,20 +55,20 @@ public class EventStatistics extends BaseEntity {
 	}
 
 	public void decrementBookmarkCount() {
-		if (bookmarkCount != 0) {
-			this.bookmarkCount--;
+		if (bookmarkCount > 0) {
+			this.bookmarkCount = Math.max(0, bookmarkCount - 1);
 		}
 	}
 
 	public void decrementVisitCount() {
-		if (visitCount != 0) {
-			this.visitCount--;
+		if (visitCount > 0) {
+			this.visitCount = Math.max(0, visitCount - 1);
 		}
 	}
 
 	public void assignEvent(Event event) {
 		if (event == null) {
-			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
+			throw new EventException(GlobalErrorCode.EVENT_NOT_FOUND);
 		}
 		this.event = event;
 	}
