@@ -97,7 +97,7 @@ public class UserEventCommandController {
 		)
 	})
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApiResponse<Void>> deleteEvent(
+	public ResponseEntity<Void> deleteEvent(
 		@PathVariable Long id,
 		@AuthenticationPrincipal(expression = "user") User user) {
 		eventCommandFacade.deleteUserEvent(id, user.getId());
