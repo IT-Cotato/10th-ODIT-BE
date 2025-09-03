@@ -92,6 +92,8 @@ public class UserEvent extends BaseEntity {
 	}
 
 	public void toggleVisited() {
-		this.visited = !this.visited;
+		this.visited = Boolean.TRUE.equals(this.visited) 
+			? Boolean.FALSE 
+			: Boolean.TRUE;
 	}
 }
