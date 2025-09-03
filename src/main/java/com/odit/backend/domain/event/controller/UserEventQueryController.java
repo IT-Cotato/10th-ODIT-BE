@@ -9,11 +9,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import com.odit.backend.domain.event.dto.request.MonthlyEventRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
@@ -122,8 +122,16 @@ public class UserEventQueryController {
 	@GetMapping("/monthly")
 	public ResponseEntity<ApiResponse<MonthlyEventPageResponseDto>> getMonthlyEvents(
 		@AuthenticationPrincipal(expression = "user") User user,
-		@Valid @RequestBody MonthlyEventRequestDto request,
+		@RequestParam
+		@Min(value = 2000, message = "연도는 2000년 이상이어야 합니다.")
+		@Max(value = 3000, message = "연도는 3000년 이하여야 합니다.")
+		Integer year,
+		@RequestParam
+		@Min(value = 1, message = "월은 1 이상이어야 합니다.")
+		@Max(value = 12, message = "월은 12 이하여야 합니다.")
+		Integer month,
 		Pageable pageable) {
+		MonthlyEventRequestDto request = new MonthlyEventRequestDto(year, month);
 		MonthlyEventPageResponseDto response = eventQueryFacade.getUserEventsByMonth(user.getId(), request, pageable);
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}
