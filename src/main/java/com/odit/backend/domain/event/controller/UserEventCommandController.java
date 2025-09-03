@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.odit.backend.domain.event.dto.request.EventRequestDto;
-import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.odit.backend.domain.event.dto.request.EventMemoUpdateRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.service.command.UserEventCommandService;
@@ -51,24 +50,6 @@ public class UserEventCommandController {
 		@Valid @RequestBody EventRequestDto request) {
 		EventResponseDto event = commandService.createUserEvent(request, user.getId());
 		return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(event));
-	}
-
-	@Operation(summary = "이벤트 기본 정보 수정", description = "기존 이벤트의 기본 정보를 수정합니다.")
-	@ApiResponses(value = {
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(
-			responseCode = "200",
-			description = "이벤트 정보 수정 성공",
-			content = @Content(schema = @Schema(implementation = EventResponseDto.class))
-		)
-	})
-	@PatchMapping("/{id}")
-	public ResponseEntity<ApiResponse<EventResponseDto>> updateEventInfo(
-		@PathVariable Long id,
-		@AuthenticationPrincipal(expression = "user") User user,
-		@Valid @RequestBody EventUpdateRequestDto request) {
-
-		EventResponseDto updatedEvent = commandService.updateEventInfo(user, id, request);
-		return ResponseEntity.ok(ApiResponse.success(updatedEvent));
 	}
 
 	@Operation(summary = "이벤트 메모 수정", description = "기존 이벤트의 메모를 수정합니다.")

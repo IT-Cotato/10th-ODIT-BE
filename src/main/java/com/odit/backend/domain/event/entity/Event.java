@@ -1,10 +1,9 @@
 package com.odit.backend.domain.event.entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.odit.backend.domain.event.exception.EventException;
 import com.odit.backend.domain.image.entity.EventImage;
 import com.odit.backend.global.entity.BaseEntity;
@@ -50,11 +49,11 @@ public class Event extends BaseEntity {
 
 	@NonNull
 	@Column(name = "start_date")
-	private LocalDate startDate;
+	private LocalDateTime startDate;
 
 	@NonNull
 	@Column(name = "end_date")
-	private LocalDate endDate;
+	private LocalDateTime endDate;
 
 	@Builder.Default
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -66,17 +65,6 @@ public class Event extends BaseEntity {
 
 	@OneToOne(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
 	private EventStatistics eventStatistics;
-
-	public static Event createEvent(Long seq, String title, String category, LocalDate startDate,
-		LocalDate endDate) {
-		Event event = new Event();
-		event.seq = seq;
-		event.title = title;
-		event.category = category;
-		event.startDate = startDate;
-		event.endDate = endDate;
-		return event;
-	}
 
 	//연관관계 메서드
 	public void addUserEvent(UserEvent userEvent) {
@@ -94,16 +82,5 @@ public class Event extends BaseEntity {
 			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
 		}
 		this.eventStatistics = eventStatistics;
-	}
-
-	public void updateEvent(EventUpdateRequestDto updateRequest) {
-		if (updateRequest.title() != null)
-			this.title = updateRequest.title();
-		if (updateRequest.category() != null)
-			this.category = updateRequest.category();
-		if (updateRequest.startDate() != null)
-			this.startDate = updateRequest.startDate();
-		if (updateRequest.endDate() != null)
-			this.endDate = updateRequest.endDate();
 	}
 }

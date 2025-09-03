@@ -8,8 +8,6 @@ import com.odit.backend.domain.event.converter.EventStatisticsConverter;
 import com.odit.backend.domain.event.dto.request.EventRequestDto;
 import com.odit.backend.domain.event.entity.Event;
 import com.odit.backend.domain.event.entity.EventStatistics;
-import com.odit.backend.domain.event.exception.EventException;
-import com.odit.backend.global.error.GlobalErrorCode;
 import com.odit.backend.domain.event.repository.EventRepository;
 import com.odit.backend.domain.event.service.query.EventQueryService;
 import com.odit.backend.domain.image.service.command.EventImageCommandService;
@@ -50,7 +48,7 @@ public class EventCommandService {
 	private void increaseBookMark(Event event) {
 		EventStatistics statistics = event.getEventStatistics();
 		if (statistics == null) {
-			throw new EventException(GlobalErrorCode.MISSING_EVENT_STATISTICS);
+			return;
 		}
 		statistics.incrementBookmarkCount();
 	}

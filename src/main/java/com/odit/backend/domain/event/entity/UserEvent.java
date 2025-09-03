@@ -3,7 +3,6 @@ package com.odit.backend.domain.event.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.odit.backend.domain.image.entity.UserEventImage;
 import com.odit.backend.domain.user.entity.User;
 import com.odit.backend.global.entity.BaseEntity;
@@ -79,13 +78,6 @@ public class UserEvent extends BaseEntity {
 		this.user = user;
 	}
 
-	// 업데이트 메서드
-	public void updateEvent(EventUpdateRequestDto request) {
-		if (request.memo() != null)
-			this.memo = request.memo();
-		if (request.visited() != null)
-			this.visited = request.visited();
-	}
 
 	public void updateMemo(String memo) {
 		this.memo = memo;

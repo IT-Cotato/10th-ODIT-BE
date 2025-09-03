@@ -3,11 +3,12 @@ package com.odit.backend.domain.event.converter;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.springframework.stereotype.Component;
+import org.springframework.data.domain.Page;
 
 import com.odit.backend.domain.event.dto.request.EventRequestDto;
-import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
+import com.odit.backend.domain.event.dto.request.MonthlyEventRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
+import com.odit.backend.domain.event.dto.response.MonthlyEventPageResponseDto;
 import com.odit.backend.domain.event.entity.Event;
 import com.odit.backend.domain.image.entity.EventImage;
 
@@ -17,13 +18,13 @@ import lombok.experimental.UtilityClass;
 public class EventConverter {
 
 	public Event toEntity(EventRequestDto request) {
-		return Event.createEvent(
-			request.seq(),
-			request.title(),
-			request.category(),
-			request.startDate(),
-			request.endDate()
-		);
+		return Event.builder()
+			.seq(request.seq())
+			.title(request.title())
+			.category(request.category())
+			.startDate(request.startDate())
+			.endDate(request.endDate())
+			.build();
 	}
 
 	public EventResponseDto toResponse(Event event) {
@@ -42,7 +43,26 @@ public class EventConverter {
 			.build();
 	}
 
-	public void updateEntity(Event event, EventUpdateRequestDto updateRequest) {
-		event.updateEvent(updateRequest);  // Event 엔터티의 update 메서드 호출
+	public MonthlyEventRequestDto toMonthlyRequest(Integer year, Integer month) {
+		return MonthlyEventRequestDto.builder()
+			.month(month)
+			.year(year)
+			.build();
+	}
+
+	public static MonthlyEventPageResponseDto toMonthlyEventPageResponseDto(Page<EventResponseDto> page, Integer year,
+		Integer month) {
+		return MonthlyEventPageResponseDto.builder()
+			.content(page.getContent())
+			.pageNumber(page.getNumber())
+			.pageSize(page.getSize())
+			.totalElements(page.getTotalElements())
+			.totalPages(page.getTotalPages())
+			.first(page.isFirst())
+			.last(page.isLast())
+			.empty(page.isEmpty())
+			.year(year)
+			.month(month)
+			.build();
 	}
 }

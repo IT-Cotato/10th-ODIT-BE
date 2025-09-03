@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
+@Builder
 @Schema(description = "월별 이벤트 조회 요청")
 public record MonthlyEventRequestDto(
 	@Schema(

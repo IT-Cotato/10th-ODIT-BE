@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.odit.backend.domain.event.converter.UserEventConverter;
 import com.odit.backend.domain.event.dto.request.EventRequestDto;
-import com.odit.backend.domain.event.dto.request.EventUpdateRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.entity.Event;
 import com.odit.backend.domain.event.entity.UserEvent;
@@ -30,7 +29,6 @@ public class UserEventCommandService {
 	private final UserEventRepository userEventRepository;
 	private final UserQueryService userQueryService;
 	private final EventCommandService eventCommandService;
-	private final UserEventImageCommandService userEventImageCommandService;
 
 	/**
 	 * 새로운 이벤트 생성
@@ -50,20 +48,6 @@ public class UserEventCommandService {
 		event.addUserEvent(userEvent);
 		user.addUserEvent(userEvent);
 		userEventRepository.save(userEvent);
-	}
-
-	/**
-	 * 이벤트 기본 정보 수정 (이미지 제외)
-	 */
-	public EventResponseDto updateEventInfo(User user, Long id, EventUpdateRequestDto request) {
-		UserEvent userEvent = userEventRepository.findByIdAndUserId(id, user.getId())
-			.orElseThrow(() -> new EventException(EVENT_NOT_FOUND));
-
-		UserEventConverter.updateEntity(userEvent, request);
-		userEventRepository.save(userEvent);
-		log.info("[Event] 이벤트 정보 수정 완료 | userId = {}, eventId = {}", user.getId(), id);
-
-		return UserEventConverter.toResponse(userEvent);
 	}
 
 	/**

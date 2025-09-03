@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
+import com.odit.backend.domain.event.converter.EventConverter;
 import com.odit.backend.domain.event.dto.request.MonthlyEventRequestDto;
 import com.odit.backend.domain.event.dto.response.EventResponseDto;
 import com.odit.backend.domain.event.dto.response.MonthlyEventPageResponseDto;
@@ -131,8 +132,11 @@ public class UserEventQueryController {
 		@Max(value = 12, message = "월은 12 이하여야 합니다.")
 		Integer month,
 		Pageable pageable) {
-		MonthlyEventRequestDto request = new MonthlyEventRequestDto(year, month);
-		MonthlyEventPageResponseDto response = eventQueryFacade.getUserEventsByMonth(user.getId(), request, pageable);
-		return ResponseEntity.ok(ApiResponse.success(response));
+		{
+			MonthlyEventRequestDto request = EventConverter.toMonthlyRequest(year, month);
+			MonthlyEventPageResponseDto response = eventQueryFacade.getUserEventsByMonth(user.getId(), request,
+				pageable);
+			return ResponseEntity.ok(ApiResponse.success(response));
+		}
 	}
 }
